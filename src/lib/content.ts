@@ -20,6 +20,11 @@ export type Movie = {
   cast: string[];
   runtime: string;
   rating: string;
+  ratings?: {
+    douban: string;
+    imdb: string;
+    rottenTomatoes: string;
+  };
   posterTone: string;
   posterUrl?: string;
   backdropUrl?: string;
@@ -60,6 +65,7 @@ export const defaultMovies: Movie[] = [
     cast: ["瑞恩·高斯林", "哈里森·福特", "安娜·德·阿玛斯"],
     runtime: "164 分钟",
     rating: "8.3 / 10",
+    ratings: { douban: "8.3", imdb: "8.0", rottenTomatoes: "88%" },
     posterTone: "from-cyan-300 via-indigo-500 to-amber-400",
     summary:
       "一部慢热、冷峻且高度依赖画面层次的科幻续作，适合愿意沉浸在声音、空间和霓虹雾气中的观众。",
@@ -91,6 +97,7 @@ export const defaultMovies: Movie[] = [
     cast: ["提莫西·查拉梅", "赞达亚", "丽贝卡·弗格森"],
     runtime: "166 分钟",
     rating: "8.6 / 10",
+    ratings: { douban: "8.2", imdb: "8.5", rottenTomatoes: "92%" },
     posterTone: "from-orange-200 via-stone-500 to-black",
     summary:
       "更接近巨幕宗教史诗的科幻续章，影像、低频和沙漠尺度是主要价值。",
@@ -122,6 +129,7 @@ export const defaultMovies: Movie[] = [
     cast: ["梁朝伟", "张曼玉"],
     runtime: "98 分钟",
     rating: "8.7 / 10",
+    ratings: { douban: "8.8", imdb: "8.1", rottenTomatoes: "91%" },
     posterTone: "from-red-700 via-rose-400 to-yellow-200",
     summary:
       "色彩、布料、走廊和时间感组成的私人记忆，高清修复的价值来自细节和胶片质感。",

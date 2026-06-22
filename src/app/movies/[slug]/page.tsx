@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { notFound } from "next/navigation"; // 命中无效 slug 时抛出 404，由 Next.js 渲染 not-found 页面
-import { Button, Card, Chip } from "@heroui/react"; // HeroUI 组件库提供的基础 UI 原子组件
+import { Card, Chip } from "@heroui/react"; // HeroUI 组件库提供的基础 UI 原子组件
 import { SiteShell } from "@/components/site-shell"; // 站点统一外壳（导航/页脚等），`@/` 是 tsconfig 配置的根别名
 import { getMovie, getMovieSlugs } from "@/lib/movie-api"; // API 优先、无配置时回退到半人工策展默认数据
 
@@ -45,17 +45,23 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
   return (
     <SiteShell>
-      <article className="mx-auto max-w-[1044px] px-5 pb-20 pt-8 md:px-8">
+      <article className="mx-auto max-w-[1280px] px-5 pb-20 pt-8 md:px-8">
         {/* 顶部 Hero 区：背景图 + 渐变叠加层营造电影感，桌面端在左下角叠加大标题 */}
-        <section className="relative -mx-5 h-[360px] overflow-hidden bg-[#14181d] md:-mx-8 md:h-[430px]">
+        <section className="detail-reveal relative left-1/2 h-[360px] w-screen max-w-[1440px] -translate-x-1/2 overflow-visible md:h-[430px]">
           {/* 第一层：影片专属色调渐变（posterTone 来自内容数据）作为底色兜底 */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${movie.posterTone} opacity-85`} />
+          <div className={`hero-feather absolute inset-x-0 top-3 bottom-0 bg-gradient-to-br ${movie.posterTone} opacity-30`} />
           {/* 真实背景图：仅当有 backdropUrl 时渲染。fill 让图片填满定位父级，priority 让首屏图优先加载（LCP 优化） */}
-          {movie.backdropUrl ? <Image src={movie.backdropUrl} alt={`${movie.title} backdrop`} fill priority className="object-cover opacity-75" sizes="1044px" /> : null}
-          {/* 第二层：径向高光 + 双向暗角渐变，压暗边缘以保证标题区域对比度 */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_28%,rgba(255,255,255,0.18),transparent_25%),linear-gradient(90deg,#14181d_0%,rgba(20,24,29,0.9)_12%,rgba(20,24,29,0.12)_45%,rgba(20,24,29,0.88)_100%),linear-gradient(0deg,#14181d_0%,rgba(20,24,29,0.78)_22%,rgba(20,24,29,0.08)_70%)]" />
+          {movie.backdropUrl ? (
+            <div className="hero-feather absolute inset-x-0 top-3 bottom-0">
+              <Image src={movie.backdropUrl} alt={`${movie.title} backdrop`} fill priority className="object-cover object-[center_30%] opacity-70" sizes="(min-width: 1440px) 1440px, 100vw" />
+            </div>
+          ) : null}
+          {/* 多层 mask：上方清到暗区，左右和底部柔和收边，避免头图边界硬切 */}
+          <div className="hero-feather absolute inset-x-0 top-3 bottom-0 bg-[linear-gradient(90deg,#080b0f_0%,rgba(8,11,15,0.82)_9%,rgba(8,11,15,0.18)_28%,rgba(8,11,15,0.12)_72%,rgba(8,11,15,0.82)_91%,#080b0f_100%)]" />
+          <div className="hero-feather absolute inset-x-0 top-3 bottom-0 bg-[linear-gradient(180deg,#080b0f_0%,rgba(8,11,15,0.8)_10%,rgba(8,11,15,0.12)_34%,rgba(8,11,15,0.16)_58%,rgba(8,11,15,0.76)_86%,#080b0f_100%)]" />
+          <div className="hero-feather absolute inset-x-0 top-3 bottom-0 bg-[radial-gradient(ellipse_at_55%_34%,rgba(255,255,255,0.11)_0%,rgba(255,255,255,0.035)_25%,transparent_56%)]" />
           {/* 桌面端标题：移动端隐藏（hidden md:block），改由下方主栏内的标题承担 */}
-          <div className="absolute bottom-8 left-[280px] hidden md:block">
+          <div className="detail-reveal absolute bottom-8 left-[max(2rem,calc((100vw-1280px)/2+280px))] hidden md:block">
             <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
               {movie.title}
               <span className="ml-3 align-baseline text-lg font-normal text-[#9ab] underline decoration-[#9ab]/50 underline-offset-4">
@@ -67,10 +73,10 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
         {/* 主体三栏布局：左侧海报/观看入口、中间决策正文、右侧操作与评分。
             桌面端用负上边距（-mt-16）让内容上移与 Hero 叠压；移动端自动堆叠为单列。 */}
-        <section className="relative z-10 grid gap-8 md:-mt-16 md:grid-cols-[230px_1fr_210px] md:items-start">
+        <section className="relative z-10 grid gap-8 md:-mt-16 md:grid-cols-[230px_minmax(0,1fr)_210px] md:items-start">
           {/* 左栏：海报卡片 + 统计 + 合法观看路径摘要 */}
           <aside className="space-y-5">
-            <Card className="overflow-hidden rounded-md border border-[#ddef]/25 bg-[#12161a] p-0 shadow-[0_5px_18px_rgba(0,0,0,0.35)]">
+            <Card className="detail-surface poster-lift overflow-hidden rounded-md border border-[#ddef]/25 bg-[#12161a] p-0 shadow-[0_5px_18px_rgba(0,0,0,0.35)]">
               {/* relative 作为 Image fill 的定位容器；无 posterUrl 时仅显示渐变占位 */}
               <div className={`relative h-[345px] bg-gradient-to-br ${movie.posterTone}`}>
                 {movie.posterUrl ? <Image src={movie.posterUrl} alt={`${movie.title} poster`} fill className="object-cover" sizes="230px" /> : null}
@@ -86,7 +92,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               ))}
             </div>
             {/* 「在哪看」卡片：只展示合法观看路径，呼应 PRD 的合规边界 */}
-            <Card className="overflow-hidden rounded bg-[#111820] p-0 text-[#9ab]">
+            <Card className="detail-surface overflow-hidden rounded bg-[#111820] p-0 text-[#9ab]">
               <div className="flex items-center justify-between bg-[#283038] px-3 py-2 text-[11px] uppercase tracking-[0.16em]">
                 <span>Where to watch</span>
                 <span>Legal</span>
@@ -102,7 +108,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           </aside>
 
           {/* 中栏：观影决策正文（移动端标题、判定摘要、简介、决策四宫格） */}
-          <main className="min-w-0 pt-2 md:pt-20">
+          <main className="detail-reveal min-w-0 pt-2 md:pt-20">
             {/* 移动端专属标题：桌面端由 Hero 区标题替代 */}
             <div className="md:hidden">
               <h1 className="text-4xl font-bold tracking-tight text-white">
@@ -125,29 +131,17 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             </div>
           </main>
 
-          {/* 右栏：用户操作按钮 + 评分分布图 */}
-          <aside className="space-y-6 pt-0 md:pt-20">
-            <div className="grid gap-1 overflow-hidden rounded bg-[#435466] text-xs text-[#d9e5ef]">
-              <Button className="h-10 rounded-none bg-[#516579] text-xs text-[#d9e5ef]">登录后记录 / 评分</Button>
-              <Button className="h-10 rounded-none bg-[#516579] text-xs text-[#d9e5ef]">分享这部影片</Button>
-            </div>
-            <Card className="rounded-none border-0 bg-transparent p-0 text-[#9ab] shadow-none">
+          {/* 右栏：跨平台评分 */}
+          <aside className="detail-reveal space-y-6 pt-0 md:pt-20">
+            <Card className="detail-reveal rounded-none border-0 bg-transparent p-0 text-[#9ab] shadow-none">
               <div className="flex items-center justify-between border-b border-[#456]/70 pb-2 text-[11px] uppercase tracking-[0.16em]">
                 <span>Ratings</span>
-                <span>317 fans</span>
+                <span>3 sources</span>
               </div>
-              {/* 评分柱状图：用固定高度数组渲染占位条形，右侧显示主评分 */}
-              <div className="mt-5 flex items-end justify-between">
-                <div className="flex items-end gap-1">
-                  {[12, 18, 27, 42, 56, 35, 28].map((height, index) => (
-                    <span key={index} className="w-3 rounded-t bg-[#5f7488]" style={{ height }} />
-                  ))}
-                </div>
-                <div className="text-right">
-                  {/* rating 形如「8.7 / 10」，split(" ")[0] 取出主分值 */}
-                  <p className="text-3xl font-light text-[#9ab]">{movie.rating.split(" ")[0]}</p>
-                  <p className="text-xs text-emerald-400">★★★★★</p>
-                </div>
+              <div className="mt-4 space-y-3">
+                <RatingSource label="豆瓣" value={movie.ratings?.douban ?? movie.rating.split(" ")[0]} hint="中文社区" />
+                <RatingSource label="IMDb" value={movie.ratings?.imdb ?? movie.rating.split(" ")[0]} hint="全球影迷" />
+                <RatingSource label="烂番茄" value={movie.ratings?.rottenTomatoes ?? "待补充"} hint="媒体/观众" />
               </div>
             </Card>
           </aside>
@@ -156,11 +150,11 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
         {/* 下半部分：主创信息标签 + 高清版本判断 / 设备场景建议两张信息卡 */}
         <section className="mt-12 grid gap-8 md:grid-cols-[230px_1fr]">
           <div /> {/* 占位空列，与上方左栏对齐，让内容从中栏起始 */}
-          <div>
+          <div className="detail-reveal">
             {/* 仿 Letterboxd 的 Tab 行（当前为纯视觉，未接交互） */}
             <div className="flex gap-5 border-b border-[#456]/70 text-xs uppercase tracking-[0.16em]">
               {['Cast', 'Crew', 'Details', 'Genres', 'Releases'].map((item, index) => (
-                <span key={item} className={`pb-2 ${index === 0 ? 'border-b border-white text-white' : 'text-emerald-400'}`}>
+                <span key={item} className={`pressable pb-2 ${index === 0 ? 'border-b border-white text-white' : 'text-emerald-400'}`}>
                   {item}
                 </span>
               ))}
@@ -169,7 +163,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             {/* 主创/相关标签云：合并导演、主演、相关推荐为一组 Chip */}
             <div className="mt-4 flex flex-wrap gap-2">
               {[movie.director, ...movie.cast, ...movie.related].map((item) => (
-                <Chip key={item} variant="soft" className="rounded bg-[#283038] px-2 py-1 text-xs text-[#9ab]">
+                <Chip key={item} variant="soft" className="pressable rounded bg-[#283038] px-2 py-1 text-xs text-[#9ab]">
                   {item}
                 </Chip>
               ))}
@@ -206,7 +200,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 // 决策面板小卡片：决策四宫格中的单元，统一「标签 + 取值」的展示样式。
 function DecisionPanel({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="rounded bg-[#202932]/80 p-4 text-[#d9e5ef] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+    <Card className="detail-surface rounded bg-[#202932]/80 p-4 text-[#d9e5ef] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#8fa1b2]">{label}</p>
       <p className="mt-2 text-sm leading-6">{value}</p>
     </Card>
@@ -216,9 +210,21 @@ function DecisionPanel({ label, value }: { label: string; value: string }) {
 // 信息卡容器：带标题栏的内容卡，children 由调用方传入（高清版本判断 / 设备场景建议复用）。
 function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="rounded bg-[#182129]/80 p-5 text-[#d9e5ef] shadow-none">
+    <Card className="detail-surface rounded bg-[#182129]/80 p-5 text-[#d9e5ef] shadow-none">
       <h2 className="border-b border-[#456]/70 pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-white">{title}</h2>
       <div className="mt-3">{children}</div>
     </Card>
+  );
+}
+
+function RatingSource({ label, value, hint }: { label: string; value: string; hint: string }) {
+  return (
+    <div className="detail-surface flex items-center justify-between rounded bg-[#182129]/72 px-4 py-3 text-[#d9e5ef]">
+      <div>
+        <p className="text-sm font-semibold text-white">{label}</p>
+        <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-[#7f93a7]">{hint}</p>
+      </div>
+      <p className="font-mono text-2xl font-light text-[#b8c8d8]">{value}</p>
+    </div>
   );
 }

@@ -3,6 +3,8 @@
 :root {
   --background: #09090b;
   --foreground: #f8f3e8;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 @theme inline {
@@ -25,4 +27,90 @@ a {
 ::selection {
   background: #f4c95d;
   color: #09090b;
+}
+
+.pressable {
+  transition:
+    transform 160ms var(--ease-out),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+.pressable:active {
+  transform: scale(0.975);
+}
+
+.detail-surface {
+  transition:
+    transform 220ms var(--ease-out),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 220ms var(--ease-out),
+    opacity 220ms var(--ease-out);
+}
+
+.detail-reveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 260ms var(--ease-out),
+    transform 260ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.rating-bar {
+  transform-origin: bottom;
+  transform: scaleY(1);
+  opacity: 1;
+  transition:
+    transform 240ms var(--ease-out),
+    opacity 220ms var(--ease-out);
+
+  @starting-style {
+    transform: scaleY(0.78);
+    opacity: 0.45;
+  }
+}
+
+.hero-feather {
+  mask-image:
+    linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, black 14%, black 82%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, black 14%, black 82%, transparent 100%);
+  -webkit-mask-composite: source-in;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .detail-surface:hover {
+    transform: translateY(-2px);
+    border-color: rgba(154, 170, 187, 0.36);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.26);
+  }
+
+  .poster-lift:hover {
+    transform: translateY(-3px) scale(1.008);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pressable,
+  .detail-surface,
+  .detail-reveal {
+    transition-duration: 1ms;
+    transform: none;
+  }
+
+  .rating-bar {
+    transition-duration: 1ms;
+    transform: none;
+  }
 }

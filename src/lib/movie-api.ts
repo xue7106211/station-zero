@@ -222,6 +222,11 @@ function mapTmdbMovie(movie: TmdbMovieDetails): Movie {
     cast: cast.length ? cast : ["演员待确认"],
     runtime: movie.runtime ? `${movie.runtime} 分钟` : "片长待确认",
     rating: typeof movie.vote_average === "number" ? `${movie.vote_average.toFixed(1)} / 10` : "评分待确认",
+    ratings: {
+      douban: "待补充",
+      imdb: typeof movie.vote_average === "number" ? movie.vote_average.toFixed(1) : "待确认",
+      rottenTomatoes: "待补充",
+    },
     posterTone: "from-slate-600 via-zinc-800 to-black",
     posterUrl: movie.poster_path ? `${TMDB_IMAGE_BASE}${movie.poster_path}` : undefined,
     backdropUrl: movie.backdrop_path ? `${TMDB_IMAGE_BASE}${movie.backdrop_path}` : undefined,
@@ -276,6 +281,11 @@ function mergeMovie(fallback: Movie, apiMovie: Movie | undefined): Movie {
     cast: apiMovie.cast.length ? apiMovie.cast : fallback.cast,
     runtime: apiMovie.runtime || fallback.runtime,
     rating: apiMovie.rating || fallback.rating,
+    ratings: {
+      douban: fallback.ratings?.douban ?? "待补充",
+      imdb: apiMovie.ratings?.imdb || fallback.ratings?.imdb || fallback.rating.split(" ")[0],
+      rottenTomatoes: fallback.ratings?.rottenTomatoes ?? "待补充",
+    },
     posterUrl: apiMovie.posterUrl || fallback.posterUrl,
     backdropUrl: apiMovie.backdropUrl || fallback.backdropUrl,
     summary: apiMovie.summary || fallback.summary,
