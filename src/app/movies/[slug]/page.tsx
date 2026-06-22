@@ -1,0 +1,224 @@
+// 影片详情页：Station Zero 的核心「观影决策」页面（App Router 动态路由 /movies/[slug]）。
+// 这是一个 React Server Component（默认服务端渲染），配合下方 generateStaticParams 在构建期预渲染为静态页面。
+
+import Image from "next/image";
+import { notFound } from "next/navigation"; // 命中无效 slug 时抛出 404，由 Next.js 渲染 not-found 页面
+import { Button, Card, Chip } from "@heroui/react"; // HeroUI 组件库提供的基础 UI 原子组件
+import { SiteShell } from "@/components/site-shell"; // 站点统一外壳（导航/页脚等），`@/` 是 tsconfig 配置的根别名
+import { getMovie, getMovieSlugs } from "@/lib/movie-api"; // API 优先、无配置时回退到半人工策展默认数据
+
+// 详情页头部展示的占位统计数据。当前为静态写死，后续接入真实数据时可替换为来自内容层的字段。
+const statItems = [
+  { label: "浏览", value: "58K", color: "text-emerald-400" },
+  { label: "收藏", value: "20K", color: "text-sky-400" },
+  { label: "推荐", value: "27K", color: "text-amber-400" },
+];
+
+// 构建期（SSG）告诉 Next.js 需要为哪些 slug 预生成静态页面。
+// 返回 [{ slug }, ...]，每一项对应一个会被静态化的动态路由实例。
+export async function generateStaticParams() {
+  const slugs = await getMovieSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
+
+// 为每个页面生成动态 SEO 元数据（<title>/<meta description>）。
+// 注意：Next.js 15 中 params 是 Promise，必须 await 后再解构取值。
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const movie = await getMovie(slug);
+  return {
+    // 影片存在时拼接标题，否则回退为「影片未找到」
+    title: movie ? `${movie.title}｜Station Zero 观影决策` : "影片未找到",
+    description: movie?.summary,
+  };
+}
+
+// 页面主组件：async 服务端组件，可直接在渲染前 await 数据。
+export default async function MoviePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params; // 同样需先 await 解出动态段参数
+  const movie = await getMovie(slug);
+
+  // 找不到对应影片直接进入 404，notFound() 会抛出特殊错误中断渲染。
+  if (!movie) {
+    notFound();
+  }
+
+  return (
+    <SiteShell>
+      <article className="mx-auto max-w-[1044px] px-5 pb-20 pt-8 md:px-8">
+        {/* 顶部 Hero 区：背景图 + 渐变叠加层营造电影感，桌面端在左下角叠加大标题 */}
+        <section className="relative -mx-5 h-[360px] overflow-hidden bg-[#14181d] md:-mx-8 md:h-[430px]">
+          {/* 第一层：影片专属色调渐变（posterTone 来自内容数据）作为底色兜底 */}
+          <div className={`absolute inset-0 bg-gradient-to-br ${movie.posterTone} opacity-85`} />
+          {/* 真实背景图：仅当有 backdropUrl 时渲染。fill 让图片填满定位父级，priority 让首屏图优先加载（LCP 优化） */}
+          {movie.backdropUrl ? <Image src={movie.backdropUrl} alt={`${movie.title} backdrop`} fill priority className="object-cover opacity-75" sizes="1044px" /> : null}
+          {/* 第二层：径向高光 + 双向暗角渐变，压暗边缘以保证标题区域对比度 */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_28%,rgba(255,255,255,0.18),transparent_25%),linear-gradient(90deg,#14181d_0%,rgba(20,24,29,0.9)_12%,rgba(20,24,29,0.12)_45%,rgba(20,24,29,0.88)_100%),linear-gradient(0deg,#14181d_0%,rgba(20,24,29,0.78)_22%,rgba(20,24,29,0.08)_70%)]" />
+          {/* 桌面端标题：移动端隐藏（hidden md:block），改由下方主栏内的标题承担 */}
+          <div className="absolute bottom-8 left-[280px] hidden md:block">
+            <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
+              {movie.title}
+              <span className="ml-3 align-baseline text-lg font-normal text-[#9ab] underline decoration-[#9ab]/50 underline-offset-4">
+                {movie.year}
+              </span>
+            </h1>
+          </div>
+        </section>
+
+        {/* 主体三栏布局：左侧海报/观看入口、中间决策正文、右侧操作与评分。
+            桌面端用负上边距（-mt-16）让内容上移与 Hero 叠压；移动端自动堆叠为单列。 */}
+        <section className="relative z-10 grid gap-8 md:-mt-16 md:grid-cols-[230px_1fr_210px] md:items-start">
+          {/* 左栏：海报卡片 + 统计 + 合法观看路径摘要 */}
+          <aside className="space-y-5">
+            <Card className="overflow-hidden rounded-md border border-[#ddef]/25 bg-[#12161a] p-0 shadow-[0_5px_18px_rgba(0,0,0,0.35)]">
+              {/* relative 作为 Image fill 的定位容器；无 posterUrl 时仅显示渐变占位 */}
+              <div className={`relative h-[345px] bg-gradient-to-br ${movie.posterTone}`}>
+                {movie.posterUrl ? <Image src={movie.posterUrl} alt={`${movie.title} poster`} fill className="object-cover" sizes="230px" /> : null}
+              </div>
+            </Card>
+            {/* 浏览/收藏/推荐统计（当前为占位数据） */}
+            <div className="flex justify-center gap-4 text-xs text-[#9ab]">
+              {statItems.map((stat) => (
+                <span key={stat.label} className="inline-flex items-center gap-1">
+                  <span className={stat.color}>●</span>
+                  {stat.value}
+                </span>
+              ))}
+            </div>
+            {/* 「在哪看」卡片：只展示合法观看路径，呼应 PRD 的合规边界 */}
+            <Card className="overflow-hidden rounded bg-[#111820] p-0 text-[#9ab]">
+              <div className="flex items-center justify-between bg-[#283038] px-3 py-2 text-[11px] uppercase tracking-[0.16em]">
+                <span>Where to watch</span>
+                <span>Legal</span>
+              </div>
+              <div className="space-y-2 px-3 py-3 text-xs">
+                {/* 仅预览前 2 个平台，其余收敛到「All legal paths…」入口 */}
+                {movie.viewingPaths.slice(0, 2).map((path) => (
+                  <p key={path.platform} className="text-[#c8d1da]">{path.platform}</p>
+                ))}
+                <p className="text-[#40bcf4]">All legal paths…</p>
+              </div>
+            </Card>
+          </aside>
+
+          {/* 中栏：观影决策正文（移动端标题、判定摘要、简介、决策四宫格） */}
+          <main className="min-w-0 pt-2 md:pt-20">
+            {/* 移动端专属标题：桌面端由 Hero 区标题替代 */}
+            <div className="md:hidden">
+              <h1 className="text-4xl font-bold tracking-tight text-white">
+                {movie.title} <span className="text-lg font-normal text-[#9ab]">{movie.year}</span>
+              </h1>
+            </div>
+            {/* 一句话决策摘要：推荐结论 + 最佳观看方式 */}
+            <p className="mt-4 max-w-xl font-mono text-xs uppercase leading-6 tracking-[0.2em] text-[#9ab] md:mt-0">
+              {movie.verdict} · {movie.bestWay}
+            </p>
+            <p className="mt-5 max-w-xl text-[15px] leading-7 text-[#c9d3dc]">
+              {movie.summary}
+            </p>
+            {/* 决策四宫格：把关键判断（最佳观看/场景/不适合/评分）结构化呈现 */}
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <DecisionPanel label="最佳观看" value={movie.bestWay} />
+              <DecisionPanel label="适合场景" value={movie.idealScene} />
+              <DecisionPanel label="不适合" value={movie.notFor} />
+              <DecisionPanel label="评分参考" value={movie.rating} />
+            </div>
+          </main>
+
+          {/* 右栏：用户操作按钮 + 评分分布图 */}
+          <aside className="space-y-6 pt-0 md:pt-20">
+            <div className="grid gap-1 overflow-hidden rounded bg-[#435466] text-xs text-[#d9e5ef]">
+              <Button className="h-10 rounded-none bg-[#516579] text-xs text-[#d9e5ef]">登录后记录 / 评分</Button>
+              <Button className="h-10 rounded-none bg-[#516579] text-xs text-[#d9e5ef]">分享这部影片</Button>
+            </div>
+            <Card className="rounded-none border-0 bg-transparent p-0 text-[#9ab] shadow-none">
+              <div className="flex items-center justify-between border-b border-[#456]/70 pb-2 text-[11px] uppercase tracking-[0.16em]">
+                <span>Ratings</span>
+                <span>317 fans</span>
+              </div>
+              {/* 评分柱状图：用固定高度数组渲染占位条形，右侧显示主评分 */}
+              <div className="mt-5 flex items-end justify-between">
+                <div className="flex items-end gap-1">
+                  {[12, 18, 27, 42, 56, 35, 28].map((height, index) => (
+                    <span key={index} className="w-3 rounded-t bg-[#5f7488]" style={{ height }} />
+                  ))}
+                </div>
+                <div className="text-right">
+                  {/* rating 形如「8.7 / 10」，split(" ")[0] 取出主分值 */}
+                  <p className="text-3xl font-light text-[#9ab]">{movie.rating.split(" ")[0]}</p>
+                  <p className="text-xs text-emerald-400">★★★★★</p>
+                </div>
+              </div>
+            </Card>
+          </aside>
+        </section>
+
+        {/* 下半部分：主创信息标签 + 高清版本判断 / 设备场景建议两张信息卡 */}
+        <section className="mt-12 grid gap-8 md:grid-cols-[230px_1fr]">
+          <div /> {/* 占位空列，与上方左栏对齐，让内容从中栏起始 */}
+          <div>
+            {/* 仿 Letterboxd 的 Tab 行（当前为纯视觉，未接交互） */}
+            <div className="flex gap-5 border-b border-[#456]/70 text-xs uppercase tracking-[0.16em]">
+              {['Cast', 'Crew', 'Details', 'Genres', 'Releases'].map((item, index) => (
+                <span key={item} className={`pb-2 ${index === 0 ? 'border-b border-white text-white' : 'text-emerald-400'}`}>
+                  {item}
+                </span>
+              ))}
+            </div>
+
+            {/* 主创/相关标签云：合并导演、主演、相关推荐为一组 Chip */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {[movie.director, ...movie.cast, ...movie.related].map((item) => (
+                <Chip key={item} variant="soft" className="rounded bg-[#283038] px-2 py-1 text-xs text-[#9ab]">
+                  {item}
+                </Chip>
+              ))}
+            </div>
+
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
+              {/* 高清版本判断：逐条列出 4K/HDR/Dolby Vision 等信号及对应结论 */}
+              <InfoCard title="高清版本判断">
+                {movie.versionSignals.map((signal) => (
+                  <div key={signal.label} className="flex items-start justify-between gap-4 border-b border-white/5 py-3 last:border-0">
+                    <div>
+                      <p className="font-medium text-[#d9e5ef]">{signal.label}</p>
+                      <p className="mt-1 text-sm text-[#9ab]">{signal.value}</p>
+                    </div>
+                    <span className="text-xs text-emerald-400">{signal.verdict}</span>
+                  </div>
+                ))}
+              </InfoCard>
+
+              {/* 设备与场景建议：按设备/场景给出观看建议清单 */}
+              <InfoCard title="设备与场景建议">
+                <ul className="space-y-3 text-sm text-[#9ab]">
+                  {movie.deviceAdvice.map((item) => <li key={item}>· {item}</li>)}
+                </ul>
+              </InfoCard>
+            </div>
+          </div>
+        </section>
+      </article>
+    </SiteShell>
+  );
+}
+
+// 决策面板小卡片：决策四宫格中的单元，统一「标签 + 取值」的展示样式。
+function DecisionPanel({ label, value }: { label: string; value: string }) {
+  return (
+    <Card className="rounded bg-[#202932]/80 p-4 text-[#d9e5ef] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#8fa1b2]">{label}</p>
+      <p className="mt-2 text-sm leading-6">{value}</p>
+    </Card>
+  );
+}
+
+// 信息卡容器：带标题栏的内容卡，children 由调用方传入（高清版本判断 / 设备场景建议复用）。
+function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Card className="rounded bg-[#182129]/80 p-5 text-[#d9e5ef] shadow-none">
+      <h2 className="border-b border-[#456]/70 pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-white">{title}</h2>
+      <div className="mt-3">{children}</div>
+    </Card>
+  );
+}
