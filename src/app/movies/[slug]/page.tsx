@@ -193,14 +193,22 @@ function InfoCard({ title, children }: { title: string; children: React.ReactNod
   );
 }
 
+// 单个评分来源展示块：左侧为来源名称与说明，右侧为评分数值
+// label：评分来源名称，例如 豆瓣 / IMDb / 烂番茄
+// value：评分数值，例如 "8.7"、"91%"
+// hint：辅助说明，作为来源下方的小字标注
 function RatingSource({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
+    // 横向两栏布局：justify-between 让来源信息与数值分列左右两端
     <div className="detail-surface flex items-center justify-between rounded bg-[#182129]/72 px-4 py-3 text-[#d9e5ef]">
+      {/* 左栏：来源名称（主）+ 辅助说明（次） */}
       <div>
         <p className="text-sm font-semibold text-white">{label}</p>
+        {/* 小字提示：大写 + 字间距，弱化为次要信息 */}
         <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-[#7f93a7]">{hint}</p>
       </div>
-      <p className="font-mono text-2xl font-light text-[#b8c8d8]">{value}</p>
+      {/* 右栏：评分数值，使用系统默认字体（font-sans） */}
+      <p className="font-sans text-2xl font-light text-[#b8c8d8]">{value}</p>
     </div>
   );
 }
