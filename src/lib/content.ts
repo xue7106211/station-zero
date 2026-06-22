@@ -2,6 +2,9 @@ export type ViewingPath = {
   platform: string;
   type: "订阅" | "租赁/购买" | "实体发行" | "资料来源";
   note: string;
+  // 正版观看/购买链接（可选）。来自 TMDB watch providers 的地区聚合页（JustWatch），
+  // 或人工录入的官方发行/购买页。无链接时前端不渲染「复制链接」按钮。
+  url?: string;
 };
 
 export type VersionSignal = {

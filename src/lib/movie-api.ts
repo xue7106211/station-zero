@@ -28,6 +28,7 @@ type TmdbMovieDetails = TmdbMovieSummary & {
     results?: Record<
       string,
       {
+        link?: string;
         flatrate?: { provider_name: string }[];
         rent?: { provider_name: string }[];
         buy?: { provider_name: string }[];
@@ -253,12 +254,14 @@ function mapProviders(providers: TmdbWatchProviderRegion | undefined): ViewingPa
   }
 
   const paths: ViewingPath[] = [];
+  // TMDB 仅提供地区级聚合链接（JustWatch），无单平台深链；将该链接挂到每个条目上。
+  const link = providers.link;
 
-  providers.flatrate?.slice(0, 2).forEach((provider) => paths.push({ platform: provider.provider_name, type: "订阅", note: "平台可用性以实时地区结果为准" }));
-  providers.rent?.slice(0, 2).forEach((provider) => paths.push({ platform: provider.provider_name, type: "租赁/购买", note: "租赁信息以平台实时结果为准" }));
-  providers.buy?.slice(0, 2).forEach((provider) => paths.push({ platform: provider.provider_name, type: "租赁/购买", note: "购买信息以平台实时结果为准" }));
+  providers.flatrate?.slice(0, 2).forEach((provider) => paths.push({ platform: provider.provider_name, type: "订阅", note: "平台可用性以实时地区结果为准", url: link }));
+  providers.rent?.slice(0, 2).forEach((provider) => paths.push({ platform: provider.provider_name, type: "租赁/购买", note: "租赁信息以平台实时结果为准", url: link }));
+  providers.buy?.slice(0, 2).forEach((provider) => paths.push({ platform: provider.provider_name, type: "租赁/购买", note: "购买信息以平台实时结果为准", url: link }));
 
-  return paths.length ? paths.slice(0, 4) : [{ platform: "TMDB Watch Providers", type: "资料来源", note: "暂无订阅、租赁或购买数据" }];
+  return paths.length ? paths.slice(0, 4) : [{ platform: "TMDB Watch Providers", type: "资料来源", note: "暂无订阅、租赁或购买数据", url: link }];
 }
 
 function mergeCuratedDefaults(apiMovies: Movie[]) {

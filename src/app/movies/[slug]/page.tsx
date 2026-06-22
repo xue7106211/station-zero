@@ -5,6 +5,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation"; // 命中无效 slug 时抛出 404，由 Next.js 渲染 not-found 页面
 import { Card, Chip } from "@heroui/react"; // HeroUI 组件库提供的基础 UI 原子组件
 import { SiteShell } from "@/components/site-shell"; // 站点统一外壳（导航/页脚等），`@/` 是 tsconfig 配置的根别名
+import { WatchProviders } from "@/components/watch-providers"; // 正版观看与购买聚合模块（客户端组件，含复制链接）
 import { getMovie, getMovieSlugs } from "@/lib/movie-api"; // API 优先、无配置时回退到半人工策展默认数据
 
 // 详情页头部展示的占位统计数据。当前为静态写死，后续接入真实数据时可替换为来自内容层的字段。
@@ -150,6 +151,9 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                   </ul>
                 </InfoCard>
               </div>
+
+              {/* 正版观看与购买聚合：按来源分类列出平台、外链与复制按钮（仅合法路径） */}
+              <WatchProviders paths={movie.viewingPaths} />
             </div>
           </main>
 
