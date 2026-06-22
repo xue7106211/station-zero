@@ -13,7 +13,7 @@ const navItems = [
 export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[#09090b] text-[#f8f3e8]">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(244,201,93,0.18),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(125,92,255,0.18),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_38%)]" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(244,201,93,0.1),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(125,92,255,0.1),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.035),transparent_38%)]" />
       <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6 md:px-10">
         <Link href="/" className="group flex items-center gap-3">
           <span className="flex size-10 items-center justify-center rounded-full border border-[#f4c95d]/40 bg-[#f4c95d]/10 font-mono text-sm text-[#f4c95d]">

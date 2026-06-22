@@ -45,35 +45,15 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
   return (
     <SiteShell>
-      <article className="mx-auto max-w-[1280px] px-5 pb-20 pt-8 md:px-8">
-        {/* 顶部 Hero 区：背景图 + 渐变叠加层营造电影感，桌面端在左下角叠加大标题 */}
-        <section className="detail-reveal relative left-1/2 h-[360px] w-screen max-w-[1440px] -translate-x-1/2 overflow-visible md:h-[430px]">
-          {/* 第一层：影片专属色调渐变（posterTone 来自内容数据）作为底色兜底 */}
-          <div className={`hero-feather absolute inset-x-0 top-3 bottom-0 bg-gradient-to-br ${movie.posterTone} opacity-30`} />
-          {/* 真实背景图：仅当有 backdropUrl 时渲染。fill 让图片填满定位父级，priority 让首屏图优先加载（LCP 优化） */}
-          {movie.backdropUrl ? (
-            <div className="hero-feather absolute inset-x-0 top-3 bottom-0">
-              <Image src={movie.backdropUrl} alt={`${movie.title} backdrop`} fill priority className="object-cover object-[center_30%] opacity-70" sizes="(min-width: 1440px) 1440px, 100vw" />
-            </div>
-          ) : null}
-          {/* 多层 mask：上方清到暗区，左右和底部柔和收边，避免头图边界硬切 */}
-          <div className="hero-feather absolute inset-x-0 top-3 bottom-0 bg-[linear-gradient(90deg,#080b0f_0%,rgba(8,11,15,0.82)_9%,rgba(8,11,15,0.18)_28%,rgba(8,11,15,0.12)_72%,rgba(8,11,15,0.82)_91%,#080b0f_100%)]" />
-          <div className="hero-feather absolute inset-x-0 top-3 bottom-0 bg-[linear-gradient(180deg,#080b0f_0%,rgba(8,11,15,0.8)_10%,rgba(8,11,15,0.12)_34%,rgba(8,11,15,0.16)_58%,rgba(8,11,15,0.76)_86%,#080b0f_100%)]" />
-          <div className="hero-feather absolute inset-x-0 top-3 bottom-0 bg-[radial-gradient(ellipse_at_55%_34%,rgba(255,255,255,0.11)_0%,rgba(255,255,255,0.035)_25%,transparent_56%)]" />
-          {/* 桌面端标题：移动端隐藏（hidden md:block），改由下方主栏内的标题承担 */}
-          <div className="detail-reveal absolute bottom-8 left-[max(2rem,calc((100vw-1280px)/2+280px))] hidden md:block">
-            <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
-              {movie.title}
-              <span className="ml-3 align-baseline text-lg font-normal text-[#9ab] underline decoration-[#9ab]/50 underline-offset-4">
-                {movie.year}
-              </span>
-            </h1>
+      <article className="relative mx-auto max-w-[1280px] px-5 pb-20 pt-8 md:px-8">
+        {movie.posterUrl ? (
+          <div className="pointer-events-none absolute -top-24 left-1/2 h-[760px] w-screen max-w-[1600px] -translate-x-1/2 overflow-hidden opacity-70">
+            <Image src={movie.posterUrl} alt="" fill priority className="scale-125 object-cover blur-3xl saturate-150" sizes="100vw" aria-hidden />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_32%_18%,rgba(255,255,255,0.16),transparent_24%),linear-gradient(180deg,rgba(9,9,11,0.18)_0%,rgba(9,9,11,0.76)_56%,#09090b_100%),linear-gradient(90deg,#09090b_0%,rgba(9,9,11,0.28)_24%,rgba(9,9,11,0.28)_76%,#09090b_100%)]" />
           </div>
-        </section>
-
-        {/* 主体三栏布局：左侧海报/观看入口、中间决策正文、右侧操作与评分。
-            桌面端用负上边距（-mt-16）让内容上移与 Hero 叠压；移动端自动堆叠为单列。 */}
-        <section className="relative z-10 grid gap-8 md:-mt-16 md:grid-cols-[230px_minmax(0,1fr)_210px] md:items-start">
+        ) : null}
+        {/* 主体三栏布局：左侧海报/观看入口、中间决策正文、右侧评分。 */}
+        <section className="relative z-10 grid gap-8 pt-10 md:grid-cols-[230px_minmax(0,1fr)_210px] md:items-start md:pt-16">
           {/* 左栏：海报卡片 + 统计 + 合法观看路径摘要 */}
           <aside className="space-y-5">
             <Card className="detail-surface poster-lift overflow-hidden rounded-md border border-[#ddef]/25 bg-[#12161a] p-0 shadow-[0_5px_18px_rgba(0,0,0,0.35)]">
@@ -108,15 +88,14 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           </aside>
 
           {/* 中栏：观影决策正文（移动端标题、判定摘要、简介、决策四宫格） */}
-          <main className="detail-reveal min-w-0 pt-2 md:pt-20">
-            {/* 移动端专属标题：桌面端由 Hero 区标题替代 */}
-            <div className="md:hidden">
-              <h1 className="text-4xl font-bold tracking-tight text-white">
+          <main className="detail-reveal min-w-0">
+            <div>
+              <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
                 {movie.title} <span className="text-lg font-normal text-[#9ab]">{movie.year}</span>
               </h1>
             </div>
             {/* 一句话决策摘要：推荐结论 + 最佳观看方式 */}
-            <p className="mt-4 max-w-xl font-mono text-xs uppercase leading-6 tracking-[0.2em] text-[#9ab] md:mt-0">
+            <p className="mt-6 max-w-xl font-mono text-xs uppercase leading-6 tracking-[0.2em] text-[#9ab] md:mt-4">
               {movie.verdict} · {movie.bestWay}
             </p>
             <p className="mt-5 max-w-xl text-[15px] leading-7 text-[#c9d3dc]">
@@ -132,7 +111,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           </main>
 
           {/* 右栏：跨平台评分 */}
-          <aside className="detail-reveal space-y-6 pt-0 md:pt-20">
+          <aside className="detail-reveal space-y-6 pt-0 md:pt-2">
             <Card className="detail-reveal rounded-none border-0 bg-transparent p-0 text-[#9ab] shadow-none">
               <div className="flex items-center justify-between border-b border-[#456]/70 pb-2 text-[11px] uppercase tracking-[0.16em]">
                 <span>Ratings</span>
