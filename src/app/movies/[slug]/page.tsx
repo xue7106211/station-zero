@@ -108,6 +108,49 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               <DecisionPanel label="不适合" value={movie.notFor} />
               <DecisionPanel label="评分参考" value={movie.rating} />
             </div>
+
+            {/* 主创信息标签 + 高清版本判断 / 设备场景建议：与上方决策内容保持同一个内容流 */}
+            <div className="mt-12">
+              {/* 仿 Letterboxd 的 Tab 行（当前为纯视觉，未接交互） */}
+              <div className="flex gap-5 border-b border-[#456]/70 text-xs uppercase tracking-[0.16em]">
+                {['Cast', 'Crew', 'Details', 'Genres', 'Releases'].map((item, index) => (
+                  <span key={item} className={`pressable pb-2 ${index === 0 ? 'border-b border-white text-white' : 'text-emerald-400'}`}>
+                    {item}
+                  </span>
+                ))}
+              </div>
+
+              {/* 主创/相关标签云：合并导演、主演、相关推荐为一组 Chip */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {[movie.director, ...movie.cast, ...movie.related].map((item) => (
+                  <Chip key={item} variant="soft" className="pressable rounded bg-[#283038] px-2 py-1 text-xs text-[#9ab]">
+                    {item}
+                  </Chip>
+                ))}
+              </div>
+
+              <div className="mt-10 grid gap-4 md:grid-cols-2">
+                {/* 高清版本判断：逐条列出 4K/HDR/Dolby Vision 等信号及对应结论 */}
+                <InfoCard title="高清版本判断">
+                  {movie.versionSignals.map((signal) => (
+                    <div key={signal.label} className="flex items-start justify-between gap-4 border-b border-white/5 py-3 last:border-0">
+                      <div>
+                        <p className="font-medium text-[#d9e5ef]">{signal.label}</p>
+                        <p className="mt-1 text-sm text-[#9ab]">{signal.value}</p>
+                      </div>
+                      <span className="text-xs text-emerald-400">{signal.verdict}</span>
+                    </div>
+                  ))}
+                </InfoCard>
+
+                {/* 设备与场景建议：按设备/场景给出观看建议清单 */}
+                <InfoCard title="设备与场景建议">
+                  <ul className="space-y-3 text-sm text-[#9ab]">
+                    {movie.deviceAdvice.map((item) => <li key={item}>· {item}</li>)}
+                  </ul>
+                </InfoCard>
+              </div>
+            </div>
           </main>
 
           {/* 右栏：跨平台评分 */}
@@ -124,52 +167,6 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               </div>
             </Card>
           </aside>
-        </section>
-
-        {/* 下半部分：主创信息标签 + 高清版本判断 / 设备场景建议两张信息卡 */}
-        <section className="mt-12 grid gap-8 md:grid-cols-[230px_1fr]">
-          <div /> {/* 占位空列，与上方左栏对齐，让内容从中栏起始 */}
-          <div className="detail-reveal">
-            {/* 仿 Letterboxd 的 Tab 行（当前为纯视觉，未接交互） */}
-            <div className="flex gap-5 border-b border-[#456]/70 text-xs uppercase tracking-[0.16em]">
-              {['Cast', 'Crew', 'Details', 'Genres', 'Releases'].map((item, index) => (
-                <span key={item} className={`pressable pb-2 ${index === 0 ? 'border-b border-white text-white' : 'text-emerald-400'}`}>
-                  {item}
-                </span>
-              ))}
-            </div>
-
-            {/* 主创/相关标签云：合并导演、主演、相关推荐为一组 Chip */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              {[movie.director, ...movie.cast, ...movie.related].map((item) => (
-                <Chip key={item} variant="soft" className="pressable rounded bg-[#283038] px-2 py-1 text-xs text-[#9ab]">
-                  {item}
-                </Chip>
-              ))}
-            </div>
-
-            <div className="mt-10 grid gap-4 md:grid-cols-2">
-              {/* 高清版本判断：逐条列出 4K/HDR/Dolby Vision 等信号及对应结论 */}
-              <InfoCard title="高清版本判断">
-                {movie.versionSignals.map((signal) => (
-                  <div key={signal.label} className="flex items-start justify-between gap-4 border-b border-white/5 py-3 last:border-0">
-                    <div>
-                      <p className="font-medium text-[#d9e5ef]">{signal.label}</p>
-                      <p className="mt-1 text-sm text-[#9ab]">{signal.value}</p>
-                    </div>
-                    <span className="text-xs text-emerald-400">{signal.verdict}</span>
-                  </div>
-                ))}
-              </InfoCard>
-
-              {/* 设备与场景建议：按设备/场景给出观看建议清单 */}
-              <InfoCard title="设备与场景建议">
-                <ul className="space-y-3 text-sm text-[#9ab]">
-                  {movie.deviceAdvice.map((item) => <li key={item}>· {item}</li>)}
-                </ul>
-              </InfoCard>
-            </div>
-          </div>
         </section>
       </article>
     </SiteShell>
