@@ -122,8 +122,8 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
               {/* 主创/相关标签云：合并导演、主演、相关推荐为一组 Chip */}
               <div className="mt-4 flex flex-wrap gap-2">
-                {[movie.director, ...movie.cast, ...movie.related].map((item) => (
-                  <Chip key={item} variant="soft" className="pressable rounded bg-[#283038] px-2 py-1 text-xs text-[#9ab]">
+                {[movie.director, ...movie.cast, ...movie.related].map((item, index) => (
+                  <Chip key={`${item}-${index}`} variant="soft" className="pressable rounded bg-[#283038] px-2 py-1 text-xs text-[#9ab]">
                     {item}
                   </Chip>
                 ))}
