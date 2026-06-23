@@ -4,6 +4,8 @@ import { Card } from "@heroui/react";
 import { getMovies } from "@/lib/movie-api";
 import { SectionHeading, SiteShell } from "@/components/site-shell";
 
+export const revalidate = 86400;
+
 export default async function MoviesPage() {
   const movies = await getMovies();
 
@@ -16,7 +18,7 @@ export default async function MoviesPage() {
             <Link key={movie.slug} href={`/movies/${movie.slug}`} className="block">
               <Card className="h-full rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-[#f8f3e8] transition hover:border-[#f4c95d]/50">
                 <div className={`relative mb-5 h-52 overflow-hidden rounded-2xl bg-gradient-to-br ${movie.posterTone}`}>
-                  {movie.posterUrl ? <Image src={movie.posterUrl} alt={`${movie.title} poster`} fill className="object-cover" sizes="(min-width: 768px) 33vw, 100vw" /> : null}
+                  {movie.posterUrl ? <Image src={movie.posterUrl} alt={`${movie.title} poster`} fill className="object-cover" loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" /> : null}
                 </div>
                 <p className="text-sm text-[#f8f3e8]/50">{movie.originalTitle} · {movie.year}</p>
                 <h2 className="mt-2 text-2xl font-semibold">{movie.title}</h2>

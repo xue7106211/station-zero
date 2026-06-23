@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "blade-runner-2049",
+    "tmdbId": 335984,
+    "verdict": "值得大屏观看",
+    "bestWay": "4K HDR + OLED 电视或投影 + 独立音响",
+    "idealScene": "周末夜晚，关灯，完整看完",
+    "notFor": "只想轻松下饭或对慢节奏不耐烦的观众",
+    "contentStatus": "published"
+  },
+  {
+    "slug": "dune-part-two",
+    "tmdbId": 693134,
+    "verdict": "优先选择大屏版本",
+    "bestWay": "IMAX / 4K HDR / 高动态范围显示设备",
+    "idealScene": "影院复映、家庭影院或周末沉浸观看",
+    "notFor": "没有看过前作、只想快速获得剧情刺激的观众",
+    "contentStatus": "published"
+  },
+  {
+    "slug": "in-the-mood-for-love",
+    "tmdbId": 843,
+    "verdict": "适合高质量修复版",
+    "bestWay": "修复版 Blu-ray / 正版流媒体高清版本",
+    "idealScene": "安静夜晚，独自观看或双人慢看",
+    "notFor": "期待强剧情推进或明确情节答案的观众",
+    "contentStatus": "published"
+  }
+]

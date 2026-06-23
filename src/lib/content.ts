@@ -15,6 +15,7 @@ export type VersionSignal = {
 
 export type Movie = {
   slug: string;
+  tmdbId?: number;
   title: string;
   originalTitle: string;
   year: string;
@@ -31,6 +32,8 @@ export type Movie = {
   posterTone: string;
   posterUrl?: string;
   backdropUrl?: string;
+  sourcePosterUrl?: string;
+  sourceBackdropUrl?: string;
   summary: string;
   verdict: string;
   bestWay: string;

@@ -25,7 +25,7 @@ export function PosterAmbientGlow({ posterUrl }: { posterUrl?: string }) {
   return (
     <div className="pointer-events-none absolute -top-24 left-1/2 h-[760px] w-[140vw] min-w-full -translate-x-1/2 overflow-hidden opacity-70">
       {/* 被模糊的海报：fill 填满容器，priority 优化首屏 LCP，scale-125 防止模糊后露边 */}
-      <Image src={posterUrl} alt="" fill priority className="scale-125 object-cover blur-3xl saturate-150" sizes="100vw" aria-hidden />
+      <Image src={posterUrl} alt="" fill className="scale-125 object-cover blur-3xl saturate-150" sizes="100vw" aria-hidden />
       {/* 渐变蒙版：径向高光 + 上下/左右暗化，避免海报色块边缘生硬 */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_32%_18%,rgba(255,255,255,0.16),transparent_24%),linear-gradient(180deg,rgba(9,9,11,0.18)_0%,rgba(9,9,11,0.76)_56%,#09090b_100%),linear-gradient(90deg,#09090b_0%,rgba(9,9,11,0.62)_8%,rgba(9,9,11,0.28)_30%,rgba(9,9,11,0.28)_70%,rgba(9,9,11,0.62)_92%,#09090b_100%)]" />
     </div>

@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "updatedAt": "2026-06-23T06:10:40.539Z",
+  "movies": [
+    {
+      "slug": "dune-part-two",
+      "tmdbId": 693134,
+      "title": "沙丘2",
+      "originalTitle": "Dune: Part Two",
+      "year": "2024",
+      "genres": [
+        "科幻",
+        "冒险"
+      ],
+      "director": "丹尼斯·维伦纽瓦",
+      "cast": [
+        "提莫西·查拉梅",
+        "赞达亚·科尔曼",
+        "丽贝卡·弗格森",
+        "哈维尔·巴登",
+        "乔什·布洛林"
+      ],
+      "runtime": "166 分钟",
+      "rating": "8.1 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "8.1",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/dune-part-two.jpg",
+      "backdropUrl": "/media/backdrops/dune-part-two.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/9uaCR4HEZqxUqgORq0uZqTNm43G.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
+      "summary": "《沙丘2》承接第一部剧情，讲述保罗·厄崔迪（提莫西·查拉梅 Timothée Chalamet 饰）被帕迪沙皇帝和哈克南人联手灭族后，在厄拉科斯星球遇到弗雷曼女战士契妮（赞达亚 Zendaya 饰）以及加入弗雷曼人后展开的传奇旅程。保罗与让他家破人亡的阴谋家们开战，同时面临着一生所爱与已知宇宙命运的两难选择。",
+      "verdict": "优先选择大屏版本",
+      "bestWay": "IMAX / 4K HDR / 高动态范围显示设备",
+      "idealScene": "影院复映、家庭影院或周末沉浸观看",
+      "notFor": "没有看过前作、只想快速获得剧情刺激的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "published",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-23T06:10:40.539Z",
+      "imageCachedAt": "2026-06-23T06:10:40.539Z",
+      "createdAt": "2026-06-23T06:10:40.539Z",
+      "updatedAt": "2026-06-23T06:10:40.539Z"
+    },
+    {
+      "slug": "in-the-mood-for-love",
+      "tmdbId": 843,
+      "title": "花样年华",
+      "originalTitle": "花樣年華",
+      "year": "2000",
+      "genres": [
+        "剧情",
+        "爱情"
+      ],
+      "director": "王家卫",
+      "cast": [
+        "张曼玉",
+        "梁朝伟",
+        "萧炳林",
+        "潘迪华",
+        "雷震"
+      ],
+      "runtime": "99 分钟",
+      "rating": "8.1 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "8.1",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/in-the-mood-for-love.jpg",
+      "backdropUrl": "/media/backdrops/in-the-mood-for-love.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/1Z32pKrmWW2nkLFYGoc79MzJin6.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/ffQFnAUm2Uu4RU0nijpjPRf9TBT.jpg",
+      "summary": "一九六二年的香港：周慕云与苏丽珍在同一天搬进相邻的公寓。他们的相遇起初保持着得体与疏离——直到发现各自配偶的秘密，一种亲密的情愫悄然滋生。王家卫的本片既含蓄典雅又视觉绚烂，精湛地勾勒出浪漫渴望与易逝的瞬间。在悸动的配乐、以及杜可风与李屏宾极致抽象的摄影美学中，这部电影成为过去二十年影坛的重要风格标杆，亦是王家卫璀璨生涯的一座里程碑。[标准收藏]",
+      "verdict": "适合高质量修复版",
+      "bestWay": "修复版 Blu-ray / 正版流媒体高清版本",
+      "idealScene": "安静夜晚，独自观看或双人慢看",
+      "notFor": "期待强剧情推进或明确情节答案的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "published",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-23T06:10:40.539Z",
+      "imageCachedAt": "2026-06-23T06:10:40.539Z",
+      "createdAt": "2026-06-23T06:10:40.539Z",
+      "updatedAt": "2026-06-23T06:10:40.539Z"
+    }
+  ]
+}

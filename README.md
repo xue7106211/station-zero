@@ -11,6 +11,8 @@ MVP 已初始化为 Next.js + TypeScript + Tailwind + HeroUI 项目，包含：
 - 片单页：围绕设备、心情和审美组织内容。
 - 高清知识页：解释 HDR、BluRay、WEB-DL、REMUX 等概念。
 - 版本追踪页与关于页：明确产品边界和后续方向。
+- 本地电影数据仓库：前端读取 `data/movies.json`，默认数据作为兜底。
+- 后台采集脚本：同步 TMDB 资料、下载海报/背景图，并写入本站本地库。
 
 ## 开发命令
 
@@ -18,6 +20,10 @@ MVP 已初始化为 Next.js + TypeScript + Tailwind + HeroUI 项目，包含：
 npm run dev
 npm run build
 npm run lint
+npm test
+npm run check:tmdb
+npm run sync:movies
+npm run import:movies -- path/to/movies.json
 ```
 
 ## 产品文档
@@ -26,17 +32,42 @@ PRD 位于 `docs/product/station-zero-prd-v0.1.md`。
 
 公开产品不提供磁力、BT、网盘、迅雷、盗版资源站或侵权下载入口。
 
-## 电影数据 API
+## 电影数据架构
 
-影片资料优先从 TMDB 拉取；未配置或请求失败时，会自动回退到 `src/lib/content.ts` 中的半人工策展默认数据。
+Station Zero 采用“外部 API 后台同步，前端读取本站本地数据”的加载方案：
+
+```txt
+TMDB / 人工录入
+        ↓
+后台同步或批量导入
+        ↓
+data/movies.json
+        ↓
+Next.js 页面读取本地数据
+        ↓
+public/media/ 本地海报与 CDN 缓存
+```
+
+核心原则：前端页面不在用户访问时实时调用 TMDB、豆瓣或其他外部电影 API。
+
+### 本地数据库 MVP
+
+- `data/movies.json` — 文件型电影数据库，保存影片条目、标题、年份、类型、海报路径、更新时间和详情页展示字段。
+- `data/movie-seeds.json` — 后台同步种子，保存 `slug`、`tmdbId` 和 Station Zero 自己的策展判断字段。
+- `src/lib/movie-api.ts` — 前端读取门面，当前只转发到本地电影数据仓库。
+- `src/lib/movie-store.ts` — 本地数据读取层，读取失败时回退到 `src/lib/content.ts` 的默认策展数据。
+- `public/media/posters/` 与 `public/media/backdrops/` — 本地化海报和背景图输出目录。
+
+### 后台同步 TMDB
+
+TMDB 只用于后台采集阶段。未配置或请求失败时，前端仍会使用 `data/movies.json` 和 `src/lib/content.ts` 中的默认策展数据。
 
 1. 复制 `.env.example` 为 `.env.local`。
 2. 填入 `TMDB_READ_ACCESS_TOKEN`，或使用 `TMDB_API_KEY`。不要在等号后添加多余空格或引号，例如 `TMDB_API_KEY=xxxx`。
-3. 重启 `npm run dev`。
+3. 运行 `npm run check:tmdb` 验证连通性。
+4. 运行 `npm run sync:movies` 同步 `data/movie-seeds.json` 中的影片。
 
 如果访问 `api.themoviedb.org` 时出现证书域名不匹配、DNS 污染或代理错误，可以把 `TMDB_API_BASE_URL` 指向你自己的 TMDB v3 兼容代理地址，值需要包含 `/3` 前缀。
-
-可运行 `npm run check:tmdb` 检查本地环境变量与 TMDB 网络连通性。
 
 如果浏览器可以访问 TMDB，但 Next.js 服务端请求失败，请在 `.env.local` 里配置本机代理，例如：
 
@@ -46,9 +77,13 @@ HTTP_PROXY=http://127.0.0.1:7890
 NO_PROXY=localhost,127.0.0.1
 ```
 
-项目的 `dev`、`build`、`start` 脚本已经启用 Node.js `--use-env-proxy`，会让服务端 `fetch` 读取这些代理变量。
+项目的 `dev`、`build`、`start`、`check:tmdb`、`sync:movies` 脚本已经启用 Node.js `--use-env-proxy` 或等价配置，会让服务端 `fetch` 读取这些代理变量。
 
 如果 `curl` 能访问 TMDB 但 Node `fetch` 超时，项目会默认启用 `TMDB_CURL_FALLBACK=true`，在服务端用系统 `curl` 兜底获取 JSON 数据。可用 `TMDB_CURL_FALLBACK=false` 关闭。
+
+`npm run sync:movies` 会把远程海报和背景图下载到 `public/media/`，并把本站图片路径写入 `data/movies.json`。`/media/:path*` 已配置长缓存头，生产环境可以接 Cloudflare 或对象存储 CDN。
+
+`npm run import:movies -- path/to/movies.json` 可导入人工整理的影片数据，按 `slug` 写入或更新本地库。
 
 TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路径参考；高清版本判断仍保留 Station Zero 的编辑判断层。
 

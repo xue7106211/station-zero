@@ -8,7 +8,9 @@ import { Card, Chip } from "@heroui/react"; // HeroUI 组件库提供的基础 U
 import { SiteShell } from "@/components/site-shell"; // 站点统一外壳（导航/页脚等），`@/` 是 tsconfig 配置的根别名
 import { PosterAmbientGlow } from "@/components/poster-ambient-glow"; // 顶部海报氛围光晕背景层（纯装饰）
 import { WatchProviders } from "@/components/watch-providers"; // 正版观看与购买聚合模块（客户端组件，含复制链接）
-import { getMovie, getMovieSlugs } from "@/lib/movie-api"; // API 优先、无配置时回退到半人工策展默认数据
+import { getMovie, getMovieSlugs } from "@/lib/movie-api"; // 读取本站本地内容库；外部 API 仅由后台同步脚本调用
+
+export const revalidate = 86400;
 
 /** 详情页头部展示的占位统计数据（浏览/收藏/推荐）。当前为静态写死，后续可替换为内容层真实字段。 */
 const statItems = [

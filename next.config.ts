@@ -6,6 +6,19 @@ import type { NextConfig } from "next";
 const unoptimizedImages = process.env.NEXT_IMAGE_UNOPTIMIZED === "true";
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/media/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     unoptimized: unoptimizedImages,
     remotePatterns: [
