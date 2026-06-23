@@ -26,14 +26,14 @@ export function WatchProviders({ paths }: { paths: ViewingPath[] }) {
 
   return (
     <section className="mt-10">
-      <h2 className="border-b border-[#456]/70 pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-white">
+      <h2 className="border-b border-[color:var(--sz-border-strong)] pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--sz-text-strong)]">
         正版观看与购买
       </h2>
       <div className="mt-4 space-y-6">
         {grouped.map((group) => (
           <div key={group.category}>
             {/* 来源分类标签：HeroUI Chip */}
-            <Chip variant="soft" size="sm" className="mb-2 bg-[#283038] text-[#9ab]">
+            <Chip variant="soft" size="sm" className="mb-2 bg-[var(--sz-surface-muted)] text-[var(--sz-muted)]">
               {group.category}
             </Chip>
             <div className="space-y-2">
@@ -44,7 +44,7 @@ export function WatchProviders({ paths }: { paths: ViewingPath[] }) {
           </div>
         ))}
       </div>
-      <p className="mt-4 text-[11px] leading-5 text-[#6b7c8d]">
+      <p className="mt-4 text-[11px] leading-5 text-[var(--sz-subtle)]">
         链接来自 TMDB / JustWatch 的地区聚合页，平台可用性、价格与地区以各正版平台实时结果为准。
       </p>
     </section>
@@ -56,7 +56,7 @@ function ProviderRow({ path }: { path: ViewingPath }) {
   const hasUrl = Boolean(path.url);
 
   return (
-    <Card className="detail-surface flex flex-row items-center justify-between gap-4 rounded bg-[#182129]/72 px-4 py-3 text-[#d9e5ef]">
+    <Card className="detail-surface flex flex-row items-center justify-between gap-4 rounded bg-[var(--sz-surface)] px-4 py-3 text-[var(--sz-text)]">
       <div className="min-w-0">
         {/* 超链接名称：有 url 时用 HeroUI Link 渲染为外链，否则纯文本 */}
         {hasUrl ? (
@@ -64,15 +64,15 @@ function ProviderRow({ path }: { path: ViewingPath }) {
             href={path.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-semibold text-[#40bcf4] hover:underline"
+            className="text-sm font-semibold text-[var(--sz-link)] hover:underline"
           >
             {path.platform}
           </Link>
         ) : (
-          <span className="text-sm font-semibold text-white">{path.platform}</span>
+          <span className="text-sm font-semibold text-[var(--sz-text-strong)]">{path.platform}</span>
         )}
         {/* 辅助描述 */}
-        <p className="mt-1 truncate text-xs text-[#7f93a7]">{path.note}</p>
+        <p className="mt-1 truncate text-xs text-[var(--sz-muted)]">{path.note}</p>
       </div>
       {hasUrl ? <CopyButton url={path.url as string} /> : null}
     </Card>

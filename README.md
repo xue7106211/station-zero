@@ -1,6 +1,6 @@
 # Station Zero 零号站
 
-Station Zero 是一个高清观影决策系统，帮助用户判断一部片值不值得看、哪里能合法看、哪个高清版本最值得看。
+Station Zero 是一个高清观影系统，帮助用户判断一部片值不值得看、哪里能合法看、哪个高清版本最值得看。
 
 ## 当前版本
 
@@ -25,12 +25,6 @@ npm run check:tmdb
 npm run sync:movies
 npm run import:movies -- path/to/movies.json
 ```
-
-## 产品文档
-
-PRD 位于 `docs/product/station-zero-prd-v0.1.md`。
-
-公开产品不提供磁力、BT、网盘、迅雷、盗版资源站或侵权下载入口。
 
 ## 电影数据架构
 
@@ -86,6 +80,46 @@ NO_PROXY=localhost,127.0.0.1
 `npm run import:movies -- path/to/movies.json` 可导入人工整理的影片数据，按 `slug` 写入或更新本地库。
 
 TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路径参考；高清版本判断仍保留 Station Zero 的编辑判断层。
+
+### 人工录入约定
+
+常规录入方式是先提供电影名称和年份，由 Agent 或编辑把它整理进 `data/movie-seeds.json`，再运行后台同步补全 TMDB 资料。
+
+推荐种子格式：
+
+```json
+[
+  {
+    "slug": "arrival",
+    "title": "降临",
+    "originalTitle": "Arrival",
+    "year": "2016",
+    "verdict": "值得安静大屏观看",
+    "bestWay": "4K HDR / Blu-ray / 高质量正版流媒体"
+  }
+]
+```
+
+如果已知 `tmdbId`，优先写入 `tmdbId`，匹配最稳定：
+
+```json
+[
+  {
+    "slug": "arrival",
+    "tmdbId": 329865,
+    "verdict": "值得安静大屏观看",
+    "bestWay": "4K HDR / Blu-ray / 高质量正版流媒体"
+  }
+]
+```
+
+录入原则：
+
+- `slug` 是本站公开 URL 标识，例如 `/movies/arrival`，优先使用英文小写 kebab-case。
+- `tmdbId` 是外部资料源 ID，只用于后台同步，不作为公开详情页主地址。
+- 电影名称和年份可用于初步搜索；当前脚本尚未把年份作为强匹配条件，遇到同名电影时应先确认 `tmdbId`。
+- `verdict`、`bestWay`、`idealScene`、`notFor`、`versionSignals`、`deviceAdvice` 是 Station Zero 编辑判断层，应人工维护。
+- 同步完成后，正式展示数据写入 `data/movies.json`，前端只读取本站本地库与 `/media/` 图片。
 
 ## UI 组件
 

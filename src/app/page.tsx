@@ -19,33 +19,33 @@ export default async function Home() {
     <SiteShell>
       <section className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-[1.05fr_0.95fr] md:px-10 md:py-24">
         <div>
-          <p className="mb-5 font-mono text-xs uppercase tracking-[0.28em] text-[#f4c95d]">
+          <p className="mb-5 font-mono text-xs uppercase tracking-[0.28em] text-[var(--sz-accent)]">
             高清观影决策系统
           </p>
           <h1 className="max-w-4xl text-5xl font-semibold leading-tight tracking-tight md:text-7xl">
             不找资源，判断一部片应该怎么被看见。
           </h1>
-          <p className="mt-7 max-w-2xl text-lg leading-9 text-[#f8f3e8]/68">
+          <p className="mt-7 max-w-2xl text-lg leading-9 text-[var(--sz-text-soft)]">
             Station Zero
             帮你判断一部片值不值得看、哪里能合法看、哪个高清版本最值得看。第一版先把单部影片决策页做到足够清楚、可信、有审美。
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link href={`/movies/${featured.slug}`}>
-              <Button className="rounded-full bg-[#f4c95d] px-6 py-3 text-sm font-semibold text-[#09090b] transition hover:bg-[#ffe08a]">
+              <Button className="rounded-full bg-[var(--sz-accent)] px-6 py-3 text-sm font-semibold text-[var(--sz-accent-contrast)] transition hover:opacity-90">
                 查看影片决策样例
               </Button>
             </Link>
             <Link href="/knowledge">
               <Button
                 variant="secondary"
-                className="rounded-full border-white/15 px-6 py-3 text-sm font-semibold text-[#f8f3e8] transition hover:border-[#f4c95d]/60 hover:text-[#f4c95d]"
+                className="rounded-full border-[color:var(--sz-border)] px-6 py-3 text-sm font-semibold text-[var(--sz-text)] transition hover:border-[color:var(--sz-accent-soft)] hover:text-[var(--sz-accent)]"
               >
                 进入高清知识库
               </Button>
             </Link>
           </div>
         </div>
-        <Card className="rounded-[2rem] border border-white/10 bg-white/[0.05] p-5 text-[#f8f3e8] backdrop-blur">
+        <Card className="rounded-[2rem] border border-[color:var(--sz-border)] bg-[var(--sz-card-strong)] p-5 text-[var(--sz-text)] backdrop-blur">
           <div
             className={`relative mb-5 h-72 overflow-hidden rounded-[1.5rem] bg-gradient-to-br ${featured.posterTone}`}
           >
@@ -60,11 +60,11 @@ export default async function Home() {
               />
             ) : null}
           </div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#f4c95d]/80">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--sz-accent)]">
             Featured decision
           </p>
           <h2 className="mt-3 text-3xl font-semibold">{featured.title}</h2>
-          <p className="mt-3 leading-7 text-[#f8f3e8]/64">{featured.summary}</p>
+          <p className="mt-3 leading-7 text-[var(--sz-text-soft)]">{featured.summary}</p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <DecisionCard label="结论" value={featured.verdict} />
             <DecisionCard label="最佳观看" value={featured.bestWay} />
@@ -85,7 +85,7 @@ export default async function Home() {
               href={`/movies/${movie.slug}`}
               className="group block"
             >
-              <Card className="h-full rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-[#f8f3e8] transition hover:-translate-y-1 hover:border-[#f4c95d]/50">
+              <Card className="h-full rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-5 text-[var(--sz-text)] transition hover:-translate-y-1 hover:border-[color:var(--sz-accent-soft)]">
                 <div
                   className={`relative mb-5 h-44 overflow-hidden rounded-2xl bg-gradient-to-br ${movie.posterTone}`}
                 >
@@ -100,13 +100,13 @@ export default async function Home() {
                     />
                   ) : null}
                 </div>
-                <p className="text-sm text-[#f8f3e8]/50">
+                <p className="text-sm text-[var(--sz-muted)]">
                   {movie.year} · {movie.genres.join(" / ")}
                 </p>
-                <h3 className="mt-2 text-2xl font-semibold group-hover:text-[#f4c95d]">
+                <h3 className="mt-2 text-2xl font-semibold group-hover:text-[var(--sz-accent)]">
                   {movie.title}
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-[#f8f3e8]/60">
+                <p className="mt-3 text-sm leading-6 text-[var(--sz-text-soft)]">
                   {movie.verdict} · {movie.bestWay}
                 </p>
               </Card>
@@ -126,14 +126,14 @@ export default async function Home() {
         <div className="grid gap-4 md:col-span-2">
           {collections.map((collection) => (
             <Link key={collection.slug} href="/collections" className="block">
-              <Card className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 text-[#f8f3e8] transition hover:border-[#f4c95d]/50">
-                <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#f4c95d]/80">
+              <Card className="rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-6 text-[var(--sz-text)] transition hover:border-[color:var(--sz-accent-soft)]">
+                <p className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--sz-accent)]">
                   {collection.kicker}
                 </p>
                 <h3 className="mt-3 text-2xl font-semibold">
                   {collection.title}
                 </h3>
-                <p className="mt-2 text-[#f8f3e8]/62">
+                <p className="mt-2 text-[var(--sz-text-soft)]">
                   {collection.description}
                 </p>
               </Card>
@@ -143,7 +143,7 @@ export default async function Home() {
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-5 px-6 py-14 md:grid-cols-2 md:px-10">
-        <Card className="rounded-3xl border border-white/10 bg-[#f4c95d] p-8 text-[#09090b]">
+        <Card className="rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-accent)] p-8 text-[var(--sz-accent-contrast)]">
           <p className="font-mono text-xs uppercase tracking-[0.2em]">
             Version tracking
           </p>
@@ -156,8 +156,8 @@ export default async function Home() {
             ))}
           </ul>
         </Card>
-        <Card className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-[#f8f3e8]">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#f4c95d]">
+        <Card className="rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-8 text-[var(--sz-text)]">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--sz-accent)]">
             Knowledge
           </p>
           <h2 className="mt-4 text-3xl font-semibold">高清知识要服务判断</h2>
@@ -165,9 +165,9 @@ export default async function Home() {
             {knowledgeEntries.map((entry) => (
               <p
                 key={entry.slug}
-                className="text-sm leading-7 text-[#f8f3e8]/65"
+                className="text-sm leading-7 text-[var(--sz-text-soft)]"
               >
-                <span className="text-[#f8f3e8]">{entry.term}</span>：
+                <span className="text-[var(--sz-text)]">{entry.term}</span>：
                 {entry.summary}
               </p>
             ))}

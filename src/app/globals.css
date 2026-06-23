@@ -3,8 +3,73 @@
 :root {
   --background: #09090b;
   --foreground: #f8f3e8;
+  --sz-bg: oklch(10.5% 0.011 285);
+  --sz-bg-rgb: 9 9 11;
+  --sz-text: oklch(96% 0.018 86);
+  --sz-text-strong: #ffffff;
+  --sz-text-soft: rgb(248 243 232 / 68%);
+  --sz-muted: rgb(248 243 232 / 55%);
+  --sz-subtle: rgb(248 243 232 / 42%);
+  --sz-card: rgb(255 255 255 / 4%);
+  --sz-card-strong: rgb(255 255 255 / 5%);
+  --sz-surface: oklch(19% 0.019 248 / 82%);
+  --sz-surface-soft: rgb(255 255 255 / 6%);
+  --sz-surface-muted: oklch(24% 0.021 250 / 72%);
+  --sz-border: rgb(255 255 255 / 10%);
+  --sz-border-strong: rgb(154 170 187 / 45%);
+  --sz-accent: oklch(83% 0.14 86);
+  --sz-accent-rgb: 244 201 93;
+  --sz-accent-contrast: #09090b;
+  --sz-accent-soft: rgb(244 201 93 / 42%);
+  --sz-accent-faint: rgb(244 201 93 / 10%);
+  --sz-link: oklch(78% 0.16 221);
+  --sz-success: oklch(73% 0.17 159);
+  --sz-info: oklch(75% 0.13 233);
+  --sz-warn: oklch(83% 0.14 80);
+  --sz-shadow: rgb(0 0 0 / 22%);
+  --sz-inset: rgb(255 255 255 / 5%);
+  --sz-page-glow: radial-gradient(circle at top left, rgb(244 201 93 / 10%), transparent 32%), radial-gradient(circle at 80% 20%, rgb(125 92 255 / 10%), transparent 28%), linear-gradient(180deg, rgb(255 255 255 / 3.5%), transparent 38%);
+  --sz-detail-glow: radial-gradient(ellipse at 32% 18%, rgb(255 255 255 / 16%), transparent 24%), linear-gradient(180deg, rgb(9 9 11 / 18%) 0%, rgb(9 9 11 / 76%) 56%, #09090b 100%), linear-gradient(90deg, #09090b 0%, rgb(9 9 11 / 62%) 8%, rgb(9 9 11 / 28%) 30%, rgb(9 9 11 / 28%) 70%, rgb(9 9 11 / 62%) 92%, #09090b 100%);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+html[data-theme="light"] {
+  --background: #f7f8fb;
+  --foreground: #111827;
+  --sz-bg: oklch(97.8% 0.006 255);
+  --sz-bg-rgb: 247 248 251;
+  --sz-text: oklch(23% 0.026 255);
+  --sz-text-strong: oklch(17% 0.028 255);
+  --sz-text-soft: rgb(17 24 39 / 72%);
+  --sz-muted: rgb(75 85 99 / 76%);
+  --sz-subtle: rgb(100 116 139 / 65%);
+  --sz-card: rgb(255 255 255 / 86%);
+  --sz-card-strong: #ffffff;
+  --sz-surface: rgb(255 255 255 / 90%);
+  --sz-surface-soft: rgb(241 245 249 / 92%);
+  --sz-surface-muted: rgb(226 232 240 / 88%);
+  --sz-border: rgb(15 23 42 / 10%);
+  --sz-border-strong: rgb(15 23 42 / 16%);
+  --sz-accent: oklch(56% 0.2 260);
+  --sz-accent-rgb: 59 130 246;
+  --sz-accent-contrast: #ffffff;
+  --sz-accent-soft: rgb(59 130 246 / 28%);
+  --sz-accent-faint: rgb(59 130 246 / 10%);
+  --sz-link: oklch(56% 0.2 260);
+  --sz-success: oklch(58% 0.15 160);
+  --sz-info: oklch(55% 0.17 240);
+  --sz-warn: oklch(62% 0.15 65);
+  --sz-shadow: rgb(15 23 42 / 8%);
+  --sz-inset: rgb(255 255 255 / 0%);
+  --sz-page-glow: radial-gradient(circle at top left, rgb(59 130 246 / 10%), transparent 34%), radial-gradient(circle at 80% 20%, rgb(124 58 237 / 8%), transparent 28%), linear-gradient(180deg, rgb(255 255 255 / 80%), transparent 42%);
+  --sz-detail-glow: linear-gradient(180deg, rgb(15 23 42 / 5%) 0%, rgb(15 23 42 / 0%) 26%);
+}
+
+/* 方案 C：亮色模式不渲染彩色海报光晕，仅保留上方 --sz-detail-glow 的极淡中性渐变，
+   避免白底上出现过曝色罩并压低正文对比度。深色模式保持「随海报取色」氛围层。 */
+html[data-theme="light"] .poster-glow-img {
+  display: none;
 }
 
 @theme inline {
@@ -12,6 +77,12 @@
   --color-foreground: var(--foreground);
   --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {
@@ -25,8 +96,8 @@ a {
 }
 
 ::selection {
-  background: #f4c95d;
-  color: #09090b;
+  background: var(--sz-accent);
+  color: var(--sz-accent-contrast);
 }
 
 .pressable {
@@ -81,8 +152,8 @@ a {
 @media (hover: hover) and (pointer: fine) {
   .detail-surface:hover {
     transform: translateY(-2px);
-    border-color: rgba(154, 170, 187, 0.36);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.26);
+    border-color: var(--sz-border-strong);
+    box-shadow: 0 18px 45px var(--sz-shadow);
   }
 
   .poster-lift:hover {

@@ -14,9 +14,9 @@ export const revalidate = 86400;
 
 /** 详情页头部展示的占位统计数据（浏览/收藏/推荐）。当前为静态写死，后续可替换为内容层真实字段。 */
 const statItems = [
-  { label: "浏览", value: "58K", color: "text-emerald-400" },
-  { label: "收藏", value: "20K", color: "text-sky-400" },
-  { label: "推荐", value: "27K", color: "text-amber-400" },
+  { label: "浏览", value: "58K", color: "text-[var(--sz-success)]" },
+  { label: "收藏", value: "20K", color: "text-[var(--sz-info)]" },
+  { label: "推荐", value: "27K", color: "text-[var(--sz-warn)]" },
 ];
 
 /**
@@ -77,14 +77,14 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
         <section className="relative z-10 grid gap-8 md:grid-cols-[230px_minmax(0,1fr)_210px] md:items-start">
           {/* 左栏：海报卡片 + 统计 + 合法观看路径摘要 */}
           <aside className="space-y-5 md:sticky md:top-6">
-            <Card className="detail-surface poster-lift overflow-hidden rounded-md border border-[#ddef]/25 bg-[#12161a] p-0 shadow-[0_5px_18px_rgba(0,0,0,0.35)]">
+            <Card className="detail-surface poster-lift overflow-hidden rounded-md border border-[color:var(--sz-border)] bg-[var(--sz-surface)] p-0 shadow-[0_5px_18px_var(--sz-shadow)]">
               {/* relative 作为 Image fill 的定位容器；无 posterUrl 时仅显示渐变占位 */}
               <div className={`relative h-[345px] bg-gradient-to-br ${movie.posterTone}`}>
                 {movie.posterUrl ? <Image src={movie.posterUrl} alt={`${movie.title} poster`} fill className="object-cover" sizes="230px" /> : null}
               </div>
             </Card>
             {/* 浏览/收藏/推荐统计（当前为占位数据） */}
-            <div className="flex justify-center gap-4 text-xs text-[#9ab]">
+            <div className="flex justify-center gap-4 text-xs text-[var(--sz-muted)]">
               {statItems.map((stat) => (
                 <span key={stat.label} className="inline-flex items-center gap-1">
                   <span className={stat.color}>●</span>
@@ -93,17 +93,17 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               ))}
             </div>
             {/* 「在哪看」卡片：只展示合法观看路径，呼应 PRD 的合规边界 */}
-            <Card className="detail-surface overflow-hidden rounded bg-[#111820] p-0 text-[#9ab]">
-              <div className="flex items-center justify-between bg-[#283038] px-3 py-2 text-[11px] uppercase tracking-[0.16em]">
+            <Card className="detail-surface overflow-hidden rounded bg-[var(--sz-surface)] p-0 text-[var(--sz-muted)]">
+              <div className="flex items-center justify-between bg-[var(--sz-surface-muted)] px-3 py-2 text-[11px] uppercase tracking-[0.16em]">
                 <span>Where to watch</span>
                 <span>Legal</span>
               </div>
               <div className="space-y-2 px-3 py-3 text-xs">
                 {/* 仅预览前 2 个平台，其余收敛到「All legal paths…」入口 */}
                 {movie.viewingPaths.slice(0, 2).map((path) => (
-                  <p key={path.platform} className="text-[#c8d1da]">{path.platform}</p>
+                  <p key={path.platform} className="text-[var(--sz-text-soft)]">{path.platform}</p>
                 ))}
-                <p className="text-[#40bcf4]">All legal paths…</p>
+                <p className="text-[var(--sz-link)]">All legal paths…</p>
               </div>
             </Card>
           </aside>
@@ -111,15 +111,15 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           {/* 中栏：观影决策正文（移动端标题、判定摘要、简介、决策四宫格） */}
           <main className="detail-reveal min-w-0">
             <div>
-              <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
-                {movie.title} <span className="text-lg font-normal text-[#9ab]">{movie.year}</span>
+              <h1 className="text-4xl font-semibold tracking-tight text-[var(--sz-text-strong)] md:text-6xl">
+                {movie.title} <span className="text-lg font-normal text-[var(--sz-muted)]">{movie.year}</span>
               </h1>
             </div>
             {/* 一句话决策摘要：推荐结论 + 最佳观看方式 */}
-            <p className="mt-6 max-w-xl font-mono text-xs uppercase leading-6 tracking-[0.2em] text-[#9ab] md:mt-4">
+            <p className="mt-6 max-w-xl font-mono text-xs uppercase leading-6 tracking-[0.2em] text-[var(--sz-muted)] md:mt-4">
               {movie.verdict} · {movie.bestWay}
             </p>
-            <p className="mt-5 max-w-xl text-[15px] leading-7 text-[#c9d3dc]">
+            <p className="mt-5 max-w-xl text-[15px] leading-7 text-[var(--sz-text-soft)]">
               {movie.summary}
             </p>
             {/* 决策四宫格：把关键判断（最佳观看/场景/不适合/评分）结构化呈现 */}
@@ -133,9 +133,9 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             {/* 主创信息标签 + 高清版本判断 / 设备场景建议：与上方决策内容保持同一个内容流 */}
             <div className="mt-12">
               {/* 仿 Letterboxd 的 Tab 行（当前为纯视觉，未接交互） */}
-              <div className="flex gap-5 border-b border-[#456]/70 text-xs uppercase tracking-[0.16em]">
+              <div className="flex gap-5 border-b border-[color:var(--sz-border-strong)] text-xs uppercase tracking-[0.16em]">
                 {['Cast', 'Crew', 'Details', 'Genres', 'Releases'].map((item, index) => (
-                  <span key={item} className={`pressable pb-2 ${index === 0 ? 'border-b border-white text-white' : 'text-emerald-400'}`}>
+                  <span key={item} className={`pressable pb-2 ${index === 0 ? 'border-b border-[color:var(--sz-text-strong)] text-[var(--sz-text-strong)]' : 'text-[var(--sz-success)]'}`}>
                     {item}
                   </span>
                 ))}
@@ -144,7 +144,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               {/* 主创/相关标签云：合并导演、主演、相关推荐为一组 Chip */}
               <div className="mt-4 flex flex-wrap gap-2">
                 {[movie.director, ...movie.cast, ...movie.related].map((item, index) => (
-                  <Chip key={`${item}-${index}`} variant="soft" className="pressable rounded bg-[#283038] px-2 py-1 text-xs text-[#9ab]">
+                  <Chip key={`${item}-${index}`} variant="soft" className="pressable rounded bg-[var(--sz-surface-muted)] px-2 py-1 text-xs text-[var(--sz-muted)]">
                     {item}
                   </Chip>
                 ))}
@@ -154,19 +154,19 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                 {/* 高清版本判断：逐条列出 4K/HDR/Dolby Vision 等信号及对应结论 */}
                 <InfoCard title="高清版本判断">
                   {movie.versionSignals.map((signal) => (
-                    <div key={signal.label} className="flex items-start justify-between gap-4 border-b border-white/5 py-3 last:border-0">
+                    <div key={signal.label} className="flex items-start justify-between gap-4 border-b border-[color:var(--sz-border)] py-3 last:border-0">
                       <div>
-                        <p className="font-medium text-[#d9e5ef]">{signal.label}</p>
-                        <p className="mt-1 text-sm text-[#9ab]">{signal.value}</p>
+                        <p className="font-medium text-[var(--sz-text)]">{signal.label}</p>
+                        <p className="mt-1 text-sm text-[var(--sz-muted)]">{signal.value}</p>
                       </div>
-                      <span className="text-xs text-emerald-400">{signal.verdict}</span>
+                      <span className="text-xs text-[var(--sz-success)]">{signal.verdict}</span>
                     </div>
                   ))}
                 </InfoCard>
 
                 {/* 设备与场景建议：按设备/场景给出观看建议清单 */}
                 <InfoCard title="设备与场景建议">
-                  <ul className="space-y-3 text-sm text-[#9ab]">
+                  <ul className="space-y-3 text-sm text-[var(--sz-muted)]">
                     {movie.deviceAdvice.map((item) => <li key={item}>· {item}</li>)}
                   </ul>
                 </InfoCard>
@@ -179,8 +179,8 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
           {/* 右栏：跨平台评分 */}
           <aside className="detail-reveal space-y-6 pt-0 md:pt-2">
-            <Card className="detail-reveal rounded-none border-0 bg-transparent p-0 text-[#9ab] shadow-none">
-              <div className="flex items-center justify-between border-b border-[#456]/70 pb-2 text-[11px] uppercase tracking-[0.16em]">
+            <Card className="detail-reveal rounded-none border-0 bg-transparent p-0 text-[var(--sz-muted)] shadow-none">
+              <div className="flex items-center justify-between border-b border-[color:var(--sz-border-strong)] pb-2 text-[11px] uppercase tracking-[0.16em]">
                 <span>Ratings</span>
                 <span>3 sources</span>
               </div>
@@ -208,8 +208,8 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
  */
 function DecisionPanel({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="detail-surface rounded bg-[#202932]/80 p-4 text-[#d9e5ef] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#8fa1b2]">{label}</p>
+    <Card className="detail-surface rounded bg-[var(--sz-surface-muted)] p-4 text-[var(--sz-text)] shadow-[inset_0_1px_0_var(--sz-inset)]">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--sz-muted)]">{label}</p>
       <p className="mt-2 text-sm leading-6">{value}</p>
     </Card>
   );
@@ -227,8 +227,8 @@ function DecisionPanel({ label, value }: { label: string; value: string }) {
  */
 function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="detail-surface rounded bg-[#182129]/80 p-5 text-[#d9e5ef] shadow-none">
-      <h2 className="border-b border-[#456]/70 pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-white">{title}</h2>
+    <Card className="detail-surface rounded bg-[var(--sz-surface)] p-5 text-[var(--sz-text)] shadow-none">
+      <h2 className="border-b border-[color:var(--sz-border-strong)] pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--sz-text-strong)]">{title}</h2>
       <div className="mt-3">{children}</div>
     </Card>
   );
@@ -246,15 +246,15 @@ function InfoCard({ title, children }: { title: string; children: React.ReactNod
 function RatingSource({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
     // 横向两栏布局：justify-between 让来源信息与数值分列左右两端
-    <div className="detail-surface flex items-center justify-between rounded bg-[#182129]/72 px-4 py-3 text-[#d9e5ef]">
+    <div className="detail-surface flex items-center justify-between rounded bg-[var(--sz-surface)] px-4 py-3 text-[var(--sz-text)]">
       {/* 左栏：来源名称（主）+ 辅助说明（次） */}
       <div>
-        <p className="text-sm font-semibold text-white">{label}</p>
+        <p className="text-sm font-semibold text-[var(--sz-text-strong)]">{label}</p>
         {/* 小字提示：大写 + 字间距，弱化为次要信息 */}
-        <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-[#7f93a7]">{hint}</p>
+        <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-[var(--sz-muted)]">{hint}</p>
       </div>
       {/* 右栏：评分数值，使用系统默认字体（font-sans） */}
-      <p className="font-sans text-2xl font-light text-[#b8c8d8]">{value}</p>
+      <p className="font-sans text-2xl font-light text-[var(--sz-text-soft)]">{value}</p>
     </div>
   );
 }

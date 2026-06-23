@@ -13,8 +13,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const themeScript = `
+try {
+  var theme = localStorage.getItem('station-zero-theme');
+  document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+} catch (_) {
+  document.documentElement.dataset.theme = 'dark';
+}`;
+
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" data-theme="dark">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>{children}</body>
     </html>
   );

@@ -16,13 +16,13 @@ export default async function MoviesPage() {
         <div className="grid gap-5 md:grid-cols-3">
           {movies.map((movie) => (
             <Link key={movie.slug} href={`/movies/${movie.slug}`} className="block">
-              <Card className="h-full rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-[#f8f3e8] transition hover:border-[#f4c95d]/50">
+              <Card className="h-full rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-5 text-[var(--sz-text)] transition hover:border-[color:var(--sz-accent-soft)]">
                 <div className={`relative mb-5 h-52 overflow-hidden rounded-2xl bg-gradient-to-br ${movie.posterTone}`}>
                   {movie.posterUrl ? <Image src={movie.posterUrl} alt={`${movie.title} poster`} fill className="object-cover" loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" /> : null}
                 </div>
-                <p className="text-sm text-[#f8f3e8]/50">{movie.originalTitle} · {movie.year}</p>
+                <p className="text-sm text-[var(--sz-muted)]">{movie.originalTitle} · {movie.year}</p>
                 <h2 className="mt-2 text-2xl font-semibold">{movie.title}</h2>
-                <p className="mt-3 text-sm leading-6 text-[#f8f3e8]/62">{movie.summary}</p>
+                <p className="mt-3 text-sm leading-6 text-[var(--sz-text-soft)]">{movie.summary}</p>
               </Card>
             </Link>
           ))}

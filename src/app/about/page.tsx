@@ -15,12 +15,12 @@ export default function AboutPage() {
         <SectionHeading eyebrow="About" title="关于零号站" description="Station Zero 是一个高清观影决策系统，不是影视资源下载站。" />
         <div className="grid gap-5 md:grid-cols-2">
           {principles.map((principle) => (
-            <Card key={principle} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 text-xl leading-9 text-[#f8f3e8]/78">
+            <Card key={principle} className="rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-6 text-xl leading-9 text-[var(--sz-text-soft)]">
               {principle}
             </Card>
           ))}
         </div>
-        <Card className="mt-8 rounded-3xl border border-[#f4c95d]/25 bg-[#f4c95d]/10 p-6 leading-8 text-[#f8f3e8]/78">
+        <Card className="mt-8 rounded-3xl border border-[color:var(--sz-accent-soft)] bg-[var(--sz-accent-faint)] p-6 leading-8 text-[var(--sz-text-soft)]">
           合规边界：公开产品不提供磁力、BT、网盘、迅雷、盗版资源站或侵权下载入口。Station Zero 的价值来自专业判断、信息组织、审美策展和合法观看导航。
         </Card>
       </section>
