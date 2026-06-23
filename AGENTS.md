@@ -25,7 +25,6 @@
 - `npm run sync:movies` — 后台调用 TMDB，同步影片资料并下载海报/背景图到本站静态目录。
 - `npm run import:movies -- path/to/movies.json` — 批量导入人工整理的影片 JSON。
 
-辅助检查：`rg "磁力|BT|网盘|迅雷|侵权|盗版" docs/ src/`。
 TMDB 配置见 `.env.example`；TMDB 只允许用于后台同步，不应在用户访问页面时实时调用。未配置 TMDB 时必须保持本地数据和默认数据可用。
 
 ## 编码风格与命名规范
