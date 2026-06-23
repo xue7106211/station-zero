@@ -131,10 +131,10 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               </h1>
             </div>
             {/* 一句话决策摘要：推荐结论 + 最佳观看方式 */}
-            <p className="mt-6 max-w-xl font-mono text-xs uppercase leading-6 tracking-[0.2em] text-[var(--sz-muted)] md:mt-4">
+            <p className="mt-6 font-mono text-xs uppercase leading-6 tracking-[0.2em] text-[var(--sz-muted)] md:mt-4">
               {movie.verdict} · {movie.bestWay}
             </p>
-            <p className="mt-5 max-w-xl text-[15px] leading-7 text-[var(--sz-text-soft)]">
+            <p className="mt-5 text-[15px] leading-7 text-[var(--sz-text-soft)]">
               {movie.summary}
             </p>
             {/* 决策四宫格：把关键判断（最佳观看/场景/不适合/评分）结构化呈现 */}
