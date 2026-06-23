@@ -22,7 +22,7 @@ try {
 }`;
 
   return (
-    <html lang="zh-CN" data-theme="dark">
+    <html lang="zh-CN" data-theme="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

@@ -1,21 +1,31 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Card } from "@heroui/react";
-import { ThemeToggle } from "./theme-toggle";
+import { SiteNav } from "./site-nav";
 
-const navItems = [
-  { href: "/movies", label: "影片" },
-  { href: "/collections", label: "片单" },
-  { href: "/knowledge", label: "高清知识" },
-  { href: "/versions", label: "版本追踪" },
-  { href: "/about", label: "关于" },
-];
-
+/**
+ * 站点统一外壳：为所有页面提供一致的背景、顶部导航与页脚。
+ *
+ * 布局结构（从外到内）：
+ * 1. 根容器铺满视口高度，用语义 token `--sz-bg` / `--sz-text` 着色，自动适配深/浅主题；
+ * 2. 一层固定定位的 `--sz-page-glow` 氛围光晕，`pointer-events-none` 不拦截交互；
+ * 3. `header`（Logo + 桌面端导航 + 主题切换）、`main`（页面内容）、`footer`（合规声明）。
+ *
+ * 内容层统一用 `relative z-10` 抬到光晕之上，避免被背景层遮挡。
+ *
+ * @param props - 组件属性
+ * @param props.children - 注入到 `<main>` 的页面内容
+ * @returns 包裹页面内容的站点外壳
+ */
 export function SiteShell({ children }: { children: ReactNode }) {
   return (
+    // 根容器：占满视口高度，背景与前景色走主题 token，深/浅模式自动切换
     <div className="min-h-screen bg-[var(--sz-bg)] text-[var(--sz-text)]">
+      {/* 全屏氛围光晕背景层：固定定位、纯装饰，pointer-events-none 不拦截点击 */}
       <div className="pointer-events-none fixed inset-0 bg-[var(--sz-page-glow)]" />
+      {/* 顶部导航条：z-10 抬到光晕之上，max-w-7xl 居中并限制最大宽度 */}
       <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6 md:px-10">
+        {/* 站点 Logo：圆形「0」徽标 + 中英文站名，点击回首页 */}
         <Link href="/" className="group flex items-center gap-3">
           <span className="flex size-10 items-center justify-center rounded-full border border-[color:var(--sz-accent-soft)] bg-[var(--sz-accent-faint)] font-mono text-sm text-[var(--sz-accent)]">
             0
@@ -27,16 +37,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <span className="text-xs text-[var(--sz-muted)]">零号站</span>
           </span>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm text-[var(--sz-muted)] md:flex">
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href} className="transition hover:text-[var(--sz-accent)]">
-              {item.label}
-            </Link>
-          ))}
-          <ThemeToggle />
-        </nav>
+        {/* 主导航（已抽离为独立组件，便于后续迭代）：桌面端横向导航 + 主题切换 */}
+        <SiteNav />
       </header>
+      {/* 页面主体内容容器 */}
       <main className="relative z-10">{children}</main>
+      {/* 页脚：合规声明，重申本站只做观影决策、不提供侵权下载入口 */}
       <footer className="relative z-10 mx-auto max-w-7xl px-6 py-10 text-sm text-[var(--sz-muted)] md:px-10">
         <div className="border-t border-[color:var(--sz-border)] pt-6">
           Station Zero 只做高清观影决策、正版路径和版本知识，不提供侵权下载入口。
