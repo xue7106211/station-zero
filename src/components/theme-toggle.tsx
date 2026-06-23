@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { Button } from "@heroui/react";
+import { Moon, Sun } from "lucide-react";
 import { normalizeTheme, themeStorageKey, type ThemeName } from "@/lib/theme";
 
 // 主题变更事件：toggleTheme 改写 <html data-theme> 后派发，通知所有订阅者重渲染。
@@ -52,7 +53,7 @@ export function ThemeToggle() {
       onPress={toggleTheme}
       className="pressable min-w-0 rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] px-3 font-mono text-xs text-[var(--sz-text)] shadow-none"
     >
-      <span aria-hidden>{isLight ? "☀" : "☾"}</span>
+      <span aria-hidden>{isLight ? <Sun className="size-4" /> : <Moon className="size-4" />}</span>
       <span className="hidden sm:inline">{isLight ? "Light" : "Dark"}</span>
     </Button>
   );

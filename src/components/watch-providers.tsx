@@ -8,6 +8,7 @@
 
 import { useState } from "react";
 import { Button, Card, Chip, Link } from "@heroui/react";
+import { Check, Copy, ExternalLink } from "lucide-react";
 import type { ViewingPath } from "@/lib/content";
 
 // 展示顺序：订阅 → 租赁/购买 → 实体发行 → 资料来源
@@ -64,9 +65,10 @@ function ProviderRow({ path }: { path: ViewingPath }) {
             href={path.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-semibold text-[var(--sz-link)] hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--sz-link)] hover:underline"
           >
             {path.platform}
+            <ExternalLink className="size-3" />
           </Link>
         ) : (
           <span className="text-sm font-semibold text-[var(--sz-text-strong)]">{path.platform}</span>
@@ -95,7 +97,8 @@ function CopyButton({ url }: { url: string }) {
   }
 
   return (
-    <Button variant="outline" size="sm" onPress={handleCopy} className="shrink-0 text-xs">
+    <Button variant="outline" size="sm" onPress={handleCopy} className="shrink-0 gap-1 text-xs">
+      {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
       {copied ? "已复制" : "复制链接"}
     </Button>
   );

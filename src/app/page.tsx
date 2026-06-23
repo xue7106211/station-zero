@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button, Card } from "@heroui/react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import { collections, knowledgeEntries, versionUpdates } from "@/lib/content";
 import { getMovies } from "@/lib/movie-api";
 import {
@@ -31,15 +32,17 @@ export default async function Home() {
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link href={`/movies/${featured.slug}`}>
-              <Button className="rounded-full bg-[var(--sz-accent)] px-6 py-3 text-sm font-semibold text-[var(--sz-accent-contrast)] transition hover:opacity-90">
+              <Button className="gap-2 rounded-full bg-[var(--sz-accent)] px-6 py-3 text-sm font-semibold text-[var(--sz-accent-contrast)] transition hover:opacity-90">
                 查看影片决策样例
+                <ArrowRight className="size-4" />
               </Button>
             </Link>
             <Link href="/knowledge">
               <Button
                 variant="secondary"
-                className="rounded-full border-[color:var(--sz-border)] px-6 py-3 text-sm font-semibold text-[var(--sz-text)] transition hover:border-[color:var(--sz-accent-soft)] hover:text-[var(--sz-accent)]"
+                className="gap-2 rounded-full border-[color:var(--sz-border)] px-6 py-3 text-sm font-semibold text-[var(--sz-text)] transition hover:border-[color:var(--sz-accent-soft)] hover:text-[var(--sz-accent)]"
               >
+                <BookOpen className="size-4" />
                 进入高清知识库
               </Button>
             </Link>

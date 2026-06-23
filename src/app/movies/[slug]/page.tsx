@@ -9,14 +9,29 @@ import { SiteShell } from "@/components/site-shell"; // 站点统一外壳（导
 import { PosterAmbientGlow } from "@/components/poster-ambient-glow"; // 顶部海报氛围光晕背景层（纯装饰）
 import { WatchProviders } from "@/components/watch-providers"; // 正版观看与购买聚合模块（客户端组件，含复制链接）
 import { getMovie, getMovieSlugs } from "@/lib/movie-api"; // 读取本站本地内容库；外部 API 仅由后台同步脚本调用
+import {
+  Ban,
+  Bookmark,
+  ChevronRight,
+  Eye,
+  Monitor,
+  MonitorPlay,
+  Play,
+  Settings2,
+  ShieldCheck,
+  Sofa,
+  Star,
+  ThumbsUp,
+  type LucideIcon,
+} from "lucide-react"; // Lucide 开源图标库（SVG 组件，可直接用于服务端组件）
 
 export const revalidate = 86400;
 
 /** 详情页头部展示的占位统计数据（浏览/收藏/推荐）。当前为静态写死，后续可替换为内容层真实字段。 */
-const statItems = [
-  { label: "浏览", value: "58K", color: "text-[var(--sz-success)]" },
-  { label: "收藏", value: "20K", color: "text-[var(--sz-info)]" },
-  { label: "推荐", value: "27K", color: "text-[var(--sz-warn)]" },
+const statItems: { label: string; value: string; color: string; Icon: LucideIcon }[] = [
+  { label: "浏览", value: "58K", color: "text-[var(--sz-success)]", Icon: Eye },
+  { label: "收藏", value: "20K", color: "text-[var(--sz-info)]", Icon: Bookmark },
+  { label: "推荐", value: "27K", color: "text-[var(--sz-warn)]", Icon: ThumbsUp },
 ];
 
 /**
@@ -87,7 +102,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             <div className="flex justify-center gap-4 text-xs text-[var(--sz-muted)]">
               {statItems.map((stat) => (
                 <span key={stat.label} className="inline-flex items-center gap-1">
-                  <span className={stat.color}>●</span>
+                  <stat.Icon className={`size-3.5 ${stat.color}`} />
                   {stat.value}
                 </span>
               ))}
@@ -95,15 +110,15 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             {/* 「在哪看」卡片：只展示合法观看路径，呼应 PRD 的合规边界 */}
             <Card className="detail-surface overflow-hidden rounded bg-[var(--sz-surface)] p-0 text-[var(--sz-muted)]">
               <div className="flex items-center justify-between bg-[var(--sz-surface-muted)] px-3 py-2 text-[11px] uppercase tracking-[0.16em]">
-                <span>Where to watch</span>
-                <span>Legal</span>
+                <span className="inline-flex items-center gap-1.5"><Play className="size-3" />Where to watch</span>
+                <span className="inline-flex items-center gap-1"><ShieldCheck className="size-3" />Legal</span>
               </div>
               <div className="space-y-2 px-3 py-3 text-xs">
                 {/* 仅预览前 2 个平台，其余收敛到「All legal paths…」入口 */}
                 {movie.viewingPaths.slice(0, 2).map((path) => (
                   <p key={path.platform} className="text-[var(--sz-text-soft)]">{path.platform}</p>
                 ))}
-                <p className="text-[var(--sz-link)]">All legal paths…</p>
+                <p className="inline-flex items-center gap-0.5 text-[var(--sz-link)]">All legal paths<ChevronRight className="size-3" /></p>
               </div>
             </Card>
           </aside>
@@ -124,10 +139,10 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             </p>
             {/* 决策四宫格：把关键判断（最佳观看/场景/不适合/评分）结构化呈现 */}
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <DecisionPanel label="最佳观看" value={movie.bestWay} />
-              <DecisionPanel label="适合场景" value={movie.idealScene} />
-              <DecisionPanel label="不适合" value={movie.notFor} />
-              <DecisionPanel label="评分参考" value={movie.rating} />
+              <DecisionPanel icon={Monitor} label="最佳观看" value={movie.bestWay} />
+              <DecisionPanel icon={Sofa} label="适合场景" value={movie.idealScene} />
+              <DecisionPanel icon={Ban} label="不适合" value={movie.notFor} />
+              <DecisionPanel icon={Star} label="评分参考" value={movie.rating} />
             </div>
 
             {/* 主创信息标签 + 高清版本判断 / 设备场景建议：与上方决策内容保持同一个内容流 */}
@@ -152,7 +167,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
               <div className="mt-10 grid gap-4 md:grid-cols-2">
                 {/* 高清版本判断：逐条列出 4K/HDR/Dolby Vision 等信号及对应结论 */}
-                <InfoCard title="高清版本判断">
+                <InfoCard icon={MonitorPlay} title="高清版本判断">
                   {movie.versionSignals.map((signal) => (
                     <div key={signal.label} className="flex items-start justify-between gap-4 border-b border-[color:var(--sz-border)] py-3 last:border-0">
                       <div>
@@ -165,7 +180,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                 </InfoCard>
 
                 {/* 设备与场景建议：按设备/场景给出观看建议清单 */}
-                <InfoCard title="设备与场景建议">
+                <InfoCard icon={Settings2} title="设备与场景建议">
                   <ul className="space-y-3 text-sm text-[var(--sz-muted)]">
                     {movie.deviceAdvice.map((item) => <li key={item}>· {item}</li>)}
                   </ul>
@@ -181,7 +196,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           <aside className="detail-reveal space-y-6 pt-0 md:pt-2">
             <Card className="detail-reveal rounded-none border-0 bg-transparent p-0 text-[var(--sz-muted)] shadow-none">
               <div className="flex items-center justify-between border-b border-[color:var(--sz-border-strong)] pb-2 text-[11px] uppercase tracking-[0.16em]">
-                <span>Ratings</span>
+                <span className="inline-flex items-center gap-1.5"><Star className="size-3" />Ratings</span>
                 <span>3 sources</span>
               </div>
               <div className="mt-4 space-y-3">
@@ -199,17 +214,21 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 }
 
 /**
- * 决策面板小卡片：决策四宫格中的单元，统一「标签 + 取值」的展示样式。
+ * 决策面板小卡片：决策四宫格中的单元，统一「图标 + 标签 + 取值」的展示样式。
  *
  * @param props - 组件属性
+ * @param props.icon - Lucide 图标组件，作为该决策维度的视觉标识
  * @param props.label - 决策维度名称，例如「最佳观看」「适合场景」
  * @param props.value - 该维度的结论文本
  * @returns 一张「标签在上、取值在下」的小卡片
  */
-function DecisionPanel({ label, value }: { label: string; value: string }) {
+function DecisionPanel({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
     <Card className="detail-surface rounded bg-[var(--sz-surface-muted)] p-4 text-[var(--sz-text)] shadow-[inset_0_1px_0_var(--sz-inset)]">
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--sz-muted)]">{label}</p>
+      <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--sz-muted)]">
+        <Icon className="size-3.5 text-[var(--sz-accent)]" />
+        {label}
+      </p>
       <p className="mt-2 text-sm leading-6">{value}</p>
     </Card>
   );
@@ -221,14 +240,18 @@ function DecisionPanel({ label, value }: { label: string; value: string }) {
  * 复用于「高清版本判断」与「设备与场景建议」两个区块。
  *
  * @param props - 组件属性
+ * @param props.icon - Lucide 图标组件，显示在标题栏左侧
  * @param props.title - 卡片标题栏文本
  * @param props.children - 卡片正文内容（任意可渲染节点）
  * @returns 带标题栏的信息卡
  */
-function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
+function InfoCard({ icon: Icon, title, children }: { icon: LucideIcon; title: string; children: React.ReactNode }) {
   return (
     <Card className="detail-surface rounded bg-[var(--sz-surface)] p-5 text-[var(--sz-text)] shadow-none">
-      <h2 className="border-b border-[color:var(--sz-border-strong)] pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--sz-text-strong)]">{title}</h2>
+      <h2 className="flex items-center gap-2 border-b border-[color:var(--sz-border-strong)] pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--sz-text-strong)]">
+        <Icon className="size-4 text-[var(--sz-accent)]" />
+        {title}
+      </h2>
       <div className="mt-3">{children}</div>
     </Card>
   );
