@@ -90,7 +90,7 @@ export async function getMovie(slug: string): Promise<Movie | undefined> {
     }
 
     const query = slug.replaceAll("-", " ");
-    return searchTmdbMovie(query);
+    return await searchTmdbMovie(query);
   } catch (error) {
     console.warn(`TMDB movie fetch failed for ${slug}; using fallback. ${formatTmdbError(error)}`);
     return fallback;
@@ -200,7 +200,14 @@ function formatTmdbError(error: unknown) {
     return `TLS certificate mismatch for ${cause.host ?? "TMDB"}; check DNS/proxy or set TMDB_API_BASE_URL to a working proxy. ${cause.reason ?? ""}`;
   }
 
-  return `${error.name}: ${error.message}`;
+  return `${error.name}: ${redactTmdbSecrets(error.message)}`;
+}
+
+function redactTmdbSecrets(value: string) {
+  return [getEnvValue("TMDB_READ_ACCESS_TOKEN"), getEnvValue("TMDB_API_KEY")]
+    .map((secret) => normalizeBearerToken(secret))
+    .filter(Boolean)
+    .reduce((message, secret) => message.replaceAll(secret, "[redacted]"), value);
 }
 
 function mapTmdbMovie(movie: TmdbMovieDetails): Movie {

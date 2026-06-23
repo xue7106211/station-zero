@@ -1,3 +1,4 @@
+// MoviePage
 // 影片详情页：Station Zero 的核心「观影决策」页面（App Router 动态路由 /movies/[slug]）。
 // 这是一个 React Server Component（默认服务端渲染），配合下方 generateStaticParams 在构建期预渲染为静态页面。
 
@@ -5,25 +6,37 @@ import Image from "next/image";
 import { notFound } from "next/navigation"; // 命中无效 slug 时抛出 404，由 Next.js 渲染 not-found 页面
 import { Card, Chip } from "@heroui/react"; // HeroUI 组件库提供的基础 UI 原子组件
 import { SiteShell } from "@/components/site-shell"; // 站点统一外壳（导航/页脚等），`@/` 是 tsconfig 配置的根别名
+import { PosterAmbientGlow } from "@/components/poster-ambient-glow"; // 顶部海报氛围光晕背景层（纯装饰）
 import { WatchProviders } from "@/components/watch-providers"; // 正版观看与购买聚合模块（客户端组件，含复制链接）
 import { getMovie, getMovieSlugs } from "@/lib/movie-api"; // API 优先、无配置时回退到半人工策展默认数据
 
-// 详情页头部展示的占位统计数据。当前为静态写死，后续接入真实数据时可替换为来自内容层的字段。
+/** 详情页头部展示的占位统计数据（浏览/收藏/推荐）。当前为静态写死，后续可替换为内容层真实字段。 */
 const statItems = [
   { label: "浏览", value: "58K", color: "text-emerald-400" },
   { label: "收藏", value: "20K", color: "text-sky-400" },
   { label: "推荐", value: "27K", color: "text-amber-400" },
 ];
 
-// 构建期（SSG）告诉 Next.js 需要为哪些 slug 预生成静态页面。
-// 返回 [{ slug }, ...]，每一项对应一个会被静态化的动态路由实例。
+/**
+ * 构建期（SSG）告知 Next.js 需要为哪些 `slug` 预生成静态页面。
+ *
+ * @returns 形如 `[{ slug }, ...]` 的数组，每一项对应一个会被静态化的动态路由实例
+ * @see https://nextjs.org/docs/app/api-reference/functions/generate-static-params
+ */
 export async function generateStaticParams() {
   const slugs = await getMovieSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
-// 为每个页面生成动态 SEO 元数据（<title>/<meta description>）。
-// 注意：Next.js 15 中 params 是 Promise，必须 await 后再解构取值。
+/**
+ * 为每个影片页生成动态 SEO 元数据（`<title>` / `<meta name="description">`）。
+ *
+ * 注意：Next.js 15+ 中 `params` 是 Promise，必须先 `await` 再解构取值。
+ *
+ * @param props - Next.js 注入的页面参数
+ * @param props.params - 解析后得到 `{ slug }` 的 Promise
+ * @returns 页面 Metadata；影片不存在时标题回退为「影片未找到」
+ */
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const movie = await getMovie(slug);
@@ -34,7 +47,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-// 页面主组件：async 服务端组件，可直接在渲染前 await 数据。
+/**
+ * 影片详情页主组件（async 服务端组件，可在渲染前直接 `await` 取数）。
+ *
+ * 取不到对应影片时调用 `notFound()` 进入 404。
+ *
+ * @param props - Next.js 注入的页面参数
+ * @param props.params - 解析后得到 `{ slug }` 的 Promise
+ * @returns 影片详情页的 JSX；未找到影片时由 `notFound()` 中断渲染
+ */
 export default async function MoviePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params; // 同样需先 await 解出动态段参数
   const movie = await getMovie(slug);
@@ -47,16 +68,13 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
   return (
     <SiteShell>
       <article className="relative mx-auto max-w-[1280px] px-5 pb-20 pt-8 md:px-8">
-        {movie.posterUrl ? (
-          <div className="pointer-events-none absolute -top-24 left-1/2 h-[760px] w-screen max-w-[1600px] -translate-x-1/2 overflow-hidden opacity-70">
-            <Image src={movie.posterUrl} alt="" fill priority className="scale-125 object-cover blur-3xl saturate-150" sizes="100vw" aria-hidden />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_32%_18%,rgba(255,255,255,0.16),transparent_24%),linear-gradient(180deg,rgba(9,9,11,0.18)_0%,rgba(9,9,11,0.76)_56%,#09090b_100%),linear-gradient(90deg,#09090b_0%,rgba(9,9,11,0.28)_24%,rgba(9,9,11,0.28)_76%,#09090b_100%)]" />
-          </div>
-        ) : null}
+        {/* 顶部氛围光晕（实现与文档见 @/components/poster-ambient-glow） */}
+        <PosterAmbientGlow posterUrl={movie.posterUrl} />
+
         {/* 主体三栏布局：左侧海报/观看入口、中间决策正文、右侧评分。 */}
-        <section className="relative z-10 grid gap-8 pt-10 md:grid-cols-[230px_minmax(0,1fr)_210px] md:items-start md:pt-16">
+        <section className="relative z-10 grid gap-8 md:grid-cols-[230px_minmax(0,1fr)_210px] md:items-start">
           {/* 左栏：海报卡片 + 统计 + 合法观看路径摘要 */}
-          <aside className="space-y-5">
+          <aside className="space-y-5 md:sticky md:top-6">
             <Card className="detail-surface poster-lift overflow-hidden rounded-md border border-[#ddef]/25 bg-[#12161a] p-0 shadow-[0_5px_18px_rgba(0,0,0,0.35)]">
               {/* relative 作为 Image fill 的定位容器；无 posterUrl 时仅显示渐变占位 */}
               <div className={`relative h-[345px] bg-gradient-to-br ${movie.posterTone}`}>
@@ -172,12 +190,20 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             </Card>
           </aside>
         </section>
+
       </article>
     </SiteShell>
   );
 }
 
-// 决策面板小卡片：决策四宫格中的单元，统一「标签 + 取值」的展示样式。
+/**
+ * 决策面板小卡片：决策四宫格中的单元，统一「标签 + 取值」的展示样式。
+ *
+ * @param props - 组件属性
+ * @param props.label - 决策维度名称，例如「最佳观看」「适合场景」
+ * @param props.value - 该维度的结论文本
+ * @returns 一张「标签在上、取值在下」的小卡片
+ */
 function DecisionPanel({ label, value }: { label: string; value: string }) {
   return (
     <Card className="detail-surface rounded bg-[#202932]/80 p-4 text-[#d9e5ef] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
@@ -187,7 +213,16 @@ function DecisionPanel({ label, value }: { label: string; value: string }) {
   );
 }
 
-// 信息卡容器：带标题栏的内容卡，children 由调用方传入（高清版本判断 / 设备场景建议复用）。
+/**
+ * 信息卡容器：带标题栏的内容卡，正文由调用方通过 `children` 传入。
+ *
+ * 复用于「高清版本判断」与「设备与场景建议」两个区块。
+ *
+ * @param props - 组件属性
+ * @param props.title - 卡片标题栏文本
+ * @param props.children - 卡片正文内容（任意可渲染节点）
+ * @returns 带标题栏的信息卡
+ */
 function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <Card className="detail-surface rounded bg-[#182129]/80 p-5 text-[#d9e5ef] shadow-none">
@@ -197,10 +232,15 @@ function InfoCard({ title, children }: { title: string; children: React.ReactNod
   );
 }
 
-// 单个评分来源展示块：左侧为来源名称与说明，右侧为评分数值
-// label：评分来源名称，例如 豆瓣 / IMDb / 烂番茄
-// value：评分数值，例如 "8.7"、"91%"
-// hint：辅助说明，作为来源下方的小字标注
+/**
+ * 单个评分来源展示块：左侧为来源名称与说明，右侧为评分数值。
+ *
+ * @param props - 组件属性
+ * @param props.label - 评分来源名称，例如「豆瓣」「IMDb」「烂番茄」
+ * @param props.value - 评分数值，例如 `"8.7"`、`"91%"`
+ * @param props.hint - 来源下方的小字辅助说明
+ * @returns 横向两栏（来源信息 / 评分数值）的评分行
+ */
 function RatingSource({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
     // 横向两栏布局：justify-between 让来源信息与数值分列左右两端
