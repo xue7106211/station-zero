@@ -11,8 +11,8 @@ import { Button, Card, Chip, Link } from "@heroui/react";
 import { Check, Copy, ExternalLink } from "lucide-react";
 import type { ViewingPath } from "@/lib/content";
 
-// 展示顺序：订阅 → 租赁/购买 → 实体发行 → 资料来源
-const CATEGORY_ORDER: ViewingPath["type"][] = ["订阅", "租赁/购买", "实体发行", "资料来源"];
+// 展示顺序：订阅 → 租赁/购买 → 实体发行 → 网盘 → 资料来源
+const CATEGORY_ORDER: ViewingPath["type"][] = ["订阅", "租赁/购买", "实体发行", "网盘", "资料来源"];
 
 export function WatchProviders({ paths }: { paths: ViewingPath[] }) {
   if (!paths.length) {
@@ -46,7 +46,7 @@ export function WatchProviders({ paths }: { paths: ViewingPath[] }) {
         ))}
       </div>
       <p className="mt-4 text-[11px] leading-5 text-[var(--sz-subtle)]">
-        链接来自 TMDB / JustWatch 的地区聚合页，平台可用性、价格与地区以各正版平台实时结果为准。
+        正版平台链接来自 TMDB / JustWatch 地区聚合；网盘链接为人工整理分享，可用性与有效期以分享页实时结果为准。
       </p>
     </section>
   );

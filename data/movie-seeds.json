@@ -60,6 +60,26 @@
     "bestWay": "正版流媒体 / Blu-ray 高清版",
     "idealScene": "安静夜晚，独自或双人慢看",
     "notFor": "期待强情节推进或快节奏叙事的观众",
+    "viewingPaths": [
+      {
+        "platform": "夸克网盘",
+        "type": "网盘",
+        "note": "【乱耳飞舞字幕组-438】2022 水与茴香 中文字幕- 伊万 一朵老香菇 2026-06-24",
+        "url": "https://pan.quark.cn/s/17bb4f89239c"
+      },
+      {
+        "platform": "百度网盘",
+        "type": "网盘",
+        "note": "【乱耳飞舞字幕组-438】2022 水与茴香 中文字幕- 伊万 嘘电影 2026-06-03",
+        "url": "https://pan.baidu.com/s/1BMqAveFsgZlVMLsb_SiTuw?pwd=bkd9"
+      },
+      {
+        "platform": "迅雷云盘",
+        "type": "网盘",
+        "note": "【乱耳飞舞字幕组-438】2022 水与茴香 中文字幕- 伊万 嘘电影 2026-06-03",
+        "url": "https://pan.xunlei.com/s/VOuCyCjVPjiPMqqjwaRRzJllA1?pwd=6a8v"
+      }
+    ],
     "contentStatus": "draft"
   },
   {
