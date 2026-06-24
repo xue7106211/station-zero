@@ -5,7 +5,7 @@ import { SectionHeading, SiteShell } from "@/components/site-shell";
 export default function CollectionsPage() {
   return (
     <SiteShell>
-      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
         <SectionHeading eyebrow="Collections" title="策展片单" description="用设备、心情、审美和场景组织影片，而不是只给排行榜。" />
         <div className="grid gap-5 md:grid-cols-3">
           {collections.map((collection) => (

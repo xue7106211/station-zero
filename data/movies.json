@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-24T01:56:31.322Z",
+  "updatedAt": "2026-06-24T03:36:01.545Z",
   "movies": [
     {
       "slug": "dune-part-two",
@@ -21,6 +21,25 @@
         "乔什·布洛林"
       ],
       "runtime": "166 分钟",
+      "writers": [
+        "丹尼斯·维伦纽瓦",
+        "乔·斯派茨"
+      ],
+      "countries": [
+        "美国"
+      ],
+      "languages": [
+        "英语"
+      ],
+      "releaseDate": "2024-02-27",
+      "aka": [
+        "Dune 2",
+        "Dune: Part 2",
+        "デューン 砂の惑星PART2",
+        "Duna 2",
+        "Hành Tinh Cát 2",
+        "Diuna: Część druga"
+      ],
       "rating": "8.1 / 10",
       "ratings": {
         "douban": "待补充",
@@ -81,10 +100,121 @@
       "related": [],
       "contentStatus": "published",
       "sourceProvider": "tmdb",
-      "sourceUpdatedAt": "2026-06-23T06:10:40.539Z",
-      "imageCachedAt": "2026-06-23T06:10:40.539Z",
+      "sourceUpdatedAt": "2026-06-24T03:36:01.545Z",
+      "imageCachedAt": "2026-06-24T03:36:01.545Z",
       "createdAt": "2026-06-23T06:10:40.539Z",
-      "updatedAt": "2026-06-24T01:56:31.322Z"
+      "updatedAt": "2026-06-24T03:36:01.545Z"
+    },
+    {
+      "slug": "blade-runner-2049",
+      "tmdbId": 335984,
+      "title": "银翼杀手2049",
+      "originalTitle": "Blade Runner 2049",
+      "year": "2017",
+      "genres": [
+        "科幻",
+        "剧情"
+      ],
+      "director": "丹尼斯·维伦纽瓦",
+      "cast": [
+        "瑞恩·高斯林",
+        "哈里森·福特",
+        "安娜·德·阿玛斯",
+        "戴夫·巴蒂斯塔",
+        "罗宾·怀特"
+      ],
+      "runtime": "164 分钟",
+      "writers": [
+        "汉普顿·范彻",
+        "迈克尔·格林"
+      ],
+      "countries": [
+        "加拿大",
+        "英国",
+        "美国"
+      ],
+      "languages": [
+        "英语",
+        "芬兰语",
+        "匈牙利语",
+        "日语",
+        "俄语",
+        "索马里语",
+        "西班牙语"
+      ],
+      "releaseDate": "2017-10-04",
+      "aka": [
+        "Blade Runner 2",
+        "Blejd Raner 2049",
+        "Бегущий по лезвию 2",
+        "Blade Runner 2049 3D",
+        "ブレードランナー 2049",
+        "블레이드 러너 2049"
+      ],
+      "rating": "7.6 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "7.6",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/blade-runner-2049.jpg",
+      "backdropUrl": "/media/backdrops/blade-runner-2049.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/sxA89XGotN9c5u5O1GWpbYYX3Ks.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/mVr0UiqyltcfqxbAUcLl9zWL8ah.jpg",
+      "palette": {
+        "vibrant": "#f61e04",
+        "darkVibrant": "#0a6578",
+        "lightVibrant": "#c1e9e1",
+        "muted": "#ac785a",
+        "darkMuted": "#415753",
+        "lightMuted": "#c9bca1"
+      },
+      "summary": "在《银翼杀手》（1982）事件发生三十年后，新一代银翼杀手、洛杉矶警察“K”发现了一个尘封已久的秘密，这个秘密有可能使所剩无几的社会陷入混乱。K的这一发现引领他踏上寻找失踪三十年的前洛杉矶警察银翼杀手瑞克·戴克之路。[华纳兄弟影业]",
+      "verdict": "值得大屏观看",
+      "bestWay": "4K HDR + OLED 电视或投影 + 独立音响",
+      "idealScene": "周末夜晚，关灯，完整看完",
+      "notFor": "只想轻松下饭或对慢节奏不耐烦的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "published",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T03:36:01.545Z",
+      "imageCachedAt": "2026-06-24T03:36:01.545Z",
+      "createdAt": "2026-06-24T03:28:38.276Z",
+      "updatedAt": "2026-06-24T03:36:01.545Z"
     },
     {
       "slug": "in-the-mood-for-love",
@@ -105,6 +235,28 @@
         "雷震"
       ],
       "runtime": "99 分钟",
+      "writers": [
+        "王家卫",
+        "刘以鬯"
+      ],
+      "countries": [
+        "中国香港",
+        "法国"
+      ],
+      "languages": [
+        "粤语",
+        "法语",
+        "西班牙语"
+      ],
+      "releaseDate": "2000-09-29",
+      "aka": [
+        "Stvorení pre lásku",
+        "Huāyàng Niánhuá",
+        "In the Mood for Love - Der Klang der Liebe",
+        "Aşk Zamanı",
+        "화양연화 리마스터링",
+        "花様年華：2000"
+      ],
       "rating": "8.1 / 10",
       "ratings": {
         "douban": "待补充",
@@ -165,10 +317,10 @@
       "related": [],
       "contentStatus": "published",
       "sourceProvider": "tmdb",
-      "sourceUpdatedAt": "2026-06-23T06:10:40.539Z",
-      "imageCachedAt": "2026-06-23T06:10:40.539Z",
+      "sourceUpdatedAt": "2026-06-24T03:36:01.545Z",
+      "imageCachedAt": "2026-06-24T03:36:01.545Z",
       "createdAt": "2026-06-23T06:10:40.539Z",
-      "updatedAt": "2026-06-24T01:56:31.322Z"
+      "updatedAt": "2026-06-24T03:36:01.545Z"
     }
   ]
 }

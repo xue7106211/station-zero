@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button, Card } from "@heroui/react";
 import { ArrowRight, BookOpen } from "lucide-react";
-import { collections, knowledgeEntries, versionUpdates } from "@/lib/content";
+import { collections, knowledgeEntries } from "@/lib/content";
 import { getMovies } from "@/lib/movie-api";
 import {
   DecisionCard,
@@ -18,7 +18,7 @@ export default async function Home() {
 
   return (
     <SiteShell>
-      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-[1.05fr_0.95fr] md:px-10 md:py-24">
+      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-[1.05fr_0.95fr] md:px-10 md:py-20">
         <div>
           <p className="mb-5 font-mono text-xs uppercase tracking-[0.28em] text-[var(--sz-accent)]">
             高清观影决策系统
@@ -75,7 +75,7 @@ export default async function Home() {
         </Card>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-14 md:px-10">
+      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
         <SectionHeading
           eyebrow="Movies"
           title="精选影片决策"
@@ -88,7 +88,7 @@ export default async function Home() {
               href={`/movies/${movie.slug}`}
               className="group block"
             >
-              <Card className="h-full rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-5 text-[var(--sz-text)] transition hover:-translate-y-1 hover:border-[color:var(--sz-accent-soft)]">
+              <Card className="card-hover h-full rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-5 text-[var(--sz-text)]">
                 <div
                   className={`relative mb-5 h-44 overflow-hidden rounded-2xl bg-gradient-to-br ${movie.posterTone}`}
                 >
@@ -118,7 +118,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-6 py-14 md:grid-cols-3 md:px-10">
+      <section className="mx-auto grid max-w-7xl gap-6 px-6 py-16 md:grid-cols-3 md:px-10 md:py-20">
         <div className="md:col-span-1">
           <SectionHeading
             eyebrow="Curation"
@@ -129,7 +129,7 @@ export default async function Home() {
         <div className="grid gap-4 md:col-span-2">
           {collections.map((collection) => (
             <Link key={collection.slug} href="/collections" className="block">
-              <Card className="rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-6 text-[var(--sz-text)] transition hover:border-[color:var(--sz-accent-soft)]">
+              <Card className="card-hover rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-6 text-[var(--sz-text)]">
                 <p className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--sz-accent)]">
                   {collection.kicker}
                 </p>
@@ -145,34 +145,25 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-6 py-14 md:grid-cols-2 md:px-10">
-        <Card className="rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-accent)] p-8 text-[var(--sz-accent-contrast)]">
-          <p className="font-mono text-xs uppercase tracking-[0.2em]">
-            Version tracking
-          </p>
-          <h2 className="mt-4 text-3xl font-semibold">
-            版本追踪先从编辑样本开始
-          </h2>
-          <ul className="mt-6 space-y-3 text-sm leading-7">
-            {versionUpdates.map((item) => (
-              <li key={item}>· {item}</li>
-            ))}
-          </ul>
-        </Card>
+      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
         <Card className="rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-8 text-[var(--sz-text)]">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--sz-accent)]">
             Knowledge
           </p>
           <h2 className="mt-4 text-3xl font-semibold">高清知识要服务判断</h2>
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {knowledgeEntries.map((entry) => (
-              <p
+              <div
                 key={entry.slug}
-                className="text-sm leading-7 text-[var(--sz-text-soft)]"
+                className="rounded-2xl border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] p-5"
               >
-                <span className="text-[var(--sz-text)]">{entry.term}</span>：
-                {entry.summary}
-              </p>
+                <p className="text-base font-semibold text-[var(--sz-text)]">
+                  {entry.term}
+                </p>
+                <p className="mt-2 text-sm leading-7 text-[var(--sz-text-soft)]">
+                  {entry.summary}
+                </p>
+              </div>
             ))}
           </div>
         </Card>

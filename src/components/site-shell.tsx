@@ -1,7 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { Card } from "@heroui/react";
-import { SiteNav } from "./site-nav";
+import { SiteHeader } from "./site-header";
 
 /**
  * 站点统一外壳：为所有页面提供一致的背景、顶部导航与页脚。
@@ -9,7 +8,7 @@ import { SiteNav } from "./site-nav";
  * 布局结构（从外到内）：
  * 1. 根容器铺满视口高度，用语义 token `--sz-bg` / `--sz-text` 着色，自动适配深/浅主题；
  * 2. 一层固定定位的 `--sz-page-glow` 氛围光晕，`pointer-events-none` 不拦截交互；
- * 3. `header`（Logo + 桌面端导航 + 主题切换）、`main`（页面内容）、`footer`（合规声明）。
+ * 3. `SiteHeader`（吸顶头部，含 Logo + 导航 + 主题切换）、`main`（页面内容）、`footer`（合规声明）。
  *
  * 内容层统一用 `relative z-10` 抬到光晕之上，避免被背景层遮挡。
  *
@@ -23,23 +22,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-[var(--sz-bg)] text-[var(--sz-text)]">
       {/* 全屏氛围光晕背景层：固定定位、纯装饰，pointer-events-none 不拦截点击 */}
       <div className="pointer-events-none fixed inset-0 bg-[var(--sz-page-glow)]" />
-      {/* 顶部导航条：z-10 抬到光晕之上，max-w-7xl 居中并限制最大宽度 */}
-      <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6 md:px-10">
-        {/* 站点 Logo：圆形「0」徽标 + 中英文站名，点击回首页 */}
-        <Link href="/" className="group flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-full border border-[color:var(--sz-accent-soft)] bg-[var(--sz-accent-faint)] font-mono text-sm text-[var(--sz-accent)]">
-            0
-          </span>
-          <span>
-            <span className="block text-sm font-semibold uppercase tracking-[0.28em] text-[var(--sz-accent)]">
-              Station Zero
-            </span>
-            <span className="text-xs text-[var(--sz-muted)]">零号站</span>
-          </span>
-        </Link>
-        {/* 主导航（已抽离为独立组件，便于后续迭代）：桌面端横向导航 + 主题切换 */}
-        <SiteNav />
-      </header>
+      {/* 顶部吸顶导航（客户端组件，滚动后加 backdrop-blur + 底部细边框） */}
+      <SiteHeader />
       {/* 页面主体内容容器 */}
       <main className="relative z-10">{children}</main>
       {/* 页脚：合规声明，重申本站只做观影决策、不提供侵权下载入口 */}

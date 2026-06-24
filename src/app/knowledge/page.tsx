@@ -5,7 +5,7 @@ import { SectionHeading, SiteShell } from "@/components/site-shell";
 export default function KnowledgePage() {
   return (
     <SiteShell>
-      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
         <SectionHeading eyebrow="Knowledge" title="高清知识库" description="解释格式、版本和设备概念，让用户知道什么时候值得追求更高规格。" />
         <div className="space-y-5">
           {knowledgeEntries.map((entry) => (

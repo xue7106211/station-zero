@@ -38,6 +38,12 @@ export type Movie = {
   director: string;
   cast: string[];
   runtime: string;
+  // 客观影片资料（由后台 TMDB 同步入库，前端只读；缺省时详情页不渲染对应行）
+  writers?: string[]; // 编剧
+  countries?: string[]; // 制片国家/地区
+  languages?: string[]; // 语言
+  releaseDate?: string; // 上映日期（YYYY-MM-DD 或人工录入文案）
+  aka?: string[]; // 又名 / 别名
   rating: string;
   ratings?: {
     douban: string;
@@ -218,12 +224,6 @@ export const knowledgeEntries: KnowledgeEntry[] = [
     summary: "REMUX 通常指保留原盘主要视频和音频流、重新封装后的版本，适合追求高规格片库的用户理解。",
     misconception: "REMUX 不是所有人都需要；如果设备、存储和播放链路不匹配，收益会很有限。",
   },
-];
-
-export const versionUpdates = [
-  "《沙丘 2》适合作为 IMAX / 4K HDR 体验片跟踪样本。",
-  "《银翼杀手 2049》适合作为 OLED 暗部层次与霓虹色彩参考。",
-  "《花样年华》适合作为修复版和发行厂牌内容样本。",
 ];
 
 export const movies = defaultMovies;

@@ -137,6 +137,18 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             <p className="mt-5 text-[15px] leading-7 text-[var(--sz-text-soft)]">
               {movie.summary}
             </p>
+            {/* 影片信息：豆瓣式单列元数据（去卡片化，紧跟简介，细分隔线区隔）。每行「标签: 值」内联，长值自然换行。缺失字段不渲染（见 MetaRow） */}
+            <div className="mt-6 space-y-2 border-t border-[color:var(--sz-border)] pt-5 text-sm leading-6">
+              <MetaRow label="导演" value={movie.director} />
+              <MetaRow label="编剧" value={movie.writers?.join(" / ")} />
+              <MetaRow label="主演" value={movie.cast.join(" / ")} />
+              <MetaRow label="类型" value={movie.genres.join(" / ")} />
+              <MetaRow label="制片国家/地区" value={movie.countries?.join(" / ")} />
+              <MetaRow label="语言" value={movie.languages?.join(" / ")} />
+              <MetaRow label="上映日期" value={movie.releaseDate} />
+              <MetaRow label="片长" value={movie.runtime} />
+              <MetaRow label="又名" value={movie.aka?.join(" / ")} />
+            </div>
             {/* 决策四宫格：把关键判断（最佳观看/场景/不适合/评分）结构化呈现 */}
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <DecisionPanel icon={Monitor} label="最佳观看" value={movie.bestWay} />
@@ -254,6 +266,26 @@ function InfoCard({ icon: Icon, title, children }: { icon: LucideIcon; title: st
       </h2>
       <div className="mt-3">{children}</div>
     </Card>
+  );
+}
+
+/**
+ * 影片信息中的单行元数据：豆瓣式内联「标签: 值」。取值为空时整行不渲染，从而做到「缺什么省什么」。
+ *
+ * 用内联文本而非两列网格：标签弱化为次要色、值为正文软色，长值（如长串主演）自然换行，
+ * 单列堆叠更紧凑、不发散。
+ *
+ * @param props - 组件属性
+ * @param props.label - 字段名，例如「导演」「制片国家/地区」
+ * @param props.value - 字段值（数组类字段由调用方 `join(" / ")` 后传入）；为空/undefined 时返回 `null`
+ * @returns 一行「标签: 值」文本；无值时返回 `null`
+ */
+function MetaRow({ label, value }: { label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <p className="text-[var(--sz-text-soft)]">
+      <span className="text-[var(--sz-muted)]">{label}:</span> {value}
+    </p>
   );
 }
 

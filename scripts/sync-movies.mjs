@@ -21,6 +21,28 @@ const apiKey = clean(process.env.TMDB_API_KEY);
 const curlFallback = clean(process.env.TMDB_CURL_FALLBACK).toLowerCase() !== 'false';
 const now = new Date().toISOString();
 
+// ISO 3166-1 alpha-2 -> 中文国家/地区名（仅常见项；未命中回退 TMDB 英文名）。
+// 定义在主流程之前，避免顶层同步循环触发 const 暂时性死区（TDZ）。
+const COUNTRY_ZH = {
+  US: '美国', GB: '英国', HK: '中国香港', TW: '中国台湾', MO: '中国澳门', CN: '中国大陆',
+  FR: '法国', CA: '加拿大', JP: '日本', KR: '韩国', IT: '意大利', DE: '德国', ES: '西班牙',
+  IN: '印度', AU: '澳大利亚', RU: '俄罗斯', NZ: '新西兰', BR: '巴西', MX: '墨西哥',
+  SE: '瑞典', NO: '挪威', DK: '丹麦', FI: '芬兰', NL: '荷兰', BE: '比利时', CH: '瑞士',
+  AT: '奥地利', IE: '爱尔兰', PL: '波兰', CZ: '捷克', PT: '葡萄牙', GR: '希腊',
+  TR: '土耳其', TH: '泰国', SG: '新加坡', MY: '马来西亚', PH: '菲律宾', ID: '印度尼西亚',
+  AR: '阿根廷', ZA: '南非', IL: '以色列', IR: '伊朗',
+};
+
+// TMDB 语言英文名 -> 中文语言名（仅常见项；未命中回退英文名）。
+const LANGUAGE_ZH = {
+  English: '英语', Cantonese: '粤语', Mandarin: '普通话', Chinese: '汉语', French: '法语',
+  Spanish: '西班牙语', Japanese: '日语', Korean: '韩语', German: '德语', Italian: '意大利语',
+  Russian: '俄语', Hindi: '印地语', Portuguese: '葡萄牙语', Arabic: '阿拉伯语', Finnish: '芬兰语',
+  Hungarian: '匈牙利语', Somali: '索马里语', Dutch: '荷兰语', Swedish: '瑞典语', Norwegian: '挪威语',
+  Danish: '丹麦语', Polish: '波兰语', Czech: '捷克语', Greek: '希腊语', Turkish: '土耳其语',
+  Thai: '泰语', Vietnamese: '越南语', Latin: '拉丁语', Hebrew: '希伯来语', Persian: '波斯语',
+};
+
 if (!existsSync(seedPath)) {
   console.error(`Missing seed file: ${seedPath}`);
   process.exit(1);
@@ -45,7 +67,7 @@ const incomingRecords = [];
 for (const seed of seeds) {
   try {
     const tmdbId = seed.tmdbId ?? await findTmdbId(seed.query ?? seed.originalTitle ?? seed.title ?? seed.slug);
-    const details = await tmdbFetch(`/movie/${tmdbId}?language=zh-CN&append_to_response=credits,watch/providers`);
+    const details = await tmdbFetch(`/movie/${tmdbId}?language=zh-CN&append_to_response=credits,watch/providers,alternative_titles`);
     const record = await mapTmdbMovie(details, seed);
     incomingRecords.push(record);
     console.log(`Synced ${record.slug}`);
@@ -78,6 +100,23 @@ async function mapTmdbMovie(movie, seed) {
   const slug = seed.slug || slugify(originalTitle);
   const director = movie.credits?.crew?.find((member) => member.job === 'Director')?.name ?? seed.director;
   const cast = movie.credits?.cast?.slice(0, 5).map((member) => member.name).filter(Boolean);
+  // 编剧：合并 Screenplay / Writer / Story 等编剧类职务并去重
+  const writers = dedupe(
+    movie.credits?.crew
+      ?.filter((member) => ['Screenplay', 'Writer', 'Story', 'Author'].includes(member.job))
+      .map((member) => member.name)
+      .filter(Boolean),
+  );
+  // 制片国家/地区、语言：TMDB 这两个字段不随 language=zh-CN 本地化（始终英文），
+  // 故按 ISO 代码/英文名映射成中文以契合中文界面；无映射时回退原始名称
+  const countries = movie.production_countries?.map(localizeCountry).filter(Boolean);
+  const languages = movie.spoken_languages?.map(localizeLanguage).filter(Boolean);
+  // 又名：取 TMDB alternative_titles，去掉与正片名重复者，限制数量
+  const aka = dedupe(
+    movie.alternative_titles?.titles
+      ?.map((entry) => entry.title)
+      .filter((title) => Boolean(title) && title !== movie.title && title !== movie.original_title),
+  )?.slice(0, 6);
   const providers = movie['watch/providers']?.results?.CN;
   const sourcePosterUrl = movie.poster_path ? `${imageBase}${movie.poster_path}` : undefined;
   const sourceBackdropUrl = movie.backdrop_path ? `${imageBase}${movie.backdrop_path}` : undefined;
@@ -99,6 +138,11 @@ async function mapTmdbMovie(movie, seed) {
     director,
     cast: cast?.length ? cast : seed.cast,
     runtime: movie.runtime ? `${movie.runtime} 分钟` : seed.runtime,
+    writers: writers?.length ? writers : seed.writers,
+    countries: countries?.length ? countries : seed.countries,
+    languages: languages?.length ? languages : seed.languages,
+    releaseDate: movie.release_date || seed.releaseDate,
+    aka: aka?.length ? aka : seed.aka,
     rating: typeof movie.vote_average === 'number' ? `${movie.vote_average.toFixed(1)} / 10` : seed.rating,
     ratings: {
       douban: seed.ratings?.douban ?? '待补充',
@@ -203,6 +247,23 @@ function imageExtension(url) {
 
 function slugify(value) {
   return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+// ISO 3166-1 alpha-2 -> 中文国家/地区名 与 语言英文名 -> 中文，定义见文件顶部（避免 const TDZ）。
+function localizeCountry(country) {
+  return COUNTRY_ZH[country?.iso_3166_1] || country?.name;
+}
+
+function localizeLanguage(language) {
+  const english = language?.english_name || language?.name;
+  return LANGUAGE_ZH[english] || english;
+}
+
+// 去重并丢掉空值；输入为空/非数组时返回 undefined（便于上层用 ?.length 判断）
+function dedupe(values) {
+  if (!Array.isArray(values)) return undefined;
+  const unique = [...new Set(values.filter(Boolean))];
+  return unique.length ? unique : undefined;
 }
 
 function clean(value = '') {

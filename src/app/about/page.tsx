@@ -11,7 +11,7 @@ const principles = [
 export default function AboutPage() {
   return (
     <SiteShell>
-      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
         <SectionHeading eyebrow="About" title="关于零号站" description="Station Zero 是一个高清观影决策系统，不是影视资源下载站。" />
         <div className="grid gap-5 md:grid-cols-2">
           {principles.map((principle) => (

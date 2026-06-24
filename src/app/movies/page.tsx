@@ -11,12 +11,12 @@ export default async function MoviesPage() {
 
   return (
     <SiteShell>
-      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
         <SectionHeading eyebrow="Movies" title="影片决策库" description="先以少量人工策展影片验证详情页的信息组织方式。" />
         <div className="grid gap-5 md:grid-cols-3">
           {movies.map((movie) => (
             <Link key={movie.slug} href={`/movies/${movie.slug}`} className="block">
-              <Card className="h-full rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-5 text-[var(--sz-text)] transition hover:border-[color:var(--sz-accent-soft)]">
+              <Card className="card-hover h-full rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-5 text-[var(--sz-text)]">
                 <div className={`relative mb-5 h-52 overflow-hidden rounded-2xl bg-gradient-to-br ${movie.posterTone}`}>
                   {movie.posterUrl ? <Image src={movie.posterUrl} alt={`${movie.title} poster`} fill className="object-cover" loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" /> : null}
                 </div>

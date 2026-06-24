@@ -28,6 +28,8 @@
   --sz-warn: oklch(83% 0.14 80);
   --sz-shadow: rgb(0 0 0 / 22%);
   --sz-inset: rgb(255 255 255 / 5%);
+  /* 吸顶头部滚动后的半透明背景（配合 backdrop-blur） */
+  --sz-header-bg: rgb(9 9 11 / 72%);
   --sz-page-glow: radial-gradient(circle at top left, rgb(244 201 93 / 10%), transparent 32%), radial-gradient(circle at 80% 20%, rgb(125 92 255 / 10%), transparent 28%), linear-gradient(180deg, rgb(255 255 255 / 3.5%), transparent 38%);
   --sz-detail-glow: radial-gradient(ellipse at 32% 16%, rgb(255 255 255 / 14%), transparent 28%), linear-gradient(180deg, rgb(9 9 11 / 6%) 0%, rgb(9 9 11 / 20%) 55%, rgb(9 9 11 / 38%) 100%), linear-gradient(90deg, #09090b 0%, rgb(9 9 11 / 48%) 12%, rgb(9 9 11 / 16%) 30%, rgb(9 9 11 / 16%) 70%, rgb(9 9 11 / 48%) 88%, #09090b 100%);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -62,6 +64,7 @@ html[data-theme="light"] {
   --sz-warn: oklch(62% 0.15 65);
   --sz-shadow: rgb(15 23 42 / 8%);
   --sz-inset: rgb(255 255 255 / 0%);
+  --sz-header-bg: rgb(247 248 251 / 82%);
   --sz-page-glow: radial-gradient(circle at top left, rgb(59 130 246 / 10%), transparent 34%), radial-gradient(circle at 80% 20%, rgb(124 58 237 / 8%), transparent 28%), linear-gradient(180deg, rgb(255 255 255 / 80%), transparent 42%);
   --sz-detail-glow: linear-gradient(180deg, rgb(15 23 42 / 5%) 0%, rgb(15 23 42 / 0%) 26%);
 }
@@ -115,6 +118,15 @@ a {
   transform: scale(0.975);
 }
 
+/* 统一的卡片悬停语言：上浮 + 强调边框 + 轻微阴影。
+   作用于可点击卡片（首页影片卡 / 片单卡、影片库卡）。基础态需自带 border 与 transition 由本类提供。 */
+.card-hover {
+  transition:
+    transform 200ms var(--ease-out),
+    border-color 180ms ease,
+    box-shadow 220ms var(--ease-out);
+}
+
 .detail-surface {
   transition:
     transform 220ms var(--ease-out),
@@ -158,6 +170,12 @@ a {
     box-shadow: 0 18px 45px var(--sz-shadow);
   }
 
+  .card-hover:hover {
+    transform: translateY(-4px);
+    border-color: var(--sz-accent-soft);
+    box-shadow: 0 18px 40px var(--sz-shadow);
+  }
+
   .poster-lift:hover {
     transform: translateY(-3px) scale(1.008);
   }
@@ -166,7 +184,8 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .pressable,
   .detail-surface,
-  .detail-reveal {
+  .detail-reveal,
+  .card-hover {
     transition-duration: 1ms;
     transform: none;
   }
