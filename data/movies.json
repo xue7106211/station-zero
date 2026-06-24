@@ -1,7 +1,112 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-24T03:36:01.545Z",
+  "updatedAt": "2026-06-24T08:21:22.248Z",
   "movies": [
+    {
+      "slug": "lee-cronins-the-mummy",
+      "tmdbId": 1304313,
+      "title": "木乃伊",
+      "originalTitle": "Lee Cronin's The Mummy",
+      "year": "2026",
+      "genres": [
+        "恐怖",
+        "悬疑"
+      ],
+      "director": "李·克洛宁",
+      "cast": [
+        "杰克·雷诺",
+        "莱娅·科斯塔",
+        "梅·卡拉美维",
+        "娜塔莉·格蕾斯",
+        "希洛·莫利纳"
+      ],
+      "runtime": "133 分钟",
+      "writers": [
+        "李·克洛宁"
+      ],
+      "countries": [
+        "美国",
+        "爱尔兰"
+      ],
+      "languages": [
+        "阿拉伯语",
+        "英语",
+        "西班牙语"
+      ],
+      "releaseDate": "2026-04-15",
+      "aka": [
+        "The Mummy",
+        "La momie",
+        "Mumia: Film Lee Cronina",
+        "מומיה של לי קרונין",
+        "Мумия Ли Кронина",
+        "Mumia"
+      ],
+      "rating": "8.0 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "8.0",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/lee-cronins-the-mummy.jpg",
+      "backdropUrl": "/media/backdrops/lee-cronins-the-mummy.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/c6Lptq5cFZ57TqMhuBgEYlLCxXI.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/xugEpZk9YQ0DIz1aFvH5HGkqpZK.jpg",
+      "palette": {
+        "vibrant": "#ae8355",
+        "darkVibrant": "#8c5424",
+        "lightVibrant": "#cea876",
+        "muted": "#b49462",
+        "darkMuted": "#4e3c2c",
+        "lightMuted": "#c0aca4"
+      },
+      "summary": "讲述一位记者的年幼女儿在沙漠中神秘失踪并音讯全无。八年后，当她突然出现在家人面前时，这个早已破碎的家庭震惊不已；原本应该是重逢的喜悦，却逐渐演变成一场活生生的恶梦。",
+      "verdict": "优先影院或大屏恐怖体验",
+      "bestWay": "IMAX / 4K HDR 流媒体 + 音响",
+      "idealScene": "关灯、音量充足，完整观看",
+      "notFor": "害怕血腥 jump scare、不愿看身体恐怖题材的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:21:22.248Z",
+      "imageCachedAt": "2026-06-24T08:21:22.248Z",
+      "createdAt": "2026-06-24T08:21:22.248Z",
+      "updatedAt": "2026-06-24T08:21:22.248Z"
+    },
     {
       "slug": "dune-part-two",
       "tmdbId": 693134,
@@ -100,10 +205,1193 @@
       "related": [],
       "contentStatus": "published",
       "sourceProvider": "tmdb",
-      "sourceUpdatedAt": "2026-06-24T03:36:01.545Z",
-      "imageCachedAt": "2026-06-24T03:36:01.545Z",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
       "createdAt": "2026-06-23T06:10:40.539Z",
-      "updatedAt": "2026-06-24T03:36:01.545Z"
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "in-the-mood-for-love",
+      "tmdbId": 843,
+      "title": "花样年华",
+      "originalTitle": "花樣年華",
+      "year": "2000",
+      "genres": [
+        "剧情",
+        "爱情"
+      ],
+      "director": "王家卫",
+      "cast": [
+        "张曼玉",
+        "梁朝伟",
+        "萧炳林",
+        "潘迪华",
+        "雷震"
+      ],
+      "runtime": "99 分钟",
+      "writers": [
+        "王家卫",
+        "刘以鬯"
+      ],
+      "countries": [
+        "中国香港",
+        "法国"
+      ],
+      "languages": [
+        "粤语",
+        "法语",
+        "西班牙语"
+      ],
+      "releaseDate": "2000-09-29",
+      "aka": [
+        "Stvorení pre lásku",
+        "Huāyàng Niánhuá",
+        "In the Mood for Love - Der Klang der Liebe",
+        "Aşk Zamanı",
+        "화양연화 리마스터링",
+        "花様年華：2000"
+      ],
+      "rating": "8.1 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "8.1",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/in-the-mood-for-love.jpg",
+      "backdropUrl": "/media/backdrops/in-the-mood-for-love.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/1Z32pKrmWW2nkLFYGoc79MzJin6.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/ffQFnAUm2Uu4RU0nijpjPRf9TBT.jpg",
+      "palette": {
+        "vibrant": "#c72130",
+        "darkVibrant": "#bd142c",
+        "lightVibrant": "#f2c07a",
+        "muted": "#a84e59",
+        "darkMuted": "#3e2326",
+        "lightMuted": "#b79fa2"
+      },
+      "summary": "一九六二年的香港：周慕云与苏丽珍在同一天搬进相邻的公寓。他们的相遇起初保持着得体与疏离——直到发现各自配偶的秘密，一种亲密的情愫悄然滋生。王家卫的本片既含蓄典雅又视觉绚烂，精湛地勾勒出浪漫渴望与易逝的瞬间。在悸动的配乐、以及杜可风与李屏宾极致抽象的摄影美学中，这部电影成为过去二十年影坛的重要风格标杆，亦是王家卫璀璨生涯的一座里程碑。[标准收藏]",
+      "verdict": "适合高质量修复版",
+      "bestWay": "修复版 Blu-ray / 正版流媒体高清版本",
+      "idealScene": "安静夜晚，独自观看或双人慢看",
+      "notFor": "期待强剧情推进或明确情节答案的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "published",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-23T06:10:40.539Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "double-happiness-2025",
+      "tmdbId": 1536559,
+      "title": "双喜",
+      "originalTitle": "雙囍",
+      "year": "2026",
+      "genres": [
+        "剧情"
+      ],
+      "director": "許承傑",
+      "cast": [
+        "刘冠廷",
+        "余香凝",
+        "杨贵媚",
+        "田启文",
+        "庹宗华"
+      ],
+      "runtime": "130 分钟",
+      "writers": [
+        "谢沛如",
+        "許承傑"
+      ],
+      "countries": [
+        "中国台湾"
+      ],
+      "languages": [
+        "日语",
+        "普通话"
+      ],
+      "releaseDate": "2026-02-17",
+      "aka": [
+        "Doblemente feliz"
+      ],
+      "rating": "6.1 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "6.1",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/double-happiness-2025.jpg",
+      "backdropUrl": "/media/backdrops/double-happiness-2025.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/v92ViZmVkb6blW3TFHd3lKkoApD.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/bRdiW7cyDXC9HWNLjCtZVGlMb6o.jpg",
+      "palette": {
+        "vibrant": "#c47642",
+        "darkVibrant": "#5d2d0e",
+        "lightVibrant": "#f3b483",
+        "muted": "#af8366",
+        "darkMuted": "#5a4134",
+        "lightMuted": "#bc8d6b"
+      },
+      "summary": "新郎高庭生与新娘吴黛玲在一生一次的大喜之日，面对多年来打死不相往来的男方父亲高盛宏与母亲白雁心争相主持儿子的终生大事，不愿得罪父母的高庭生只好联合岳父老吴、婚顾小芮、伴郎大蔡，试图瞒天过海在一天内完美举办两场婚礼。",
+      "verdict": "适合家庭或情侣周末观看",
+      "bestWay": "正版流媒体高清版 / 影院上映场次",
+      "idealScene": "周末午后或夜晚，轻松看完一部华语家庭喜剧",
+      "notFor": "期待强类型片刺激、不愿看家庭戏的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "hokum",
+      "tmdbId": 1430077,
+      "title": "幽旅巫咒",
+      "originalTitle": "Hokum",
+      "year": "2026",
+      "genres": [
+        "恐怖"
+      ],
+      "director": "达米安·麦卡锡",
+      "cast": [
+        "亚当·斯科特",
+        "Peter Coonan",
+        "大卫·威尔莫特",
+        "Florence Ordesh",
+        "Will O'Connell"
+      ],
+      "runtime": "107 分钟",
+      "writers": [
+        "达米安·麦卡锡"
+      ],
+      "countries": [
+        "美国",
+        "爱尔兰",
+        "United Arab Emirates",
+        "中国香港"
+      ],
+      "languages": [
+        "英语"
+      ],
+      "releaseDate": "2026-04-29",
+      "aka": [
+        "Hokum: La Maldición de la Bruja",
+        "ห้องกุมวิญญาณ",
+        "Ba Trợn"
+      ],
+      "rating": "7.0 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "7.0",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/hokum.jpg",
+      "backdropUrl": "/media/backdrops/hokum.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/bj5gdqsB34GSpvLglN4lslV9EjQ.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/woZX9wZaiX70LbW7bOeNccNTIhp.jpg",
+      "palette": {
+        "vibrant": "#8f3f37",
+        "darkVibrant": "#7c2c14",
+        "lightVibrant": "#dcb4ac",
+        "muted": "#9d6851",
+        "darkMuted": "#5d3f2f",
+        "lightMuted": "#ccc4b7"
+      },
+      "summary": "　　小说家欧姆·鲍曼前往一家偏远客栈，为父母撒落骨灰，却被一则传闻缠上——蜜月套房里，有女巫在此徘徊作祟。诡异的幻象接连浮现，一桩骇人失踪案骤然发生，迫使他必须面对自己过往中那些阴暗不堪的角落。",
+      "verdict": "值得在安静环境完整观看",
+      "bestWay": "影院版或 4K 流媒体 + 好耳机/音响",
+      "idealScene": "关灯、音量到位，一次性看完",
+      "notFor": "害怕 jump scare、不愿看民俗恐怖题材的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "acqua-e-anice",
+      "tmdbId": 1005735,
+      "title": "水与茴香",
+      "originalTitle": "Acqua e anice",
+      "year": "2022",
+      "genres": [
+        "喜剧",
+        "剧情"
+      ],
+      "director": "Corrado Ceron",
+      "cast": [
+        "斯特法尼娅·桑德雷莉",
+        "Silvia D'Amico",
+        "Paolo Rossi",
+        "Luisa De Santis",
+        "Paolo Cioni"
+      ],
+      "runtime": "109 分钟",
+      "writers": [
+        "Federico Fava",
+        "Corrado Ceron",
+        "Valentina Zanella"
+      ],
+      "languages": [
+        "意大利语"
+      ],
+      "releaseDate": "2022-11-03",
+      "rating": "7.1 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "7.1",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/acqua-e-anice.jpg",
+      "backdropUrl": "/media/backdrops/acqua-e-anice.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/wUvlL69JfOQiAruLwMANTEVTjeu.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/eqRzPPzd40766fL2CyLhlGn0Ps5.jpg",
+      "palette": {
+        "vibrant": "#05a6b0",
+        "darkVibrant": "#0594a4",
+        "lightVibrant": "#fcb89d",
+        "muted": "#5c4c9c",
+        "darkMuted": "#243e26",
+        "lightMuted": "#c9999c"
+      },
+      "summary": "奥林匹娅年过七旬依然沉湎于作为舞者与歌手的昔日荣光，在人生即将走到尽头之际，她决定与年轻姑娘玛利亚开启一趟回忆之旅。",
+      "verdict": "适合慢节奏文艺片爱好者",
+      "bestWay": "正版流媒体 / Blu-ray 高清版",
+      "idealScene": "安静夜晚，独自或双人慢看",
+      "notFor": "期待强情节推进或快节奏叙事的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "a-vida-luminosa",
+      "tmdbId": 1462597,
+      "title": "明亮的日子",
+      "originalTitle": "A Vida Luminosa",
+      "year": "2025",
+      "genres": [
+        "剧情"
+      ],
+      "director": "João Rosas",
+      "cast": [
+        "Francisco Melo",
+        "Cécile Matignon",
+        "Margarida Dias",
+        "Federica Balbi",
+        "Gemma Tria"
+      ],
+      "runtime": "106 分钟",
+      "writers": [
+        "João Rosas"
+      ],
+      "countries": [
+        "葡萄牙",
+        "法国"
+      ],
+      "languages": [
+        "法语",
+        "葡萄牙语"
+      ],
+      "releaseDate": "2025-05-07",
+      "rating": "0.0 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "0.0",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/a-vida-luminosa.jpg",
+      "backdropUrl": "/media/backdrops/a-vida-luminosa.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/8gH62d0YZQmHuwfJFcToy7kmV8u.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/n7RIiElVfTBaEwTdgz6QPNwgRvn.jpg",
+      "palette": {
+        "vibrant": "#1fac2f",
+        "darkVibrant": "#0e5370",
+        "lightVibrant": "#8fd9ec",
+        "muted": "#a18560",
+        "darkMuted": "#254c42",
+        "lightMuted": "#b5a796"
+      },
+      "summary": "春意正浓，尼科劳刚刚年满二十四岁，但他并不想大张旗鼓地举办一场盛大的生日派对。他开始察觉到自己成为专业音乐家的梦想正在破灭，他仍然与父母同住，并且对前女友念念不忘。尽管他缺乏向前迈进的动力，但命运却向他抛出了几个机会，让他重新掌控自己的生活。",
+      "verdict": "适合文艺片观众耐心观看",
+      "bestWay": "正版流媒体高清版",
+      "idealScene": "周末午后，独自沉浸观看",
+      "notFor": "期待明确剧情高潮或强戏剧冲突的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "a-pied-doeuvre",
+      "tmdbId": 1430820,
+      "title": "执笔",
+      "originalTitle": "À pied d’œuvre",
+      "year": "2026",
+      "genres": [
+        "剧情"
+      ],
+      "director": "Valérie Donzelli",
+      "cast": [
+        "巴斯蒂安·布永",
+        "维吉妮·莱多恩",
+        "安德烈·马孔",
+        "Valérie Donzelli",
+        "玛丽·里维埃"
+      ],
+      "runtime": "92 分钟",
+      "writers": [
+        "Valérie Donzelli",
+        "Gilles Marchand"
+      ],
+      "countries": [
+        "法国"
+      ],
+      "languages": [
+        "法语"
+      ],
+      "releaseDate": "2026-02-04",
+      "rating": "6.5 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "6.5",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/a-pied-doeuvre.jpg",
+      "backdropUrl": "/media/backdrops/a-pied-doeuvre.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/iqeF5Yr65hPlEJojJGESjVclf6h.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/xzY5ZwVZSMMn111DhNcQs2M3J9Q.jpg",
+      "palette": {
+        "vibrant": "#af7c39",
+        "darkVibrant": "#784913",
+        "lightVibrant": "#dec19a",
+        "muted": "#948851",
+        "darkMuted": "#61592d",
+        "lightMuted": "#cbc7b1"
+      },
+      "summary": "这个故事讲述一位事业有成的摄影师放弃一切投身写作，却陷入赤贫。这是一段清醒而自嘲的激进人生轨迹——一个愿为自由付出高昂代价的男人。",
+      "verdict": "文学改编片，画质不是第一优先级",
+      "bestWay": "正版流媒体 / 影院艺术院线场次",
+      "idealScene": "安静环境，关注人物与处境变化",
+      "notFor": "只想看视觉奇观或强类型娱乐的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "a-foggy-tale",
+      "tmdbId": 1174334,
+      "title": "大濛",
+      "originalTitle": "大濛",
+      "year": "2025",
+      "genres": [
+        "剧情"
+      ],
+      "director": "陈玉勋",
+      "cast": [
+        "方郁婷",
+        "柯炜林",
+        "汤毓绮",
+        "曾敬骅",
+        "潘丽丽"
+      ],
+      "runtime": "134 分钟",
+      "writers": [
+        "陈玉勋"
+      ],
+      "countries": [
+        "中国台湾"
+      ],
+      "languages": [
+        "普通话"
+      ],
+      "releaseDate": "2025-11-27",
+      "aka": [
+        "안개가 들려주는 이야기"
+      ],
+      "rating": "7.4 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "7.4",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/a-foggy-tale.jpg",
+      "backdropUrl": "/media/backdrops/a-foggy-tale.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/5nXkeQHSHPccTMllRZMURs790fR.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/gMDGov7yzowLP92yf8AzMkOrcfD.jpg",
+      "palette": {
+        "vibrant": "#dd8521",
+        "darkVibrant": "#734511",
+        "lightVibrant": "#fcf4eb",
+        "muted": "#967f62",
+        "darkMuted": "#48413e",
+        "lightMuted": "#c0b7ad"
+      },
+      "summary": "1954年，一个15岁女孩阿月（方郁婷 饰），听闻哥哥在台北被枪毙的消息，独自搭火车从嘉义到台北，不顾一切后果，只为带哥哥回家。她懵懂无知初到台北，意外下被来自广东、思乡而归不得的三轮车夫赵公道（柯炜林 饰）所救。两个没有血缘关系的人，因为缘分变成患难之交，展开一段为筹措赎尸费，而赌上性命的旅程。",
+      "verdict": "值得认真大屏观看",
+      "bestWay": "影院版 / 4K 正版流媒体 + 色彩准确屏幕",
+      "idealScene": "完整、不被打断地看完，留出情绪沉淀时间",
+      "notFor": "对历史背景毫无兴趣、只想轻松娱乐的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "ladies-first",
+      "tmdbId": 1368881,
+      "title": "女士优先",
+      "originalTitle": "Ladies First",
+      "year": "2026",
+      "genres": [
+        "喜剧",
+        "奇幻"
+      ],
+      "director": "西娅·沙洛克",
+      "cast": [
+        "萨莎·拜伦·科恩",
+        "裴淳华",
+        "汤姆·戴维斯",
+        "艾米莉·莫迪默",
+        "韦鲁切·欧皮亚"
+      ],
+      "runtime": "94 分钟",
+      "writers": [
+        "Natalie Krinsky",
+        "辛科·保罗",
+        "凯蒂·西尔伯曼"
+      ],
+      "countries": [
+        "美国"
+      ],
+      "languages": [
+        "英语"
+      ],
+      "releaseDate": "2026-05-21",
+      "aka": [
+        "Сначала дамы",
+        "נשים תחילה"
+      ],
+      "rating": "6.0 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "6.0",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/ladies-first.jpg",
+      "backdropUrl": "/media/backdrops/ladies-first.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/zeYO2Hy6UOeYpWrBLNjugAn5FaB.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/bOy625BjpCskOWnx3tD09MsKVCb.jpg",
+      "palette": {
+        "vibrant": "#e21117",
+        "darkVibrant": "#061e46",
+        "lightVibrant": "#8db7d0",
+        "muted": "#6d8793",
+        "darkMuted": "#374f60",
+        "lightMuted": "#c8dae2"
+      },
+      "summary": "达米安看似拥有一切：金钱、权力，和源源不断的艳遇。但就在即将升任顶尖广告公司的首席执行官之际，人生突然遭逢剧变。他苏醒过来，发现竟置身于自己最害怕的恶梦：一个由女性主宰的平行世界。曾经他在董事会议室里呼风唤雨，如今却人微言轻，还和变得强悍大胆的同事艾莉克斯起了冲突。随着游戏规则改变，艾莉克斯大权在握，这两人激烈争斗，共同演绎出这部想象权力结构翻转的趣味讽刺喜剧。",
+      "verdict": "流媒体观看即可",
+      "bestWay": "Netflix 正版高清流媒体",
+      "idealScene": "通勤或居家碎片时间，轻松看完",
+      "notFor": "对性别议题 satire 敏感、期待高级喜剧结构的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "all-greens",
+      "tmdbId": 1532395,
+      "title": "万事顺利",
+      "originalTitle": "万事快調〈オール・グリーンズ〉",
+      "year": "2026",
+      "genres": [
+        "喜剧",
+        "剧情"
+      ],
+      "director": "児山隆",
+      "cast": [
+        "南沙良",
+        "出口夏希",
+        "吉田美月喜",
+        "羽村仁成",
+        "黑崎煌代"
+      ],
+      "runtime": "119 分钟",
+      "writers": [
+        "児山隆"
+      ],
+      "countries": [
+        "日本"
+      ],
+      "languages": [
+        "日语"
+      ],
+      "releaseDate": "2026-01-16",
+      "aka": [
+        "青青校园少女草"
+      ],
+      "rating": "7.2 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "7.2",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/all-greens.jpg",
+      "backdropUrl": "/media/backdrops/all-greens.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/yo6eLG1F2tC8ecdkXcYLlfu72bl.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/bjxeug8RRFXJGX9QXNXpBpy6gOt.jpg",
+      "palette": {
+        "vibrant": "#0d9849",
+        "darkVibrant": "#0b5837",
+        "lightVibrant": "#dc6c8c",
+        "muted": "#619b74",
+        "darkMuted": "#325d49",
+        "lightMuted": "#c69d9f"
+      },
+      "summary": "本片改编自第28届松本清张赏受赏作品。要告别这个可恶的乡下，就得花钱！总之要钱！那就在学校屋顶上种大麻吧！背景是位于北关东胡同的乡下高中。为了各自的目的，三个女高中生和一个宅男开始在学校的屋顶上培育偶然得到的大麻种子。它的名字就是大麻栽培联谊会＜ALL・GREENS＞。把对平凡日常的不满和苦闷藏在心中，用大麻做梦想的三人和一人，未来会怎样！？",
+      "verdict": "青春片，画质要求中等",
+      "bestWay": "正版流媒体高清版",
+      "idealScene": "周末夜晚，轻松看完",
+      "notFor": "对青春叛逆题材无感、期待严肃剧情片的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "go-brother",
+      "tmdbId": 543628,
+      "title": "快把我哥带走",
+      "originalTitle": "快把我哥带走",
+      "year": "2018",
+      "genres": [
+        "喜剧",
+        "剧情"
+      ],
+      "director": "郑芬芬",
+      "cast": [
+        "张子枫",
+        "彭昱畅",
+        "赵今麦",
+        "孙泽源",
+        "姜宏波"
+      ],
+      "runtime": "113 分钟",
+      "writers": [
+        "赵越",
+        "郑芬芬"
+      ],
+      "countries": [
+        "中国大陆"
+      ],
+      "languages": [
+        "普通话"
+      ],
+      "releaseDate": "2018-08-17",
+      "aka": [
+        "Kuai Ba Wo Ge Dai Zou",
+        "Take My Brother Away",
+        "Исчезни, брат!"
+      ],
+      "rating": "7.0 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "7.0",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/go-brother.jpg",
+      "backdropUrl": "/media/backdrops/go-brother.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/h4KsgdlFPrtQPmS7MwJwOuovfvm.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/6rEquC3i0iH2eY9otMLXc6GP831.jpg",
+      "palette": {
+        "vibrant": "#cd6f26",
+        "darkVibrant": "#570505",
+        "lightVibrant": "#e6a16d",
+        "muted": "#a6685e",
+        "darkMuted": "#512f24",
+        "lightMuted": "#b0bcc9"
+      },
+      "summary": "拥有一个每天耍贱整蛊妹妹、毫无家庭感的哥哥是一种什么感受？油炸还是蒸锅？时秒只希望哥哥时分彻底消失！连珍贵的生日愿望都是“快把我哥带走”。不料愿望成真，哥哥变成闺蜜妙妙的哥哥，时秒同情妙妙的同时心里暗爽摆脱“大魔王”！变成独生女的时秒感觉生活无限美好，但却发现时分除了整天和好基友甄开心、万岁插科打诨、整蛊妹妹妙妙之外，还隐藏着不为人知的秘密……",
+      "verdict": "流媒体即可，情绪转折在后段",
+      "bestWay": "正版流媒体高清版",
+      "idealScene": "居家轻松观看，建议看到结尾",
+      "notFor": "只想看纯喜剧、不愿接受情感转折的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "project-hail-mary",
+      "tmdbId": 687163,
+      "title": "挽救计划",
+      "originalTitle": "Project Hail Mary",
+      "year": "2026",
+      "genres": [
+        "科幻",
+        "冒险"
+      ],
+      "director": "菲尔·洛德",
+      "cast": [
+        "瑞恩·高斯林",
+        "桑德拉·惠勒",
+        "詹姆斯·奥尔蒂斯",
+        "莱昂内尔·博伊斯",
+        "米拉娜·薇恩翠"
+      ],
+      "runtime": "157 分钟",
+      "writers": [
+        "德鲁·高达"
+      ],
+      "countries": [
+        "美国"
+      ],
+      "languages": [
+        "普通话",
+        "英语",
+        "日语",
+        "俄语"
+      ],
+      "releaseDate": "2026-03-15",
+      "aka": [
+        "Projet dernière chance",
+        "Der Astronaut - Project Hail Mary",
+        "ภารกิจกู้สุริยะ",
+        "Проект «Аве Мария»",
+        "Proyecto Salvación",
+        "Проект «Конец света»"
+      ],
+      "rating": "8.7 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "8.7",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/project-hail-mary.jpg",
+      "backdropUrl": "/media/backdrops/project-hail-mary.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/qf8HaEGNUFXU6nVAq9BVEk4Tiqb.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/8Tfys3mDZVp4tNoH2ktm06a0Tau.jpg",
+      "palette": {
+        "vibrant": "#dd5519",
+        "darkVibrant": "#96290c",
+        "lightVibrant": "#ecdb93",
+        "muted": "#9f7d4d",
+        "darkMuted": "#305331",
+        "lightMuted": "#7bb87e"
+      },
+      "summary": "太阳正在被“吃”掉，绝望吞噬地球。一名“平凡”的中学教师背负全人类的希望，踏上“太空不归路”。末路孤旅中，他意外遇到一位外星萌友，一个同样身陷绝境的外星工程师，这对“宇宙搭子”成了两个文明最后的救命稻草。他们能否在资源紧缺的情况下攻克重重科学谜 题，寻回唯一的希望火种？",
+      "verdict": "强烈建议 IMAX 或大屏观看",
+      "bestWay": "IMAX / 4K HDR 影院版 / 高规格家庭影院",
+      "idealScene": "周末完整沉浸，不被打断",
+      "notFor": "对硬科幻设定不耐烦、只想看动作片的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
+    },
+    {
+      "slug": "amoeba",
+      "tmdbId": 1166688,
+      "title": "核",
+      "originalTitle": "Amoeba",
+      "year": "2026",
+      "genres": [
+        "剧情"
+      ],
+      "director": "Tan Siyou",
+      "cast": [
+        "Ranice Tay",
+        "Nicole Lee Wen",
+        "Lim Shi-An",
+        "Genevieve Tan",
+        "高捷"
+      ],
+      "runtime": "98 分钟",
+      "writers": [
+        "Tan Siyou"
+      ],
+      "countries": [
+        "新加坡",
+        "荷兰",
+        "法国",
+        "西班牙",
+        "韩国"
+      ],
+      "languages": [
+        "英语",
+        "普通话"
+      ],
+      "releaseDate": "2026-03-21",
+      "rating": "6.0 / 10",
+      "ratings": {
+        "douban": "待补充",
+        "imdb": "6.0",
+        "rottenTomatoes": "待补充"
+      },
+      "posterTone": "from-slate-600 via-zinc-800 to-black",
+      "posterUrl": "/media/posters/amoeba.jpg",
+      "backdropUrl": "/media/backdrops/amoeba.jpg",
+      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/wvSc3Swz1lCGewaJynWuXh6ndRV.jpg",
+      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/tdDESdpoXKQpUSjcFr4M6an6oNe.jpg",
+      "palette": {
+        "vibrant": "#0849dd",
+        "darkVibrant": "#700405",
+        "lightVibrant": "#6976f0",
+        "muted": "#9b6275",
+        "darkMuted": "#723a45",
+        "lightMuted": "#a4a5c7"
+      },
+      "summary": "新加坡，这个被誉为全球最干净、最安全的国家，16岁女孩周却无法忍受这样的新加坡。生活在一个仍保留鞭刑、连在街上嚼口香糖都属违法的国家，会是种怎样的感受？\r 　　当我们透过校园中发生的、带有前现代暴力色彩的事件这一隐喻，将新加坡视作一个巨大的水族箱时，其含义便延伸至国家暴力层面。周是唯一反抗校规的人。她的朋友们受其勇敢举动的鼓舞，同意仿照三合会成立一个组织。\r 　　然而，他们笨拙的计划很快被校方发现。为逃避惩罚，所有人都必须在期末考试中取得好成绩。考场上，朋友们给出的都是既爱国又标准的答案。可周会给出怎样的答案呢？",
+      "verdict": "值得认真观看的华语独立片",
+      "bestWay": "影展/艺术院线场次或正版高清流媒体",
+      "idealScene": "安静环境，关注人物关系与成长细节",
+      "notFor": "期待强情节类型片、不愿看青春成长叙事的观众",
+      "viewingPaths": [
+        {
+          "platform": "TMDB Watch Providers",
+          "type": "资料来源",
+          "note": "暂无可用平台数据，需人工补充地区可用性"
+        }
+      ],
+      "versionSignals": [
+        {
+          "label": "4K",
+          "value": "需以平台和发行版本标识为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "HDR",
+          "value": "需以平台和设备支持为准",
+          "verdict": "待确认"
+        },
+        {
+          "label": "Blu-ray",
+          "value": "可继续补充实体发行信息",
+          "verdict": "待确认"
+        },
+        {
+          "label": "流媒体",
+          "value": "可补充画质与码率判断",
+          "verdict": "待确认"
+        }
+      ],
+      "deviceAdvice": [
+        "先确认片源规格",
+        "大屏观看前检查 HDR 标识"
+      ],
+      "related": [],
+      "contentStatus": "draft",
+      "sourceProvider": "tmdb",
+      "sourceUpdatedAt": "2026-06-24T08:17:41.423Z",
+      "imageCachedAt": "2026-06-24T08:17:41.423Z",
+      "createdAt": "2026-06-24T08:17:41.423Z",
+      "updatedAt": "2026-06-24T08:17:41.423Z"
     },
     {
       "slug": "blade-runner-2049",
@@ -214,112 +1502,6 @@
       "sourceUpdatedAt": "2026-06-24T03:36:01.545Z",
       "imageCachedAt": "2026-06-24T03:36:01.545Z",
       "createdAt": "2026-06-24T03:28:38.276Z",
-      "updatedAt": "2026-06-24T03:36:01.545Z"
-    },
-    {
-      "slug": "in-the-mood-for-love",
-      "tmdbId": 843,
-      "title": "花样年华",
-      "originalTitle": "花樣年華",
-      "year": "2000",
-      "genres": [
-        "剧情",
-        "爱情"
-      ],
-      "director": "王家卫",
-      "cast": [
-        "张曼玉",
-        "梁朝伟",
-        "萧炳林",
-        "潘迪华",
-        "雷震"
-      ],
-      "runtime": "99 分钟",
-      "writers": [
-        "王家卫",
-        "刘以鬯"
-      ],
-      "countries": [
-        "中国香港",
-        "法国"
-      ],
-      "languages": [
-        "粤语",
-        "法语",
-        "西班牙语"
-      ],
-      "releaseDate": "2000-09-29",
-      "aka": [
-        "Stvorení pre lásku",
-        "Huāyàng Niánhuá",
-        "In the Mood for Love - Der Klang der Liebe",
-        "Aşk Zamanı",
-        "화양연화 리마스터링",
-        "花様年華：2000"
-      ],
-      "rating": "8.1 / 10",
-      "ratings": {
-        "douban": "待补充",
-        "imdb": "8.1",
-        "rottenTomatoes": "待补充"
-      },
-      "posterTone": "from-slate-600 via-zinc-800 to-black",
-      "posterUrl": "/media/posters/in-the-mood-for-love.jpg",
-      "backdropUrl": "/media/backdrops/in-the-mood-for-love.jpg",
-      "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/1Z32pKrmWW2nkLFYGoc79MzJin6.jpg",
-      "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/ffQFnAUm2Uu4RU0nijpjPRf9TBT.jpg",
-      "palette": {
-        "vibrant": "#c72130",
-        "darkVibrant": "#bd142c",
-        "lightVibrant": "#f2c07a",
-        "muted": "#a84e59",
-        "darkMuted": "#3e2326",
-        "lightMuted": "#b79fa2"
-      },
-      "summary": "一九六二年的香港：周慕云与苏丽珍在同一天搬进相邻的公寓。他们的相遇起初保持着得体与疏离——直到发现各自配偶的秘密，一种亲密的情愫悄然滋生。王家卫的本片既含蓄典雅又视觉绚烂，精湛地勾勒出浪漫渴望与易逝的瞬间。在悸动的配乐、以及杜可风与李屏宾极致抽象的摄影美学中，这部电影成为过去二十年影坛的重要风格标杆，亦是王家卫璀璨生涯的一座里程碑。[标准收藏]",
-      "verdict": "适合高质量修复版",
-      "bestWay": "修复版 Blu-ray / 正版流媒体高清版本",
-      "idealScene": "安静夜晚，独自观看或双人慢看",
-      "notFor": "期待强剧情推进或明确情节答案的观众",
-      "viewingPaths": [
-        {
-          "platform": "TMDB Watch Providers",
-          "type": "资料来源",
-          "note": "暂无可用平台数据，需人工补充地区可用性"
-        }
-      ],
-      "versionSignals": [
-        {
-          "label": "4K",
-          "value": "需以平台和发行版本标识为准",
-          "verdict": "待确认"
-        },
-        {
-          "label": "HDR",
-          "value": "需以平台和设备支持为准",
-          "verdict": "待确认"
-        },
-        {
-          "label": "Blu-ray",
-          "value": "可继续补充实体发行信息",
-          "verdict": "待确认"
-        },
-        {
-          "label": "流媒体",
-          "value": "可补充画质与码率判断",
-          "verdict": "待确认"
-        }
-      ],
-      "deviceAdvice": [
-        "先确认片源规格",
-        "大屏观看前检查 HDR 标识"
-      ],
-      "related": [],
-      "contentStatus": "published",
-      "sourceProvider": "tmdb",
-      "sourceUpdatedAt": "2026-06-24T03:36:01.545Z",
-      "imageCachedAt": "2026-06-24T03:36:01.545Z",
-      "createdAt": "2026-06-23T06:10:40.539Z",
       "updatedAt": "2026-06-24T03:36:01.545Z"
     }
   ]
