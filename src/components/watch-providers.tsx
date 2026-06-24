@@ -9,13 +9,28 @@
 import { useState } from "react";
 import { Button, Card, Chip, Link } from "@heroui/react";
 import { Check, Copy, ExternalLink } from "lucide-react";
-import type { ViewingPath } from "@/lib/content";
+import type { VersionSignal, ViewingPath } from "@/lib/content";
 
 // 展示顺序：订阅 → 租赁/购买 → 实体发行 → 网盘 → 磁力 → 资料来源
 const CATEGORY_ORDER: ViewingPath["type"][] = ["订阅", "租赁/购买", "实体发行", "网盘", "磁力", "资料来源"];
 
-export function WatchProviders({ paths, movieTitle }: { paths: ViewingPath[]; movieTitle: string }) {
-  if (!paths.length) {
+const VERDICT_STYLES: Record<VersionSignal["verdict"], string> = {
+  强推荐: "border-[color:rgb(62_207_142/35%)] bg-[rgb(62_207_142/12%)] text-[var(--sz-success)]",
+  推荐: "border-[color:rgb(62_207_142/28%)] bg-[rgb(62_207_142/10%)] text-[var(--sz-success)]",
+  够用: "border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] text-[var(--sz-warn)]",
+  待确认: "border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] text-[var(--sz-subtle)]",
+};
+
+export function WatchProviders({
+  paths,
+  versionSignals = [],
+  movieTitle,
+}: {
+  paths: ViewingPath[];
+  versionSignals?: VersionSignal[];
+  movieTitle: string;
+}) {
+  if (!paths.length && !versionSignals.length) {
     return null;
   }
 
@@ -30,7 +45,17 @@ export function WatchProviders({ paths, movieTitle }: { paths: ViewingPath[]; mo
       <h2 className="border-b border-[color:var(--sz-border-strong)] pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--sz-text-strong)]">
         观看来源
       </h2>
-      <div className="mt-4 space-y-6">
+
+      {versionSignals.length > 0 ? (
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          {versionSignals.map((signal) => (
+            <VersionSignalRow key={signal.label} signal={signal} />
+          ))}
+        </div>
+      ) : null}
+
+      {paths.length > 0 ? (
+      <div className={versionSignals.length > 0 ? "mt-6 space-y-6" : "mt-4 space-y-6"}>
         {grouped.map((group) => (
           <div key={group.category}>
             {/* 来源分类标签：HeroUI Chip */}
@@ -45,10 +70,27 @@ export function WatchProviders({ paths, movieTitle }: { paths: ViewingPath[]; mo
           </div>
         ))}
       </div>
+      ) : null}
       <p className="mt-4 text-[11px] leading-5 text-[var(--sz-subtle)]">
         正版平台链接来自 TMDB / JustWatch 地区聚合；网盘与磁力链接为人工整理分享，可用性与有效期以分享页或做种情况为准。
       </p>
     </section>
+  );
+}
+
+function VersionSignalRow({ signal }: { signal: VersionSignal }) {
+  return (
+    <Card className="detail-surface flex items-start justify-between gap-3 rounded-md border border-[color:var(--sz-border)] bg-[var(--sz-surface)] px-3.5 py-2.5 text-[var(--sz-text)]">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-[var(--sz-text-strong)]">{signal.label}</p>
+        <p className="mt-1 text-xs leading-5 text-[var(--sz-muted)]">{signal.value}</p>
+      </div>
+      <span
+        className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-medium tracking-wide ${VERDICT_STYLES[signal.verdict]}`}
+      >
+        {signal.verdict}
+      </span>
+    </Card>
   );
 }
 
