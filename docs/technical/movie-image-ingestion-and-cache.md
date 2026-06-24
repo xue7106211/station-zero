@@ -272,6 +272,7 @@ src/lib/movie-api.ts -> src/lib/movie-store.ts -> data/movies.json -> defaultMov
 
 ### 下一步建议
 
+- 万级批量录入与 SQL 迁移的完整方案见 [bulk-movie-ingestion-and-sql-migration.md](./bulk-movie-ingestion-and-sql-migration.md)（规划中，尚未实施）。
 - 把 `data/movies.json` 迁移到 SQLite 或 Postgres。
 - 为人工录入增加受保护的 `/admin` 表单。
 - 为图片增加压缩、尺寸统一和 WebP/AVIF 输出。
