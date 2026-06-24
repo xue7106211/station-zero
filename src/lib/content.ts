@@ -13,6 +13,21 @@ export type VersionSignal = {
   verdict: "强推荐" | "推荐" | "够用" | "待确认";
 };
 
+/**
+ * 海报主色调色板（由后台 node-vibrant 从本地海报取色后落库，前端只读）。
+ *
+ * 六个字段对应 node-vibrant 的六个标准 swatch，均为可选——某个色族在图中找不到时缺省。
+ * 前端用这些色值合成详情页顶部的氛围光晕背景（见 PosterAmbientGlow）。
+ */
+export type MoviePalette = {
+  vibrant?: string;
+  darkVibrant?: string;
+  lightVibrant?: string;
+  muted?: string;
+  darkMuted?: string;
+  lightMuted?: string;
+};
+
 export type Movie = {
   slug: string;
   tmdbId?: number;
@@ -34,6 +49,7 @@ export type Movie = {
   backdropUrl?: string;
   sourcePosterUrl?: string;
   sourceBackdropUrl?: string;
+  palette?: MoviePalette;
   summary: string;
   verdict: string;
   bestWay: string;

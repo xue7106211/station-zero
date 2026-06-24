@@ -2,12 +2,12 @@
 // 同步影视资源数据脚本
 
 import { createHash } from 'node:crypto'; // 计算图片字节的 SHA-1 短指纹（取前 8 位），仅用于日志标识缓存版本，非安全用途
-import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, extname, join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mergeMovieRecords, readMovieDatabase, toPublicMediaPath, writeMovieDatabase } from './movie-database.mjs';
+import { extractPalette } from './palette.mjs'; // 基于 node-vibrant 从本地海报取色
 
 const execFileAsync = promisify(execFile);
 const databasePath = process.env.MOVIE_DATABASE_PATH || 'data/movies.json';
@@ -81,8 +81,12 @@ async function mapTmdbMovie(movie, seed) {
   const providers = movie['watch/providers']?.results?.CN;
   const sourcePosterUrl = movie.poster_path ? `${imageBase}${movie.poster_path}` : undefined;
   const sourceBackdropUrl = movie.backdrop_path ? `${imageBase}${movie.backdrop_path}` : undefined;
-  const posterUrl = sourcePosterUrl ? toPublicMediaPath(await downloadImage(sourcePosterUrl, posterDir, slug, 'poster')) : seed.posterUrl;
+  // 先拿到海报的本地文件路径，再分别用于：1) 转成公开静态路径 posterUrl；2) 本地取色 palette
+  const posterFile = sourcePosterUrl ? await downloadImage(sourcePosterUrl, posterDir, slug, 'poster') : undefined;
+  const posterUrl = posterFile ? toPublicMediaPath(posterFile) : seed.posterUrl;
   const backdropUrl = sourceBackdropUrl ? toPublicMediaPath(await downloadImage(sourceBackdropUrl, backdropDir, slug, 'backdrop')) : seed.backdropUrl;
+  // 调色板：对刚下载的本地海报取色；取色失败不应中断整条同步，降级为种子里的 palette（若有）
+  const palette = posterFile ? await safeExtractPalette(posterFile, slug) : seed.palette;
 
   return {
     ...seed,
@@ -105,6 +109,7 @@ async function mapTmdbMovie(movie, seed) {
     backdropUrl,
     sourcePosterUrl,
     sourceBackdropUrl,
+    palette,
     summary: movie.overview || seed.summary,
     viewingPaths: seed.viewingPaths?.length ? seed.viewingPaths : mapProviders(providers),
     versionSignals: seed.versionSignals?.length ? seed.versionSignals : [
@@ -118,6 +123,17 @@ async function mapTmdbMovie(movie, seed) {
     sourceUpdatedAt: now,
     imageCachedAt: posterUrl || backdropUrl ? now : seed.imageCachedAt,
   };
+}
+
+async function safeExtractPalette(posterFile, slug) {
+  try {
+    const palette = await extractPalette(posterFile);
+    if (palette) console.log(`Palette ${slug}: ${Object.values(palette).join(' ')}`);
+    return palette;
+  } catch (error) {
+    console.warn(`Palette extraction failed for ${slug}: ${formatError(error)}`);
+    return undefined;
+  }
 }
 
 async function downloadImage(url, outputDir, slug, kind) {

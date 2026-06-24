@@ -66,9 +66,11 @@ html[data-theme="light"] {
   --sz-detail-glow: linear-gradient(180deg, rgb(15 23 42 / 5%) 0%, rgb(15 23 42 / 0%) 26%);
 }
 
-/* 方案 C：亮色模式不渲染彩色海报光晕，仅保留上方 --sz-detail-glow 的极淡中性渐变，
-   避免白底上出现过曝色罩并压低正文对比度。深色模式保持「随海报取色」氛围层。 */
-html[data-theme="light"] .poster-glow-img {
+/* 方案 C：亮色模式不渲染随海报取色的氛围层（彩色 mesh 与模糊海报），仅保留上方
+   --sz-detail-glow 的极淡中性渐变，避免白底上出现过曝色罩并压低正文对比度。
+   深色模式保持「随海报取色」氛围层。 */
+html[data-theme="light"] .poster-glow-img,
+html[data-theme="light"] .poster-glow-paint {
   display: none;
 }
 

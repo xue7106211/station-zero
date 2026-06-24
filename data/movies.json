@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-23T06:10:40.539Z",
+  "updatedAt": "2026-06-24T01:56:31.322Z",
   "movies": [
     {
       "slug": "dune-part-two",
@@ -32,6 +32,14 @@
       "backdropUrl": "/media/backdrops/dune-part-two.jpg",
       "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/9uaCR4HEZqxUqgORq0uZqTNm43G.jpg",
       "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
+      "palette": {
+        "vibrant": "#f47e07",
+        "darkVibrant": "#8c1705",
+        "lightVibrant": "#f6b73f",
+        "muted": "#aa7e56",
+        "darkMuted": "#343c44",
+        "lightMuted": "#ab938e"
+      },
       "summary": "《沙丘2》承接第一部剧情，讲述保罗·厄崔迪（提莫西·查拉梅 Timothée Chalamet 饰）被帕迪沙皇帝和哈克南人联手灭族后，在厄拉科斯星球遇到弗雷曼女战士契妮（赞达亚 Zendaya 饰）以及加入弗雷曼人后展开的传奇旅程。保罗与让他家破人亡的阴谋家们开战，同时面临着一生所爱与已知宇宙命运的两难选择。",
       "verdict": "优先选择大屏版本",
       "bestWay": "IMAX / 4K HDR / 高动态范围显示设备",
@@ -76,7 +84,7 @@
       "sourceUpdatedAt": "2026-06-23T06:10:40.539Z",
       "imageCachedAt": "2026-06-23T06:10:40.539Z",
       "createdAt": "2026-06-23T06:10:40.539Z",
-      "updatedAt": "2026-06-23T06:10:40.539Z"
+      "updatedAt": "2026-06-24T01:56:31.322Z"
     },
     {
       "slug": "in-the-mood-for-love",
@@ -108,6 +116,14 @@
       "backdropUrl": "/media/backdrops/in-the-mood-for-love.jpg",
       "sourcePosterUrl": "https://image.tmdb.org/t/p/w780/1Z32pKrmWW2nkLFYGoc79MzJin6.jpg",
       "sourceBackdropUrl": "https://image.tmdb.org/t/p/w780/ffQFnAUm2Uu4RU0nijpjPRf9TBT.jpg",
+      "palette": {
+        "vibrant": "#c72130",
+        "darkVibrant": "#bd142c",
+        "lightVibrant": "#f2c07a",
+        "muted": "#a84e59",
+        "darkMuted": "#3e2326",
+        "lightMuted": "#b79fa2"
+      },
       "summary": "一九六二年的香港：周慕云与苏丽珍在同一天搬进相邻的公寓。他们的相遇起初保持着得体与疏离——直到发现各自配偶的秘密，一种亲密的情愫悄然滋生。王家卫的本片既含蓄典雅又视觉绚烂，精湛地勾勒出浪漫渴望与易逝的瞬间。在悸动的配乐、以及杜可风与李屏宾极致抽象的摄影美学中，这部电影成为过去二十年影坛的重要风格标杆，亦是王家卫璀璨生涯的一座里程碑。[标准收藏]",
       "verdict": "适合高质量修复版",
       "bestWay": "修复版 Blu-ray / 正版流媒体高清版本",
@@ -152,7 +168,7 @@
       "sourceUpdatedAt": "2026-06-23T06:10:40.539Z",
       "imageCachedAt": "2026-06-23T06:10:40.539Z",
       "createdAt": "2026-06-23T06:10:40.539Z",
-      "updatedAt": "2026-06-23T06:10:40.539Z"
+      "updatedAt": "2026-06-24T01:56:31.322Z"
     }
   ]
 }

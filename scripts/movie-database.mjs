@@ -73,6 +73,7 @@ export function normalizeMovieRecord(record, now = new Date().toISOString()) {
     backdropUrl: record.backdropUrl,
     sourcePosterUrl: record.sourcePosterUrl,
     sourceBackdropUrl: record.sourceBackdropUrl,
+    palette: record.palette,
     summary: record.summary ?? '简介待补充。',
     verdict: record.verdict ?? '适合纳入观影决策',
     bestWay: record.bestWay ?? '优先确认正版平台、4K / HDR 标识和发行版本',

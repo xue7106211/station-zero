@@ -86,7 +86,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
     <SiteShell>
       <article className="relative mx-auto max-w-[1280px] px-5 pb-20 pt-8 md:px-8">
         {/* 顶部氛围光晕（实现与文档见 @/components/poster-ambient-glow） */}
-        <PosterAmbientGlow posterUrl={movie.posterUrl} />
+        <PosterAmbientGlow posterUrl={movie.posterUrl} palette={movie.palette} />
 
         {/* 主体三栏布局：左侧海报/观看入口、中间决策正文、右侧评分。 */}
         <section className="relative z-10 grid gap-8 md:grid-cols-[230px_minmax(0,1fr)_210px] md:items-start">

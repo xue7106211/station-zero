@@ -84,6 +84,7 @@ function normalizeMovieRecord(record: Partial<MovieRecord>): MovieRecord {
     posterTone: record.posterTone ?? "from-slate-600 via-zinc-800 to-black",
     posterUrl: record.posterUrl,
     backdropUrl: record.backdropUrl,
+    palette: record.palette,
     summary: record.summary ?? "简介待补充。",
     verdict: record.verdict ?? "适合纳入观影决策",
     bestWay: record.bestWay ?? "优先确认正版平台、4K / HDR 标识和发行版本",
