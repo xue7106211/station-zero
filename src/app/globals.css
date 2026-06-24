@@ -29,7 +29,7 @@
   --sz-shadow: rgb(0 0 0 / 22%);
   --sz-inset: rgb(255 255 255 / 5%);
   --sz-page-glow: radial-gradient(circle at top left, rgb(244 201 93 / 10%), transparent 32%), radial-gradient(circle at 80% 20%, rgb(125 92 255 / 10%), transparent 28%), linear-gradient(180deg, rgb(255 255 255 / 3.5%), transparent 38%);
-  --sz-detail-glow: radial-gradient(ellipse at 32% 18%, rgb(255 255 255 / 16%), transparent 24%), linear-gradient(180deg, rgb(9 9 11 / 18%) 0%, rgb(9 9 11 / 76%) 56%, #09090b 100%), linear-gradient(90deg, #09090b 0%, rgb(9 9 11 / 62%) 8%, rgb(9 9 11 / 28%) 30%, rgb(9 9 11 / 28%) 70%, rgb(9 9 11 / 62%) 92%, #09090b 100%);
+  --sz-detail-glow: radial-gradient(ellipse at 32% 16%, rgb(255 255 255 / 14%), transparent 28%), linear-gradient(180deg, rgb(9 9 11 / 6%) 0%, rgb(9 9 11 / 20%) 55%, rgb(9 9 11 / 38%) 100%), linear-gradient(90deg, #09090b 0%, rgb(9 9 11 / 48%) 12%, rgb(9 9 11 / 16%) 30%, rgb(9 9 11 / 16%) 70%, rgb(9 9 11 / 48%) 88%, #09090b 100%);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
