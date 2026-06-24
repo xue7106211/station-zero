@@ -15,8 +15,10 @@ export default function RootLayout({
 }>) {
   const themeScript = `
 try {
-  var theme = localStorage.getItem('station-zero-theme');
-  document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+  var pref = localStorage.getItem('station-zero-theme');
+  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var resolved = pref === 'light' ? 'light' : pref === 'dark' ? 'dark' : (prefersDark ? 'dark' : 'light');
+  document.documentElement.dataset.theme = resolved;
 } catch (_) {
   document.documentElement.dataset.theme = 'dark';
 }`;

@@ -1,60 +1,92 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-import { Button } from "@heroui/react";
-import { Moon, Sun } from "lucide-react";
-import { normalizeTheme, themeStorageKey, type ThemeName } from "@/lib/theme";
+import { useEffect, useSyncExternalStore } from "react";
+import { Monitor, Moon, Sun } from "lucide-react";
+import {
+  normalizeThemePreference,
+  resolveTheme,
+  systemPrefersDark,
+  themeStorageKey,
+  type ThemePreference,
+} from "@/lib/theme";
 
-// 主题变更事件：toggleTheme 改写 <html data-theme> 后派发，通知所有订阅者重渲染。
 const THEME_CHANGE_EVENT = "station-zero-theme-change";
 
-/**
- * 订阅主题变化（仅在客户端调用）。
- * @param onChange - 主题变更时触发的回调
- * @returns 取消订阅函数
- */
+const themeOptions: {
+  value: ThemePreference;
+  label: string;
+  Icon: typeof Sun;
+}[] = [
+  { value: "light", label: "浅色模式", Icon: Sun },
+  { value: "dark", label: "深色模式", Icon: Moon },
+  { value: "system", label: "跟随系统", Icon: Monitor },
+];
+
 function subscribe(onChange: () => void) {
   window.addEventListener(THEME_CHANGE_EVENT, onChange);
   return () => window.removeEventListener(THEME_CHANGE_EVENT, onChange);
 }
 
-/** 客户端快照：真实主题来自 <html data-theme>（由 layout 内联脚本在 paint 前写入）。 */
-function getSnapshot(): ThemeName {
-  return normalizeTheme(document.documentElement.dataset.theme);
+function readPreference(): ThemePreference {
+  try {
+    return normalizeThemePreference(localStorage.getItem(themeStorageKey));
+  } catch {
+    return "dark";
+  }
 }
 
-/** 服务端 / 水合首帧快照：与 layout 的 SSR 兜底 `data-theme="dark"` 保持一致，避免水合不匹配。 */
-function getServerSnapshot(): ThemeName {
+function getSnapshot(): ThemePreference {
+  return readPreference();
+}
+
+function getServerSnapshot(): ThemePreference {
   return "dark";
 }
 
+function applyPreference(preference: ThemePreference) {
+  document.documentElement.dataset.theme = resolveTheme(preference, systemPrefersDark());
+  localStorage.setItem(themeStorageKey, preference);
+  window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
+}
+
 export function ThemeToggle() {
-  // useSyncExternalStore 保证：SSR 与 hydration 首帧用 getServerSnapshot（"dark"），
-  // 与服务端 HTML 一致；hydration 完成后再切到 getSnapshot（真实主题），不会报水合错误。
-  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const preference = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  function toggleTheme() {
-    const nextTheme: ThemeName = theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = nextTheme;
-    localStorage.setItem(themeStorageKey, nextTheme);
-    // 派发事件触发 useSyncExternalStore 重新读取快照并重渲染。
-    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
-  }
-
-  const isLight = theme === "light";
+  useEffect(() => {
+    if (preference !== "system") return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => {
+      document.documentElement.dataset.theme = resolveTheme("system", media.matches);
+    };
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, [preference]);
 
   return (
-    <Button
-      type="button"
-      size="sm"
-      variant="secondary"
-      aria-label={isLight ? "切换到深色模式" : "切换到亮色模式"}
-      aria-pressed={isLight}
-      onPress={toggleTheme}
-      className="pressable min-w-0 rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] px-3 font-mono text-xs text-[var(--sz-text)] shadow-none"
+    <div
+      role="group"
+      aria-label="主题模式"
+      className="inline-flex items-center gap-0.5 rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] p-0.5"
     >
-      <span aria-hidden>{isLight ? <Sun className="size-4" /> : <Moon className="size-4" />}</span>
-      <span className="hidden sm:inline">{isLight ? "Light" : "Dark"}</span>
-    </Button>
+      {themeOptions.map(({ value, label, Icon }) => {
+        const active = preference === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            aria-label={label}
+            aria-pressed={active}
+            onClick={() => applyPreference(value)}
+            className={`pressable flex size-8 items-center justify-center rounded-full transition-[color,background-color,box-shadow] duration-200 ${
+              active
+                ? "bg-[var(--sz-card-strong)] text-[var(--sz-text-strong)] shadow-[0_1px_3px_var(--sz-shadow)]"
+                : "text-[var(--sz-muted)] hover:text-[var(--sz-text-soft)]"
+            }`}
+          >
+            <Icon className="size-4" aria-hidden />
+          </button>
+        );
+      })}
+    </div>
   );
 }

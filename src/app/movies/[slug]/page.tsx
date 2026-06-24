@@ -6,6 +6,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation"; // 命中无效 slug 时抛出 404，由 Next.js 渲染 not-found 页面
 import { Card, Chip } from "@heroui/react"; // HeroUI 组件库提供的基础 UI 原子组件
 import { SiteShell } from "@/components/site-shell"; // 站点统一外壳（导航/页脚等），`@/` 是 tsconfig 配置的根别名
+import { DecisionTags } from "@/components/decision-tags";
 import { PosterAmbientGlow } from "@/components/poster-ambient-glow"; // 顶部海报氛围光晕背景层（纯装饰）
 import { WatchProviders } from "@/components/watch-providers"; // 正版观看与购买聚合模块（客户端组件，含复制链接）
 import { getMovie, getMovieSlugs } from "@/lib/movie-api"; // 读取本站本地内容库；外部 API 仅由后台同步脚本调用
@@ -130,10 +131,8 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                 {movie.title} <span className="text-lg font-normal text-[var(--sz-muted)]">{movie.year}</span>
               </h1>
             </div>
-            {/* 一句话决策摘要：推荐结论 + 最佳观看方式 */}
-            <p className="mt-6 font-mono text-xs uppercase leading-6 tracking-[0.2em] text-[var(--sz-muted)] md:mt-4">
-              {movie.verdict} · {movie.bestWay}
-            </p>
+            {/* 决策标签：结论 + 最佳观看方式拆成 Tag，突出视觉层次 */}
+            <DecisionTags verdict={movie.verdict} bestWay={movie.bestWay} />
             <p className="mt-5 text-[15px] leading-7 text-[var(--sz-text-soft)]">
               {movie.summary}
             </p>
@@ -207,9 +206,9 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           {/* 右栏：跨平台评分 */}
           <aside className="detail-reveal space-y-6 pt-0 md:pt-2">
             <Card className="detail-reveal rounded-none border-0 bg-transparent p-0 text-[var(--sz-muted)] shadow-none">
-              <div className="flex items-center justify-between border-b border-[color:var(--sz-border-strong)] pb-2 text-[11px] uppercase tracking-[0.16em]">
-                <span className="inline-flex items-center gap-1.5"><Star className="size-3" />Ratings</span>
-                <span>3 sources</span>
+              <div className="flex items-center gap-1.5 border-b border-[color:var(--sz-border-strong)] pb-2 text-[11px] uppercase tracking-[0.16em]">
+                <Star className="size-3" />
+                评分
               </div>
               <div className="mt-4 space-y-3">
                 <RatingSource label="豆瓣" value={movie.ratings?.douban ?? movie.rating.split(" ")[0]} hint="中文社区" />
