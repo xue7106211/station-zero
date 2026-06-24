@@ -9,6 +9,7 @@ import { SiteNav } from "./site-nav";
  *
  * 始终 `sticky top-0`，长页面滚动时导航保持可达。位于页面顶部时保持通透（无背景、透明边框）；
  * 一旦向下滚动就切换为半透明背景 + `backdrop-blur` + 底部细边框，让导航与内容分层、不被遮挡。
+ * 高度需与 `globals.css` 中 `--sz-header-height` 保持一致，供详情页 sticky 侧栏避让。
  *
  * 抽成客户端组件，是因为「滚动后才加效果」需要监听 `window.scroll` 维护 `scrolled` 状态。
  *

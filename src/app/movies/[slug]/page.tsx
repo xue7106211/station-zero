@@ -91,7 +91,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
         {/* 主体三栏布局：左侧海报/观看入口、中间决策正文、右侧评分。 */}
         <section className="relative z-10 grid gap-8 md:grid-cols-[230px_minmax(0,1fr)_210px] md:items-start">
           {/* 左栏：海报卡片 + 统计 + 合法观看路径摘要 */}
-          <aside className="space-y-5 md:sticky md:top-6">
+          <aside className="space-y-5 md:sticky md:top-[var(--sz-sticky-top)]">
             <Card className="detail-surface poster-lift overflow-hidden rounded-md border border-[color:var(--sz-border)] bg-[var(--sz-surface)] p-0 shadow-[0_5px_18px_var(--sz-shadow)]">
               {/* relative 作为 Image fill 的定位容器；无 posterUrl 时仅显示渐变占位 */}
               <div className={`relative h-[345px] bg-gradient-to-br ${movie.posterTone}`}>
