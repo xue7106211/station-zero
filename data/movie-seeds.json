@@ -189,5 +189,43 @@
     "idealScene": "安静环境，关注人物关系与成长细节",
     "notFor": "期待强情节类型片、不愿看青春成长叙事的观众",
     "contentStatus": "draft"
+  },
+  {
+    "slug": "playdate",
+    "tmdbId": 1248226,
+    "title": "玩爆约会",
+    "originalTitle": "Playdate",
+    "year": "2025",
+    "verdict": "轻松动作喜剧，大屏看更过瘾",
+    "bestWay": "4K HDR AMZN WEB-DL / Prime Video 正版流媒体",
+    "idealScene": "周末夜晚，轻松看完一部合家欢动作喜剧",
+    "notFor": "期待严肃剧情或对夸张桥段零容忍的观众",
+    "viewingPaths": [
+      {
+        "platform": "高清影视之家",
+        "type": "磁力",
+        "note": "1080p AMZN WEB-DL H.264 DDP5.1 · 5.29GB · 简繁英字幕 · 2026-03-13",
+        "url": "magnet:?xt=urn:btih:0384fafc33c8cd4d575eea9d3ca28fc275713aa8"
+      },
+      {
+        "platform": "高清影视之家",
+        "type": "磁力",
+        "note": "2160p HDR10+ AMZN WEB-DL H.265 DDP5.1 REPACK · 12.39GB · 简繁英字幕 · 2026-02-26",
+        "url": "magnet:?xt=urn:btih:d74fb5764d1135524932b8e08d75a8ddd6ae7d34"
+      },
+      {
+        "platform": "高清影视之家",
+        "type": "磁力",
+        "note": "2160p AMZN WEB-DL H.265 DDP5.1 · 9.65GB · 无字片源 · 2025-11-12",
+        "url": "magnet:?xt=urn:btih:982e1f4f02e9f53f2c937e680983a2c223e9ea8f"
+      }
+    ],
+    "versionSignals": [
+      { "label": "4K", "value": "2160p AMZN WEB-DL 有多个版本", "verdict": "推荐" },
+      { "label": "HDR", "value": "HDR10+ 版本可见", "verdict": "推荐" },
+      { "label": "流媒体", "value": "AMZN WEB-DL 片源", "verdict": "够用" },
+      { "label": "Blu-ray", "value": "实体发行待确认", "verdict": "待确认" }
+    ],
+    "contentStatus": "draft"
   }
 ]

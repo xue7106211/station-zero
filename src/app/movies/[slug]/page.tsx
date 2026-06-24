@@ -199,7 +199,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               </div>
 
               {/* 正版观看与购买聚合：按来源分类列出平台、外链与复制按钮（仅合法路径） */}
-              <WatchProviders paths={movie.viewingPaths} />
+              <WatchProviders paths={movie.viewingPaths} movieTitle={movie.title} />
             </div>
           </main>
 

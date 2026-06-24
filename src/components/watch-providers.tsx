@@ -11,10 +11,10 @@ import { Button, Card, Chip, Link } from "@heroui/react";
 import { Check, Copy, ExternalLink } from "lucide-react";
 import type { ViewingPath } from "@/lib/content";
 
-// 展示顺序：订阅 → 租赁/购买 → 实体发行 → 网盘 → 资料来源
-const CATEGORY_ORDER: ViewingPath["type"][] = ["订阅", "租赁/购买", "实体发行", "网盘", "资料来源"];
+// 展示顺序：订阅 → 租赁/购买 → 实体发行 → 网盘 → 磁力 → 资料来源
+const CATEGORY_ORDER: ViewingPath["type"][] = ["订阅", "租赁/购买", "实体发行", "网盘", "磁力", "资料来源"];
 
-export function WatchProviders({ paths }: { paths: ViewingPath[] }) {
+export function WatchProviders({ paths, movieTitle }: { paths: ViewingPath[]; movieTitle: string }) {
   if (!paths.length) {
     return null;
   }
@@ -28,7 +28,7 @@ export function WatchProviders({ paths }: { paths: ViewingPath[] }) {
   return (
     <section className="mt-10">
       <h2 className="border-b border-[color:var(--sz-border-strong)] pb-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--sz-text-strong)]">
-        正版观看与购买
+        观看来源
       </h2>
       <div className="mt-4 space-y-6">
         {grouped.map((group) => (
@@ -39,22 +39,27 @@ export function WatchProviders({ paths }: { paths: ViewingPath[] }) {
             </Chip>
             <div className="space-y-2">
               {group.items.map((path, index) => (
-                <ProviderRow key={`${path.platform}-${index}`} path={path} />
+                <ProviderRow key={`${path.platform}-${index}`} path={path} movieTitle={movieTitle} />
               ))}
             </div>
           </div>
         ))}
       </div>
       <p className="mt-4 text-[11px] leading-5 text-[var(--sz-subtle)]">
-        正版平台链接来自 TMDB / JustWatch 地区聚合；网盘链接为人工整理分享，可用性与有效期以分享页实时结果为准。
+        正版平台链接来自 TMDB / JustWatch 地区聚合；网盘与磁力链接为人工整理分享，可用性与有效期以分享页或做种情况为准。
       </p>
     </section>
   );
 }
 
 // 单条平台行：HeroUI Card 容器 + Link（名称）+ 辅助描述 +（有链接时）复制按钮。
-function ProviderRow({ path }: { path: ViewingPath }) {
+function ProviderRow({ path, movieTitle }: { path: ViewingPath; movieTitle: string }) {
   const hasUrl = Boolean(path.url);
+  const linkLabel = path.type === "磁力" ? movieTitle : path.platform;
+  const note =
+    path.type === "磁力" && path.platform !== movieTitle
+      ? `${path.platform} · ${path.note}`
+      : path.note;
 
   return (
     <Card className="detail-surface flex flex-row items-center justify-between gap-4 rounded bg-[var(--sz-surface)] px-4 py-3 text-[var(--sz-text)]">
@@ -67,14 +72,14 @@ function ProviderRow({ path }: { path: ViewingPath }) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--sz-link)] hover:underline"
           >
-            {path.platform}
+            {linkLabel}
             <ExternalLink className="size-3" />
           </Link>
         ) : (
-          <span className="text-sm font-semibold text-[var(--sz-text-strong)]">{path.platform}</span>
+          <span className="text-sm font-semibold text-[var(--sz-text-strong)]">{linkLabel}</span>
         )}
         {/* 辅助描述 */}
-        <p className="mt-1 truncate text-xs text-[var(--sz-muted)]">{path.note}</p>
+        <p className="mt-1 truncate text-xs text-[var(--sz-muted)]">{note}</p>
       </div>
       {hasUrl ? <CopyButton url={path.url as string} /> : null}
     </Card>
