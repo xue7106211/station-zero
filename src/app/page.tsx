@@ -4,6 +4,7 @@ import { Button, Card } from "@heroui/react";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { collections, knowledgeEntries } from "@/lib/content";
 import { getMovies } from "@/lib/movie-api";
+import { MovieCard, movieCardGridClassName } from "@/components/movie-card";
 import {
   DecisionCard,
   SectionHeading,
@@ -81,38 +82,14 @@ export default async function Home() {
           title="精选影片决策"
           description="每张卡片先给判断，再展开资料、正版路径、高清版本和设备建议。"
         />
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className={movieCardGridClassName}>
           {movies.map((movie) => (
             <Link
               key={movie.slug}
               href={`/movies/${movie.slug}`}
               className="group block"
             >
-              <Card className="card-hover h-full rounded-3xl border border-[color:var(--sz-border)] bg-[var(--sz-card)] p-5 text-[var(--sz-text)]">
-                <div
-                  className={`relative mb-5 h-44 overflow-hidden rounded-2xl bg-gradient-to-br ${movie.posterTone}`}
-                >
-                  {movie.posterUrl ? (
-                    <Image
-                      src={movie.posterUrl}
-                      alt={`${movie.title} poster`}
-                      fill
-                      className="object-cover"
-                      loading="lazy"
-                      sizes="(min-width: 768px) 33vw, 100vw"
-                    />
-                  ) : null}
-                </div>
-                <p className="text-sm text-[var(--sz-muted)]">
-                  {movie.year} · {movie.genres.join(" / ")}
-                </p>
-                <h3 className="mt-2 text-2xl font-semibold group-hover:text-[var(--sz-accent)]">
-                  {movie.title}
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-[var(--sz-text-soft)]">
-                  {movie.verdict} · {movie.bestWay}
-                </p>
-              </Card>
+              <MovieCard movie={movie} />
             </Link>
           ))}
         </div>
