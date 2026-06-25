@@ -12,8 +12,8 @@ MVP 基于 Next.js + TypeScript + Tailwind CSS 4 + HeroUI，包含：
 - 高清知识页：解释 HDR、BluRay、WEB-DL、REMUX 等概念。
 - 关于页：产品边界与合规声明。
 - 站点壳层：吸顶导航、移动端抽屉菜单、浅色/深色/跟随系统主题切换。
-- 本地电影数据仓库：前端读取 `data/movies.json`，默认数据作为兜底。
-- 后台采集脚本：同步 TMDB 资料、下载海报/背景图、提取海报色板，并写入本站本地库。
+- 电影数据层：前端经 `movie-api` 读取 **Supabase Postgres**（优先）或 `data/movies.json`（回退）。
+- 后台采集脚本：同步 TMDB 资料、下载海报/背景图、提取海报色板，并写入本地库与 SQL。
 
 ## 开发命令
 
@@ -22,46 +22,102 @@ npm run dev
 npm run build
 npm run lint
 npm test
+```
+
+### TMDB 后台同步
+
+```bash
 npm run check:tmdb
 npm run sync:movies
 npm run import:movies -- path/to/movies.json
 npm run extract:palettes
 ```
 
+### 数据库（Supabase Postgres）
+
+```bash
+npm run check:database      # 验证 DATABASE_URL 连通与表状态
+npm run db:generate         # 根据 schema 生成 migration
+npm run db:migrate          # 应用 migration 到 Supabase
+npm run db:push             # 开发时快速推送 schema（可跳过 migration 文件）
+npm run db:migrate:json     # 将 data/movies.json upsert 到 SQL
+```
+
 ## 电影数据架构
 
-Station Zero 采用“外部 API 后台同步，前端读取本站本地数据”的加载方案：
+Station Zero 采用「外部 API 后台生产内容，前端只读本站数据」的加载方案：
 
 ```txt
 TMDB / 人工录入
         ↓
 后台同步或批量导入
         ↓
-data/movies.json
+data/movies.json（编辑源 + JSON 回退）
         ↓
-Next.js 页面读取本地数据
+db:migrate:json / 未来录入流水线
+        ↓
+Supabase Postgres（movies / viewing_paths / media_assets）
+        ↓
+movie-api.ts（SQL 优先，失败或无配置时回退 JSON）
+        ↓
+Next.js 页面
         ↓
 public/media/ 本地海报与 CDN 缓存
 ```
 
-核心原则：前端页面不在用户访问时实时调用 TMDB、豆瓣或其他外部电影 API。
+核心原则：
 
-### 本地数据库 MVP
+- 前端页面不在用户访问时实时调用 TMDB、豆瓣或其他外部电影 API。
+- 浏览器不直连 Supabase；仅服务端与脚本通过 `DATABASE_URL` 访问数据库。
 
-- `data/movies.json` — 文件型电影数据库，保存影片条目、标题、年份、类型、海报路径、色板、更新时间和详情页展示字段。
-- `data/movie-seeds.json` — 后台同步种子，保存 `slug`、`tmdbId` 和 Station Zero 自己的策展判断字段。
-- `src/lib/movie-api.ts` — 前端读取门面，当前只转发到本地电影数据仓库。
-- `src/lib/movie-store.ts` — 本地数据读取层，读取失败时回退到 `src/lib/content.ts` 的默认策展数据。
-- `public/media/posters/` 与 `public/media/backdrops/` — 本地化海报和背景图输出目录。
+### 读取层（当前）
+
+| 能力 | 实现 |
+|------|------|
+| 列表 `/movies` | SQL 分页，30 条/页，`content_status = published`，`ORDER BY updated_at DESC` |
+| 首页精选 | 仅展示 `published` 影片 |
+| 详情 `/movies/[slug]` | `movies` JOIN `viewing_paths` 单次查询；任意状态 slug 可访问 |
+| 构建策略 | Top 50 `published` 预热 SSG；其余 slug 按需 ISR（`revalidate = 86400`） |
+| 无 `DATABASE_URL` | 自动回退 `data/movies.json` |
+
+关键模块：
+
+- `src/lib/movie-api.ts` — 页面读取门面（SQL 优先 + JSON fallback）
+- `src/lib/movie-sql-store.ts` — Supabase 查询与分页
+- `src/lib/movie-store.ts` — 文件型 JSON 读取与默认数据合并
+- `src/lib/movie-mapper.ts` — SQL 行 → 前端 `Movie` 类型映射
+- `src/db/schema.ts` — Drizzle schema（`movies`、`viewing_paths`、`media_assets`、`import_staging`）
+
+### 本地文件库
+
+- `data/movies.json` — 文件型电影库，编辑与 JSON 回退源。
+- `data/movie-seeds.json` — 后台同步种子，保存 `slug`、`tmdbId` 和 Station Zero 策展判断字段。
+- `public/media/posters/` 与 `public/media/backdrops/` — 本地化海报和背景图。
+
+### 环境变量
+
+复制 `.env.example` 为 `.env.local`，按需配置：
+
+```env
+# TMDB 后台同步（可选）
+TMDB_READ_ACCESS_TOKEN=
+TMDB_API_KEY=
+
+# Supabase Postgres（可选；配置后页面优先读 SQL）
+# 使用 Transaction pooler URI（端口 6543）
+DATABASE_URL=
+```
+
+未配置 `DATABASE_URL` 时，应用仍可用 `data/movies.json` 与默认策展数据运行。
 
 ### 后台同步 TMDB
 
 TMDB 只用于后台采集阶段。未配置或请求失败时，前端仍会使用 `data/movies.json` 和 `src/lib/content.ts` 中的默认策展数据。
 
-1. 复制 `.env.example` 为 `.env.local`。
-2. 填入 `TMDB_READ_ACCESS_TOKEN`，或使用 `TMDB_API_KEY`。不要在等号后添加多余空格或引号，例如 `TMDB_API_KEY=xxxx`。
-3. 运行 `npm run check:tmdb` 验证连通性。
-4. 运行 `npm run sync:movies` 同步 `data/movie-seeds.json` 中的影片。
+1. 填入 `TMDB_READ_ACCESS_TOKEN` 或 `TMDB_API_KEY`（等号后不要多余空格或引号）。
+2. 运行 `npm run check:tmdb` 验证连通性。
+3. 运行 `npm run sync:movies` 同步 `data/movie-seeds.json` 中的影片。
+4. 若已配置 `DATABASE_URL`，运行 `npm run db:migrate:json` 将变更同步到 SQL。
 
 如果访问 `api.themoviedb.org` 时出现证书域名不匹配、DNS 污染或代理错误，可以把 `TMDB_API_BASE_URL` 指向你自己的 TMDB v3 兼容代理地址，值需要包含 `/3` 前缀。
 
@@ -73,9 +129,7 @@ HTTP_PROXY=http://127.0.0.1:7890
 NO_PROXY=localhost,127.0.0.1
 ```
 
-项目的 `dev`、`build`、`start`、`check:tmdb`、`sync:movies` 脚本已经启用 Node.js `--use-env-proxy` 或等价配置，会让服务端 `fetch` 读取这些代理变量。
-
-如果 `curl` 能访问 TMDB 但 Node `fetch` 超时，项目会默认启用 `TMDB_CURL_FALLBACK=true`，在服务端用系统 `curl` 兜底获取 JSON 数据。可用 `TMDB_CURL_FALLBACK=false` 关闭。
+`dev`、`build`、`start`、`check:tmdb`、`sync:movies` 已启用 Node.js `--use-env-proxy`，服务端 `fetch` 会读取这些代理变量。
 
 `npm run sync:movies` 会：
 
@@ -106,6 +160,7 @@ TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路
     "title": "降临",
     "originalTitle": "Arrival",
     "year": "2016",
+    "contentStatus": "published",
     "verdict": "值得安静大屏观看",
     "bestWay": "4K HDR / Blu-ray / 高质量正版流媒体"
   }
@@ -119,6 +174,7 @@ TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路
   {
     "slug": "arrival",
     "tmdbId": 329865,
+    "contentStatus": "published",
     "verdict": "值得安静大屏观看",
     "bestWay": "4K HDR / Blu-ray / 高质量正版流媒体"
   }
@@ -129,9 +185,19 @@ TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路
 
 - `slug` 是本站公开 URL 标识，例如 `/movies/arrival`，优先使用英文小写 kebab-case。
 - `tmdbId` 是外部资料源 ID，只用于后台同步，不作为公开详情页主地址。
+- `contentStatus` 控制列表可见性：`published` 出现在 `/movies` 与首页；`draft` / `review` 仅详情直链可访问。
 - 电影名称和年份可用于初步搜索；当前脚本尚未把年份作为强匹配条件，遇到同名电影时应先确认 `tmdbId`。
 - `verdict`、`bestWay`、`idealScene`、`notFor`、`versionSignals`、`deviceAdvice` 是 Station Zero 编辑判断层，应人工维护。
-- 同步完成后，正式展示数据写入 `data/movies.json`，前端只读取本站本地库与 `/media/` 图片。
+- 同步完成后检查 `data/movies.json` 是否写入本地图片路径与色板；配置 `DATABASE_URL` 后运行 `npm run db:migrate:json` 同步到 SQL。
+
+### 万级批量录入（规划中）
+
+万级录入流水线、对象存储与生产部署方案见：
+
+- `docs/technical/bulk-movie-ingestion-and-sql-migration.md`
+- `docs/technical/万级影视批量录入 — 可执行清单（v1）.md`
+
+当前已完成 Schema、Supabase 连通与读取层改造；批量 staging 录入脚本与生产 CDN 部署仍在推进中。
 
 ## UI 与主题
 

@@ -8,16 +8,23 @@
     "start": "node --use-env-proxy ./node_modules/next/dist/bin/next start",
     "lint": "eslint",
     "check:tmdb": "node --env-file=.env.local --use-env-proxy scripts/check-tmdb.mjs",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test tests/*.test.mjs && node --import tsx --test tests/*.test.mts",
     "sync:movies": "node --env-file=.env.local --use-env-proxy scripts/sync-movies.mjs",
     "import:movies": "node scripts/import-movies.mjs",
-    "extract:palettes": "node scripts/extract-palettes.mjs"
+    "extract:palettes": "node scripts/extract-palettes.mjs",
+    "check:database": "node --env-file=.env.local scripts/check-database.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs migrate",
+    "db:push": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs push",
+    "db:migrate:json": "node --env-file=.env.local --import tsx scripts/migrate-json-to-sql.mts"
   },
   "dependencies": {
     "@heroui/react": "^3.2.1",
     "@heroui/styles": "^3.2.1",
+    "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
+    "postgres": "^3.4.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -26,10 +33,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "node-vibrant": "^4.0.4",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

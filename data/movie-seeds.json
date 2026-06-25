@@ -36,7 +36,7 @@
     "bestWay": "正版流媒体高清版 / 影院上映场次",
     "idealScene": "周末午后或夜晚，轻松看完一部华语家庭喜剧",
     "notFor": "期待强类型片刺激、不愿看家庭戏的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "hokum",
@@ -48,7 +48,7 @@
     "bestWay": "影院版或 4K 流媒体 + 好耳机/音响",
     "idealScene": "关灯、音量到位，一次性看完",
     "notFor": "害怕 jump scare、不愿看民俗恐怖题材的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "acqua-e-anice",
@@ -80,7 +80,7 @@
         "url": "https://pan.xunlei.com/s/VOuCyCjVPjiPMqqjwaRRzJllA1?pwd=6a8v"
       }
     ],
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "a-vida-luminosa",
@@ -92,7 +92,7 @@
     "bestWay": "正版流媒体高清版",
     "idealScene": "周末午后，独自沉浸观看",
     "notFor": "期待明确剧情高潮或强戏剧冲突的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "a-pied-doeuvre",
@@ -104,7 +104,7 @@
     "bestWay": "正版流媒体 / 影院艺术院线场次",
     "idealScene": "安静环境，关注人物与处境变化",
     "notFor": "只想看视觉奇观或强类型娱乐的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "a-foggy-tale",
@@ -116,7 +116,7 @@
     "bestWay": "影院版 / 4K 正版流媒体 + 色彩准确屏幕",
     "idealScene": "完整、不被打断地看完，留出情绪沉淀时间",
     "notFor": "对历史背景毫无兴趣、只想轻松娱乐的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "ladies-first",
@@ -128,7 +128,7 @@
     "bestWay": "Netflix 正版高清流媒体",
     "idealScene": "通勤或居家碎片时间，轻松看完",
     "notFor": "对性别议题 satire 敏感、期待高级喜剧结构的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "all-greens",
@@ -140,7 +140,7 @@
     "bestWay": "正版流媒体高清版",
     "idealScene": "周末夜晚，轻松看完",
     "notFor": "对青春叛逆题材无感、期待严肃剧情片的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "lee-cronins-the-mummy",
@@ -152,7 +152,7 @@
     "bestWay": "IMAX / 4K HDR 流媒体 + 音响",
     "idealScene": "关灯、音量充足，完整观看",
     "notFor": "害怕血腥 jump scare、不愿看身体恐怖题材的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "go-brother",
@@ -164,7 +164,7 @@
     "bestWay": "正版流媒体高清版",
     "idealScene": "居家轻松观看，建议看到结尾",
     "notFor": "只想看纯喜剧、不愿接受情感转折的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "project-hail-mary",
@@ -176,7 +176,7 @@
     "bestWay": "IMAX / 4K HDR 影院版 / 高规格家庭影院",
     "idealScene": "周末完整沉浸，不被打断",
     "notFor": "对硬科幻设定不耐烦、只想看动作片的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "amoeba",
@@ -188,7 +188,7 @@
     "bestWay": "影展/艺术院线场次或正版高清流媒体",
     "idealScene": "安静环境，关注人物关系与成长细节",
     "notFor": "期待强情节类型片、不愿看青春成长叙事的观众",
-    "contentStatus": "draft"
+    "contentStatus": "published"
   },
   {
     "slug": "playdate",
@@ -226,6 +226,6 @@
       { "label": "流媒体", "value": "AMZN WEB-DL 片源", "verdict": "够用" },
       { "label": "Blu-ray", "value": "实体发行待确认", "verdict": "待确认" }
     ],
-    "contentStatus": "draft"
+    "contentStatus": "published"
   }
 ]

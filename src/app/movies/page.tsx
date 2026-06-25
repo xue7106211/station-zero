@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { getMovies } from "@/lib/movie-api";
+import { getMoviesPage } from "@/lib/movie-api";
 import { MovieCard, movieCardGridClassName } from "@/components/movie-card";
 import { MoviePagination } from "@/components/movie-pagination";
 import { SectionHeading, SiteShell } from "@/components/site-shell";
-import { MOVIES_PAGE_SIZE, paginateMovies, parseMoviesPage } from "@/lib/movies-pagination";
+import { parseMoviesPage } from "@/lib/movies-pagination";
 
 export const revalidate = 86400;
 
@@ -13,12 +13,7 @@ type MoviesPageProps = {
 
 export default async function MoviesPage({ searchParams }: MoviesPageProps) {
   const { page: pageParam } = await searchParams;
-  const movies = await getMovies();
-  const { items, currentPage, totalPages, totalItems } = paginateMovies(
-    movies,
-    parseMoviesPage(pageParam),
-    MOVIES_PAGE_SIZE,
-  );
+  const { items, currentPage, totalPages, totalItems } = await getMoviesPage(parseMoviesPage(pageParam));
 
   return (
     <SiteShell>

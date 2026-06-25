@@ -41,6 +41,21 @@ export async function getMovieSlugsFromStore(): Promise<string[]> {
   return movies.map((movie) => movie.slug);
 }
 
+export async function listPublishedMoviesFromStore(): Promise<Movie[]> {
+  const storedMovies = await readStoredMovies();
+  return storedMovies
+    .filter((movie) => movie.contentStatus === "published")
+    .map(toPublicMovie);
+}
+
+export async function listPublishedMovieSlugsFromStore(): Promise<string[]> {
+  const storedMovies = await readStoredMovies();
+  return storedMovies
+    .filter((movie) => movie.contentStatus === "published")
+    .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
+    .map((movie) => movie.slug);
+}
+
 export async function readStoredMovies(): Promise<MovieRecord[]> {
   try {
     const raw = await readFile(movieDatabasePath, "utf8");
@@ -53,6 +68,42 @@ export async function readStoredMovies(): Promise<MovieRecord[]> {
     console.warn(`Movie database read failed; using curated defaults. ${formatStoreError(error)}`);
     return [];
   }
+}
+
+function toPublicMovie(record: MovieRecord): Movie {
+  return {
+    slug: record.slug,
+    tmdbId: record.tmdbId,
+    title: record.title,
+    originalTitle: record.originalTitle,
+    year: record.year,
+    genres: record.genres,
+    director: record.director,
+    cast: record.cast,
+    runtime: record.runtime,
+    writers: record.writers,
+    countries: record.countries,
+    languages: record.languages,
+    releaseDate: record.releaseDate,
+    aka: record.aka,
+    rating: record.rating,
+    ratings: record.ratings,
+    posterTone: record.posterTone,
+    posterUrl: record.posterUrl,
+    backdropUrl: record.backdropUrl,
+    sourcePosterUrl: record.sourcePosterUrl,
+    sourceBackdropUrl: record.sourceBackdropUrl,
+    palette: record.palette,
+    summary: record.summary,
+    verdict: record.verdict,
+    bestWay: record.bestWay,
+    idealScene: record.idealScene,
+    notFor: record.notFor,
+    viewingPaths: record.viewingPaths,
+    versionSignals: record.versionSignals,
+    deviceAdvice: record.deviceAdvice,
+    related: record.related,
+  };
 }
 
 function mergeWithFallback(storedMovies: MovieRecord[]): Movie[] {

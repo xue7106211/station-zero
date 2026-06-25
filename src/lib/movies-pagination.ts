@@ -1,4 +1,4 @@
-export const MOVIES_PAGE_SIZE = 12;
+export const MOVIES_PAGE_SIZE = 30;
 
 export function parseMoviesPage(pageParam?: string): number {
   const page = Number(pageParam);

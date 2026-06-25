@@ -2,8 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button, Card } from "@heroui/react";
 import { ArrowRight, BookOpen } from "lucide-react";
-import { collections, knowledgeEntries } from "@/lib/content";
-import { getMovies } from "@/lib/movie-api";
+import { collections, defaultMovies, knowledgeEntries } from "@/lib/content";
+import { getPublishedMovies } from "@/lib/movie-api";
 import { MovieCard, movieCardGridClassName } from "@/components/movie-card";
 import {
   DecisionCard,
@@ -14,8 +14,8 @@ import {
 export const revalidate = 86400;
 
 export default async function Home() {
-  const movies = await getMovies();
-  const featured = movies[0];
+  const movies = await getPublishedMovies();
+  const featured = movies[0] ?? defaultMovies[0];
 
   return (
     <SiteShell>

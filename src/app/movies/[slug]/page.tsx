@@ -10,7 +10,7 @@ import { DecisionTags } from "@/components/decision-tags";
 import { RatingPanel } from "@/components/rating-panel";
 import { PosterAmbientGlow } from "@/components/poster-ambient-glow"; // 顶部海报氛围光晕背景层（纯装饰）
 import { WatchProviders } from "@/components/watch-providers"; // 正版观看与购买聚合模块（客户端组件，含复制链接）
-import { getMovie, getMovieSlugs } from "@/lib/movie-api"; // 读取本站本地内容库；外部 API 仅由后台同步脚本调用
+import { getMovie, getMovieSlugsForBuild, MOVIES_STATIC_BUILD_LIMIT } from "@/lib/movie-api"; // 读取本站本地内容库；外部 API 仅由后台同步脚本调用
 import {
   Bookmark,
   ChevronRight,
@@ -20,6 +20,8 @@ import {
   ThumbsUp,
   type LucideIcon,
 } from "lucide-react"; // Lucide 开源图标库（SVG 组件，可直接用于服务端组件）
+
+export const dynamicParams = true;
 
 export const revalidate = 86400;
 
@@ -37,7 +39,7 @@ const statItems: { label: string; value: string; color: string; Icon: LucideIcon
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-static-params
  */
 export async function generateStaticParams() {
-  const slugs = await getMovieSlugs();
+  const slugs = await getMovieSlugsForBuild(MOVIES_STATIC_BUILD_LIMIT);
   return slugs.map((slug) => ({ slug }));
 }
 
