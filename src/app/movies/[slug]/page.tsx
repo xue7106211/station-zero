@@ -111,8 +111,8 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               </div>
               <div className="space-y-2 px-3 py-3 text-xs">
                 {/* 仅预览前 2 个平台，其余收敛到「All legal paths…」入口 */}
-                {movie.viewingPaths.slice(0, 2).map((path) => (
-                  <p key={path.platform} className="text-[var(--sz-text-soft)]">{path.platform}</p>
+                {movie.viewingPaths.slice(0, 2).map((path, index) => (
+                  <p key={path.url ?? `${path.platform}-${index}`} className="text-[var(--sz-text-soft)]">{path.platform}</p>
                 ))}
                 <p className="inline-flex items-center gap-0.5 text-[var(--sz-link)]">All legal paths<ChevronRight className="size-3" /></p>
               </div>

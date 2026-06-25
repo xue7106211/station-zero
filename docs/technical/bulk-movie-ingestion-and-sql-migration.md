@@ -12,6 +12,8 @@ Station Zero 当前使用 `data/movies.json` + `public/media/` 作为电影库 M
 - **原始数据形态**：片名 + 年份 + 链接，**通常没有 `tmdbId`**
 - **产品目标**：完整详情页（TMDB 元数据 + 本地化海报 + 人工来源链接）
 - **部署目标**：生产环境用 **SQL 管理业务数据**；图片与文本由后台统一维护，前端只读本站数据
+- **访问目标**：生产站点需在中国大陆**相对稳定可访问**（Vercel 实测几乎不可用，**不作为生产主机**）
+- **隐私目标**：站点与运营链路**不得关联或泄露**运营者个人住址、实名信息、家庭 IP、物理位置等可识别身份的信息
 
 本文档**不包含实现代码**，仅作为决策与实施前的参考基线。
 
@@ -116,14 +118,14 @@ flowchart TB
     resolve --> sync[sync-movies-to-sql]
     sync --> tmdb[TMDB API]
     sync --> pg[(Postgres)]
-    sync --> blob[对象存储 Vercel Blob / R2]
+    sync --> blob[对象存储 S3 兼容 / R2 / 又拍等]
   end
-  subgraph runtime [生产访问]
-    pg --> next[Next.js SSR/ISR]
-    blob --> cdn[CDN 长缓存]
-    cdn --> next
-    next --> list["/movies 分页 24-30"]
-    next --> detail["/movies/slug 详情"]
+  subgraph runtime [生产访问 大陆可访问拓扑]
+    pg --> app[自托管 Next.js Node Docker]
+    blob --> cdn[CDN 边缘 对外可见 IP]
+    cdn --> app
+    app --> list["/movies 分页 24-30"]
+    app --> detail["/movies/slug 详情"]
   end
 ```
 
@@ -140,10 +142,130 @@ flowchart TB
 
 ### 技术选型（建议）
 
-- **数据库**：PostgreSQL（Neon / Supabase，配 Vercel）
+> **生产与开发分离**：本地 / CI 仍可用 Vercel Preview 做功能验证；**万级生产流量走自托管 + CDN**，见下文「生产部署：大陆可访问与隐私隔离」。
+
+- **应用运行时（生产）**：境外 VPS 或云主机（香港 / 新加坡 / 日本等）上 **Docker 自托管 Next.js**（`node server.js` 或 `standalone` 输出 + Caddy/Nginx 反代）
+- **应用运行时（开发/预览）**：Vercel 或本地 `npm run dev`（不作为大陆生产方案）
+- **数据库**：PostgreSQL — 与源站同 VPC / 内网，或托管库 + **IP 白名单**（Neon / Supabase / 自建均可，**禁止对公网 0.0.0.0/0 开放**）
 - **ORM / 迁移**：Drizzle + `drizzle-kit`
-- **对象存储**：Vercel Blob 或 Cloudflare R2
-- **环境变量**：`DATABASE_URL`；TMDB 凭证仍仅用于后台脚本
+- **对象存储**：S3 兼容（Cloudflare R2、Backblaze B2、又拍云等），经 CDN 对外发图
+- **CDN**：Bunny CDN、Cloudflare（大陆稳定性因线路而异）、或境内 CDN **回源境外**（需单独评估备案与域名策略）
+- **环境变量**：`DATABASE_URL`、对象存储密钥、CDN 回源密钥；TMDB 凭证仍仅用于后台脚本
+
+---
+
+## 生产部署：大陆可访问与隐私隔离
+
+### 问题陈述
+
+| 约束 | 说明 |
+|------|------|
+| Vercel 大陆不可用 | 边缘节点与路由在大陆访问极不稳定，不适合作为生产主机或唯一 CDN |
+| 隐私优先 | 域名 WHOIS、服务器账单、站点页脚、备案主体、源站 IP 等均可能反向关联到个人 |
+| 内容属性 | 站点含网盘 / 磁力等来源链接，运营者身份暴露的风险权重应高于普通内容站 |
+
+**结论**：生产应采用 **「CDN 对外 + 源站隐藏 + 数据与身份隔离」** 拓扑；购买 VPS / 云服务前先把隐私边界写进架构，而不是事后补救。
+
+### 推荐拓扑（隐私友好 baseline）
+
+```mermaid
+flowchart LR
+  user[大陆访客] --> cdn[CDN 边缘节点]
+  cdn --> origin[源站 VPS 仅允许 CDN 回源 IP]
+  origin --> pg[(Postgres 内网)]
+  origin --> obj[对象存储]
+  cdn --> obj
+  admin[运营者] --> vpn[WireGuard / SSH 隧道]
+  vpn --> origin
+```
+
+要点：
+
+1. **访客只接触 CDN 与对象存储 URL**，不直连源站 IP。
+2. **源站防火墙**（`ufw` / 云安全组）：仅放行 CDN 回源 IP 段 + 运营者 VPN/SSH 来源；关闭多余端口。
+3. **Postgres 不对公网监听**；若用托管库，仅允许源站 egress IP。
+4. **后台录入与 sync 脚本**在源站或 CI 跑，TMDB 出站与访客访问路径分离。
+
+### 部署方案对比（待采购前选型）
+
+| 方案 | 大陆访问稳定性 | 隐私友好度 | 运维复杂度 | 适用阶段 |
+|------|----------------|------------|------------|----------|
+| **A. 境外 VPS（HK/SG/JP）+ CDN** | 中（取决于线路与 CDN） | **高**（可选低 KYC 服务商） | 中 | **推荐生产 baseline** |
+| **B. 境外云主机（阿里云/腾讯云 香港区）** | 中高 | 中（国内账号通常**强实名**） | 中 | 要稳定线路、可接受实名 |
+| **C. 个人 VPS 直连，无 CDN** | 低–中 | **低**（源 IP 易暴露、易被扫） | 低 | **不推荐** |
+| **D. 境内云 + ICP 备案 + 境内 CDN** | 高 | **低**（备案绑定主体与手机号） | 高 | 与当前隐私目标**冲突大** |
+| **E. Vercel + Neon（现状延伸）** | 极低 | 中 | 低 | 仅开发 / 海外受众 |
+
+**倾向建议**：优先 **方案 A** — 境外 VPS + CDN + 对象存储；在 A 稳定后再考虑是否叠加境内 CDN 回源（不默认走备案路线）。
+
+### 隐私隔离清单（实施前逐项确认）
+
+#### 1. 域名与 WHOIS
+
+- 注册商选支持 **WHOIS Privacy / Redaction** 的（如 Cloudflare Registrar、Porkbun、Namecheap 等）。
+- 使用 **项目专用邮箱**（别名邮箱即可），不用个人常用邮箱出现在 WHOIS /  abuse 联系里。
+- 站点页脚、关于页、错误页：**不出现**真实姓名、住址、个人手机号。
+
+#### 2. 服务器与账单身份
+
+- VPS 账单联系邮箱与域名邮箱**同一项目身份**，与个人日常邮箱分离。
+- 若服务商支持，优先选 **KYC 要求低** 的境外 VPS；支付方式评估是否需与个人信用卡强绑定（必要时单独虚拟卡 / 项目卡）。
+- **不在站点任何公开资源**中暴露源站 IP、SSH 端口、面板 hostname。
+
+#### 3. 隐藏源站 IP（必做）
+
+- 全站（HTML + 图片）经 **CDN** 出网；源站仅 CDN 回源。
+- 配置 **CDN → Origin** 认证（回源 Header 密钥或 mTLS，视 CDN 能力）。
+- 源站禁止对 `0.0.0.0/0:443` 开放；仅 CDN IP 段 + 管理 VPN。
+- 对象存储 bucket **默认私有**，经 CDN 或 signed URL 对外；避免公开 listing 泄露 bucket 结构。
+
+#### 4. 运营访问路径
+
+- 管理 SSH **禁止密码登录**，仅密钥；密钥专用、不与个人其他服务复用。
+- 优先 **WireGuard / Tailscale** 进内网后再连 Postgres / 管理端口，而非 Postgres 公网 + 弱口令。
+- 后台 sync 脚本、数据库迁移：**不在**访客可访问的 URL 路径下暴露。
+
+#### 5. 内容与元数据
+
+- Git 提交作者、公开 Issue、站点「关于」页：使用 **项目化名**，不链个人社交主页。
+- 图片 EXIF、PDF 附件等上传前 **剥离元数据**（拍摄位置、设备序列号等）。
+- 日志：Nginx/Caddy access log 定期轮转；**不**把含访客 IP 的原始日志公开或上传到第三方分析（若用分析，选自托管或隐私友好方案）。
+
+#### 6. 大陆合规边界（与隐私的张力）
+
+- **ICP 备案**在大陆境内托管时通常要求**实名主体**，与「不关联个人信息」目标直接冲突 — 当前方案**默认不走**境内主体备案路线。
+- 境外托管 + 无备案.custom 域名在大陆可达性依赖 CDN/线路，**不保证**与竞品同等级别稳定；需在 pilot 阶段实测延迟与可用率。
+- 站点内容（来源链接聚合）本身的合规风险独立于技术隐私，产品边界见 [about 页合规说明](../../src/app/about/page.tsx) 与 PRD；本文档只覆盖**基础设施层身份隔离**。
+
+### 对本文档其它章节的修订
+
+| 原假设 | 修订后 |
+|--------|--------|
+| Vercel 生产 + Neon | 生产改为 **VPS Docker + 内网 Postgres**；Neon 可作 dev/staging |
+| Vercel Blob | **S3 兼容对象存储** + CDN 域名 |
+| Cloudflare 长缓存 | 保留策略；大陆是否采用 CF 需在 **pilot 实测** 后定 CDN 供应商 |
+| 「部署验证 0.5–1 天」 | 增加 **CDN 回源 + 防火墙 + 大陆多地拨测**（见下） |
+
+### 部署相关待办（补充）
+
+| # | 事项 | 产出 |
+|---|------|------|
+| D1 | 确定生产方案（A/B）与 CDN 供应商 | 书面选型记录（线路、价格、回源方式） |
+| D2 | 注册项目域名 + 开启 WHOIS 隐私 | 域名 + DNS 托管 |
+| D3 | 采购 VPS / 云主机，创建**项目专用** SSH 密钥 | 源站 IP（不公开） |
+| D4 | 源站：Docker Compose（app + postgres + caddy） | `deploy/` 或 `docker-compose.prod.yml` 草案 |
+| D5 | CDN 回源 + 源站防火墙仅放行 CDN IP | 防火墙规则截图 / IaC |
+| D6 | 对象存储 bucket + CDN 自定义域名（如 `media.example.com`） | 图片 URL 写入 `movies.poster_url` |
+| D7 | 大陆多地访问拨测（手动或第三方） | 延迟 / 可用率记录，决定是否换 CDN 或加境内加速 |
+| D8 | 隐私自查：WHOIS、页脚、about、响应头 `Server`、错误页 | checklist 全部勾选 |
+
+### 购买前决策问题（请先回答再下单）
+
+1. **可接受的实名程度**：完全不接受境内强实名 → 锁定方案 A；可接受香港云实名 → 可评估方案 B。
+2. **预算区间**：VPS + CDN + 对象存储月费上限（影响是否上境内 CDN 回源）。
+3. **域名策略**：`.com` 境外注册即可；若未来考虑 `.cn` 或境内 CDN，需单独评估备案与隐私冲突。
+4. **运维投入**：是否接受自行维护 Docker / 证书续期 / 备份（VPS 方案必需）。
+5. **备份与恢复**：Postgres 与对象存储的离线备份频率、加密、存放位置（不与源站同账号单点）。
 
 ---
 
@@ -309,13 +431,16 @@ flowchart LR
 
 ## 实施优先级
 
-1. Postgres schema + Drizzle migrations
-2. 对象存储 + CDN 发图
-3. `movie-store` 分页读取 + 列表懒加载
-4. `sync-movies-to-sql` + staging
-5. `resolve-tmdb-ids`
-6. `prepare-staging`
-7. 构建策略（published ISR，不全量 SSG）
+1. **生产部署选型 + 隐私边界确认**（D1–D3，见「生产部署：大陆可访问与隐私隔离」）
+2. Postgres schema + Drizzle migrations
+3. 对象存储 + CDN 发图（D6）
+4. 源站 Docker 化 + CDN 回源与防火墙（D4–D5）
+5. `movie-store` 分页读取 + 列表懒加载
+6. `sync-movies-to-sql` + staging
+7. `resolve-tmdb-ids`
+8. `prepare-staging`
+9. 构建策略（published ISR，不全量 SSG）
+10. 大陆拨测与 CDN 调优（D7–D8）
 
 ---
 
@@ -336,12 +461,14 @@ flowchart LR
 
 | 环节 | 耗时（粗估） |
 |------|-------------|
+| 部署选型 + VPS/CDN 采购与基线 hardened | 1–2 天 |
 | DB + 对象存储 + 读取层 | 3–5 天 |
+| Docker 生产编排 + CDN 回源/firewall | 1–2 天 |
 | prepare + resolve + sync 脚本 | 2–3 天 |
 | 100 条 pilot | 0.5–1 天 |
 | 全量 1 万+ | 2–4 天 |
-| 部署验证 | 0.5–1 天 |
-| **合计** | **约 8–14 个工作日** |
+| 部署验证 + 大陆拨测 | 1–2 天 |
+| **合计** | **约 10–17 个工作日** |
 
 ---
 
@@ -349,9 +476,12 @@ flowchart LR
 
 | 风险 | 对策 |
 |------|------|
+| Vercel / 默认境外 CDN 在大陆不可用 | 生产改自托管 VPS + 可换 CDN；pilot 阶段大陆拨测 |
+| 源站 IP 泄露导致人肉 / 攻击 | CDN 前置 + 防火墙仅放行回源 IP；禁止直连部署 |
+| 域名 / 账单 / 备案关联个人身份 | WHOIS 隐私、项目专用邮箱与支付、默认不走 ICP 备案 |
 | 图片 BYTEA 导致库膨胀、Serverless 慢 | 路径在 SQL，二进制在对象存储 + CDN |
 | 列表一次加载全库 | SQL 分页 + 懒加载 |
-| 1 万页 SSG 构建爆炸 | 仅 published Top N 预热 |
+| 1 万页 SSG 构建爆炸 | 仅 published Top N 预热；生产用 ISR/动态而非全量 SSG |
 | TMDB 限流 | 分批 + 限速 + 429 退避 |
 | 同名片错配 | year 消歧 + ambiguous 人工队列 |
 | 链接被 TMDB 覆盖 | staging `viewing_paths` 优先 |
@@ -360,7 +490,7 @@ flowchart LR
 
 ## 试点建议
 
-先 **100 条端到端**：`CSV → staging → resolve → sync → SQL 分页列表 + CDN 海报 + 详情页链接分组`，统计错配率与单条耗时，再放大全量。
+先 **100 条端到端**：`CSV → staging → resolve → sync → SQL 分页列表 + CDN 海报 + 详情页链接分组`，并在**大陆网络环境下**验证列表/详情/图片加载，统计错配率、单条耗时与可用率，再放大全量。
 
 ---
 
