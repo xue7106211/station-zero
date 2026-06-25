@@ -250,7 +250,7 @@ flowchart LR
 
 | # | 事项 | 产出 |
 |---|------|------|
-| D1 | 确定生产方案（A/B）与 CDN 供应商 | 书面选型记录（线路、价格、回源方式） |
+| D1 | 确定生产方案（A/B）与 CDN 供应商 | [大陆拓扑选型记录.md](./大陆拓扑选型记录.md)（线路、回源方式） |
 | D2 | 注册项目域名 + 开启 WHOIS 隐私 | 域名 + DNS 托管 |
 | D3 | 采购 VPS / 云主机，创建**项目专用** SSH 密钥 | 源站 IP（不公开） |
 | D4 | 源站：Docker Compose（app + postgres + caddy） | `deploy/` 或 `docker-compose.prod.yml` 草案 |
