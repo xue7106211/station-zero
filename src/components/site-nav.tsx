@@ -51,9 +51,8 @@ export function SiteNav() {
   const pathname = usePathname();
 
   return (
-    <div className="flex items-center gap-2 sm:gap-3 md:gap-6">
-      {/* 桌面端横向导航：仅在 md 及以上显示 */}
-      <nav className="hidden items-center gap-6 text-sm md:flex">
+    <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-6">
+      <nav aria-label="主导航" className="hidden items-center gap-6 text-sm md:flex">
         {navItems.map((item) => {
           const active = isActiveRoute(pathname, item.href);
           return (
@@ -61,15 +60,14 @@ export function SiteNav() {
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className={`group relative py-1 transition-colors hover:text-[var(--sz-accent)] focus-visible:outline-none focus-visible:text-[var(--sz-accent)] ${
+              className={`group relative py-1 transition-colors duration-200 ease-out motion-reduce:transition-none hover:text-[var(--sz-accent)] focus-visible:outline-none focus-visible:text-[var(--sz-accent)] ${
                 active ? "text-[var(--sz-accent)]" : "text-[var(--sz-muted)]"
               }`}
             >
               {item.label}
-              {/* 底部指示线：激活态常显；非激活态 hover 时滑出 */}
               <span
                 aria-hidden
-                className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left rounded-full bg-[var(--sz-accent)] transition-transform duration-300 ${
+                className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left rounded-full bg-[var(--sz-accent)] transition-transform duration-200 ease-out motion-reduce:transition-none ${
                   active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                 }`}
               />
@@ -78,7 +76,6 @@ export function SiteNav() {
         })}
       </nav>
 
-      {/* 主题切换按钮（深/浅），桌面与移动端都可见 */}
       <ThemeToggle />
 
       <MobileNav pathname={pathname} />
