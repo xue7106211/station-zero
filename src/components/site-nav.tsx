@@ -1,10 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Drawer } from "@heroui/react";
-import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
+
+const MobileNav = dynamic(() => import("./mobile-nav").then((mod) => ({ default: mod.MobileNav })), {
+  ssr: false,
+});
 
 /** 顶部主导航项：`href` 为路由路径，`label` 为中文显示名。 */
 export type NavItem = { href: string; label: string };
@@ -33,6 +36,8 @@ export const navItems: NavItem[] = [
 function isActiveRoute(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
+
+export { isActiveRoute };
 
 /**
  * 站点顶部主导航。
@@ -76,76 +81,7 @@ export function SiteNav() {
       {/* 主题切换按钮（深/浅），桌面与移动端都可见 */}
       <ThemeToggle />
 
-      {/* 移动端汉堡菜单：md 以下显示，点击展开右侧抽屉 */}
       <MobileNav pathname={pathname} />
     </div>
-  );
-}
-
-/**
- * 移动端抽屉导航（HeroUI Drawer）。
- *
- * 触发按钮仅在 md 以下显示；抽屉从右侧滑出，列出与桌面端相同的导航项。点击任一链接后通过
- * Dialog 渲染属性的 `close()` 主动关闭抽屉（App Router 路由切换不会重载页面，不会自动关闭）。
- *
- * @param props.pathname - 当前路由，用于抽屉内的激活态高亮
- */
-function MobileNav({ pathname }: { pathname: string }) {
-  return (
-    <Drawer>
-      <Drawer.Trigger
-        aria-label="打开导航菜单"
-        className="pressable flex size-9 items-center justify-center rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] text-[var(--sz-text)] outline-none focus-visible:border-[color:var(--sz-accent-soft)] md:hidden"
-      >
-        <Menu className="size-5" aria-hidden />
-      </Drawer.Trigger>
-
-      <Drawer.Backdrop className="bg-[rgb(0_0_0/45%)] backdrop-blur-sm">
-        <Drawer.Content
-          placement="right"
-          className="w-[78%] max-w-xs border-l border-[color:var(--sz-border)] bg-[var(--sz-bg)] text-[var(--sz-text)]"
-        >
-          <Drawer.Dialog className="flex h-full flex-col outline-none">
-            {({ close }) => (
-              <>
-                <Drawer.Header className="flex items-center justify-between px-6 pt-6">
-                  <span className="font-mono text-xs uppercase tracking-[0.28em] text-[var(--sz-accent)]">
-                    Station Zero
-                  </span>
-                  <Drawer.CloseTrigger
-                    aria-label="关闭菜单"
-                    className="pressable flex size-9 items-center justify-center rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] text-[var(--sz-text)] outline-none"
-                  >
-                    <X className="size-5" aria-hidden />
-                  </Drawer.CloseTrigger>
-                </Drawer.Header>
-                <Drawer.Body className="px-4 py-6">
-                  <nav className="flex flex-col gap-1">
-                    {navItems.map((item) => {
-                      const active = isActiveRoute(pathname, item.href);
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => close()}
-                          aria-current={active ? "page" : undefined}
-                          className={`pressable flex items-center rounded-2xl border-l-2 px-4 py-3 text-base transition-colors ${
-                            active
-                              ? "border-[var(--sz-accent)] bg-[var(--sz-accent-faint)] text-[var(--sz-accent)]"
-                              : "border-transparent text-[var(--sz-text-soft)] hover:bg-[var(--sz-surface-soft)] hover:text-[var(--sz-text)]"
-                          }`}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                  </nav>
-                </Drawer.Body>
-              </>
-            )}
-          </Drawer.Dialog>
-        </Drawer.Content>
-      </Drawer.Backdrop>
-    </Drawer>
   );
 }

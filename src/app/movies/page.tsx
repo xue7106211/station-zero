@@ -18,7 +18,11 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
   return (
     <SiteShell>
       <section className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-20">
-        <SectionHeading eyebrow="Movies" title="影片决策库" description="先以少量人工策展影片验证详情页的信息组织方式。" />
+        <SectionHeading
+          eyebrow="Movies"
+          title="影片决策库"
+          description="每张卡片先给判断，再展开资料、正版路径、高清版本和设备建议。"
+        />
         <div className={movieCardGridClassName}>
           {items.map((movie, index) => (
             <Link key={movie.slug} href={`/movies/${movie.slug}`} className="group block">

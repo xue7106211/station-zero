@@ -40,8 +40,8 @@ export function SectionHeading({ eyebrow, title, description }: { eyebrow: strin
   return (
     <div className="mb-8 max-w-3xl">
       <p className="mb-3 font-mono text-xs uppercase tracking-[0.24em] text-[var(--sz-accent)]">{eyebrow}</p>
-      <h2 className="text-3xl font-semibold tracking-tight md:text-5xl">{title}</h2>
-      <p className="mt-4 text-base leading-8 text-[var(--sz-text-soft)] md:text-lg">{description}</p>
+      <h2 className="text-balance text-3xl font-semibold tracking-tight md:text-5xl">{title}</h2>
+      <p className="mt-4 text-pretty text-base leading-8 text-[var(--sz-text-soft)] md:text-lg">{description}</p>
     </div>
   );
 }

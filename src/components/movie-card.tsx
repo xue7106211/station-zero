@@ -81,11 +81,11 @@ export function MovieCard({ movie, priority = false, className }: MovieCardProps
   return (
     <article className={className}>
       <MovieCardPoster movie={movie} priority={priority} />
-      <h3 className="mt-2 truncate text-sm font-medium text-[var(--sz-link)] transition-colors group-hover:text-[var(--sz-accent)]">
+      <h3 className="mt-2 truncate text-sm font-medium text-[var(--sz-text)] transition-colors group-hover:text-[var(--sz-accent)]">
         {movie.title}
       </h3>
-      <p className="mt-1 truncate text-xs text-[var(--sz-muted)]">
-        {movie.year} · {movie.verdict}
+      <p className="mt-1 line-clamp-2 text-pretty text-xs leading-5 text-[var(--sz-muted)]">
+        <span className="tabular-nums">{movie.year}</span> · {movie.verdict}
       </p>
     </article>
   );
