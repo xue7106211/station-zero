@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "@heroui/react/styles";
 import "./globals.css";
 
@@ -13,22 +14,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const themeScript = `
-try {
-  var pref = localStorage.getItem('station-zero-theme');
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  var resolved = pref === 'light' ? 'light' : pref === 'dark' ? 'dark' : (prefersDark ? 'dark' : 'light');
-  document.documentElement.dataset.theme = resolved;
-} catch (_) {
-  document.documentElement.dataset.theme = 'dark';
-}`;
-
   return (
     <html lang="zh-CN" data-theme="dark" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
-      <body>{children}</body>
+      <body>
+        <Script src="/theme-init.js" strategy="beforeInteractive" />
+        {children}
+      </body>
     </html>
   );
 }
