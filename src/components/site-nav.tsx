@@ -3,25 +3,15 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isActiveRoute, navItems, type NavItem } from "@/lib/nav-items";
 import { ThemeToggle } from "./theme-toggle";
 
 const MobileNav = dynamic(() => import("./mobile-nav").then((mod) => ({ default: mod.MobileNav })), {
   ssr: false,
 });
 
-/** 顶部主导航项：`href` 为路由路径，`label` 为中文显示名。 */
-export type NavItem = { href: string; label: string };
-
-/**
- * 站点主导航条目（数组顺序即展示顺序）。
- * 新增 / 调整 / 排序顶部入口时，改这里即可，桌面端与移动端抽屉共用同一份数据。
- */
-export const navItems: NavItem[] = [
-  { href: "/movies", label: "影片" },
-  { href: "/collections", label: "片单" },
-  { href: "/knowledge", label: "高清知识" },
-  { href: "/about", label: "关于" },
-];
+export type { NavItem };
+export { navItems };
 
 /**
  * 判断某个导航项是否为「当前页」。
@@ -33,10 +23,6 @@ export const navItems: NavItem[] = [
  * @param href - 导航项目标路径
  * @returns 是否处于激活态
  */
-function isActiveRoute(pathname: string, href: string) {
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
 export { isActiveRoute };
 
 /**

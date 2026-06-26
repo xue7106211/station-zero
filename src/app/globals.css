@@ -1,15 +1,29 @@
+/* Station Zero 全局样式
+ *
+ * 设计 token 以 `--sz-*` 为前缀，通过 `<html data-theme="dark|light">` 切换。
+ * 首屏主题由 public/theme-init.js 在 React 水合前写入，避免深浅色闪烁。
+ * 组件优先引用 token，而非硬编码色值。 
+ * https://tailwindcss.com/docs/theme
+ */
 @import "tailwindcss";
 
+/* ── 深色主题（默认） ───────────────────────────────────────────── */
+
 :root {
+  /* Next / Tailwind 桥接变量 */
   --background: #09090b;
   --foreground: #f8f3e8;
+
+  /* 背景与正文 */
   --sz-bg: oklch(10.5% 0.011 285);
-  --sz-bg-rgb: 9 9 11;
+  --sz-bg-rgb: 9 9 11; /* 供 rgb(var(--sz-bg-rgb) / α) 半透明叠层使用 */
   --sz-text: oklch(96% 0.018 86);
   --sz-text-strong: #ffffff;
   --sz-text-soft: rgb(248 243 232 / 68%);
   --sz-muted: rgb(248 243 232 / 55%);
   --sz-subtle: rgb(248 243 232 / 42%);
+
+  /* 卡片 / 表面层级 */
   --sz-card: rgb(255 255 255 / 4%);
   --sz-card-strong: rgb(255 255 255 / 5%);
   --sz-surface: oklch(19% 0.019 248 / 82%);
@@ -17,6 +31,9 @@
   --sz-surface-muted: oklch(24% 0.021 250 / 72%);
   --sz-border: rgb(255 255 255 / 10%);
   --sz-border-strong: rgb(154 170 187 / 45%);
+  --sz-inset: rgb(255 255 255 / 5%); /* 卡片内高光边 */
+
+  /* 强调色与语义色 */
   --sz-accent: oklch(83% 0.14 86);
   --sz-accent-rgb: 244 201 93;
   --sz-accent-contrast: #09090b;
@@ -27,17 +44,23 @@
   --sz-info: oklch(75% 0.13 233);
   --sz-warn: oklch(83% 0.14 80);
   --sz-shadow: rgb(0 0 0 / 22%);
-  --sz-inset: rgb(255 255 255 / 5%);
-  /* 吸顶头部高度（与 SiteHeader 内边距 + Logo 对齐）；供 sticky 侧栏等避让 */
+
+  /* 布局：吸顶头部高度（与 SiteHeader 内边距 + Logo 对齐）；供 sticky 侧栏等避让 */
   --sz-header-height: 4.5rem;
   --sz-sticky-top: calc(var(--sz-header-height) + 0.75rem);
   /* 吸顶头部滚动后的半透明背景（配合 backdrop-blur） */
   --sz-header-bg: rgb(9 9 11 / 72%);
+
+  /* 装饰性背景光晕（全站 / 详情页） */
   --sz-page-glow: radial-gradient(circle at top left, rgb(244 201 93 / 10%), transparent 32%), radial-gradient(circle at 80% 20%, rgb(125 92 255 / 10%), transparent 28%), linear-gradient(180deg, rgb(255 255 255 / 3.5%), transparent 38%);
   --sz-detail-glow: radial-gradient(ellipse at 32% 16%, rgb(255 255 255 / 14%), transparent 28%), linear-gradient(180deg, rgb(9 9 11 / 6%) 0%, rgb(9 9 11 / 20%) 55%, rgb(9 9 11 / 38%) 100%), linear-gradient(90deg, #09090b 0%, rgb(9 9 11 / 48%) 12%, rgb(9 9 11 / 16%) 30%, rgb(9 9 11 / 16%) 70%, rgb(9 9 11 / 48%) 88%, #09090b 100%);
+
+  /* 交互缓动曲线 */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
+
+/* ── 浅色主题覆盖 ───────────────────────────────────────────────── */
 
 html[data-theme="light"] {
   --background: #f7f8fb;
@@ -72,6 +95,7 @@ html[data-theme="light"] {
   --sz-detail-glow: linear-gradient(180deg, rgb(15 23 42 / 5%) 0%, rgb(15 23 42 / 0%) 26%);
 }
 
+/* md 及以上加高头部，同步更新 sticky 避让距离 */
 @media (width >= 48rem) {
   :root {
     --sz-header-height: 5rem;
@@ -87,6 +111,7 @@ html[data-theme="light"] .poster-glow-paint {
   display: none;
 }
 
+/* Tailwind v4 主题桥接：把 CSS 变量映射为 Tailwind 色板与字体 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -94,10 +119,12 @@ html[data-theme="light"] .poster-glow-paint {
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
 }
 
+/* ── 基础重置 ───────────────────────────────────────────────────── */
+
 html,
 body {
   max-width: 100%;
-  overflow-x: clip;
+  overflow-x: clip; /* 防止横向滚动条，比 hidden 不阻断 sticky */
 }
 
 body {
@@ -115,6 +142,9 @@ a {
   color: var(--sz-accent-contrast);
 }
 
+/* ── 交互工具类 ─────────────────────────────────────────────────── */
+
+/* 可按压控件（按钮、图标触发器）：按下微缩放反馈 */
 .pressable {
   transition:
     transform 160ms var(--ease-out),
@@ -137,6 +167,7 @@ a {
     box-shadow 220ms var(--ease-out);
 }
 
+/* 详情页信息块：悬停时轻微抬升 */
 .detail-surface {
   transition:
     transform 220ms var(--ease-out),
@@ -146,6 +177,7 @@ a {
     opacity 220ms var(--ease-out);
 }
 
+/* 详情页区块入场：@starting-style 实现首帧淡入上移 */
 .detail-reveal {
   opacity: 1;
   transform: translateY(0);
@@ -159,20 +191,18 @@ a {
   }
 }
 
+/* 评分面板进度条：用 scaleX 动画，避免 width 触发布局重算 */
 .rating-bar {
-  transform-origin: bottom;
-  transform: scaleY(1);
-  opacity: 1;
-  transition:
-    transform 240ms var(--ease-out),
-    opacity 220ms var(--ease-out);
+  transform: scaleX(var(--rating-scale, 1));
+  transform-origin: left;
+  transition: transform 200ms var(--ease-out);
 
   @starting-style {
-    transform: scaleY(0.78);
-    opacity: 0.45;
+    transform: scaleX(0);
   }
 }
 
+/* 仅精细指针设备启用 hover 抬升，避免触摸端 sticky hover */
 @media (hover: hover) and (pointer: fine) {
   .detail-surface:hover {
     transform: translateY(-2px);
@@ -191,6 +221,7 @@ a {
   }
 }
 
+/* 减弱动效偏好：压缩过渡时长并禁用 transform 动画 */
 @media (prefers-reduced-motion: reduce) {
   .pressable,
   .detail-surface,

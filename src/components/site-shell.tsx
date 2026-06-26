@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Card } from "@heroui/react";
+import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 
 /**
@@ -8,7 +9,7 @@ import { SiteHeader } from "./site-header";
  * 布局结构（从外到内）：
  * 1. 根容器铺满视口高度，用语义 token `--sz-bg` / `--sz-text` 着色，自动适配深/浅主题；
  * 2. 一层固定定位的 `--sz-page-glow` 氛围光晕，`pointer-events-none` 不拦截交互；
- * 3. `SiteHeader`（吸顶头部，含 Logo + 导航 + 主题切换）、`main`（页面内容）、`footer`（合规声明）。
+ * 3. `SiteHeader`（吸顶头部，含 Logo + 导航 + 主题切换）、`main`（页面内容）、`SiteFooter`（合规声明与次要导航）。
  *
  * 内容层统一用 `relative z-10` 抬到光晕之上，避免被背景层遮挡。
  *
@@ -26,12 +27,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <SiteHeader />
       {/* 页面主体内容容器 */}
       <main className="relative z-10">{children}</main>
-      {/* 页脚：合规声明，重申本站只做观影决策、不提供侵权下载入口 */}
-      <footer className="relative z-10 mx-auto max-w-7xl px-6 py-10 text-sm text-[var(--sz-muted)] md:px-10">
-        <div className="border-t border-[color:var(--sz-border)] pt-6">
-          Station Zero 只做高清观影决策、正版路径和版本知识，不提供侵权下载入口。
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

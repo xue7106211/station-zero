@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Star } from "lucide-react";
 
 export type RatingSourceKey = "douban" | "imdb" | "rottenTomatoes";
@@ -44,28 +45,28 @@ const platformMeta: Record<
  */
 export function RatingPanel({ items, className }: RatingPanelProps) {
   return (
-    <div className={className}>
+    <section className={className} aria-label="跨平台评分">
       <div className="flex items-center gap-1.5 border-b border-[color:var(--sz-border-strong)] pb-2 text-[11px] uppercase tracking-[0.16em] text-[var(--sz-muted)]">
-        <Star className="size-3 text-[var(--sz-accent)]" />
+        <Star className="size-3 text-[var(--sz-accent)]" aria-hidden />
         评分
       </div>
-      <div className="mt-3 space-y-2">
-        {items.map((item, index) => (
-          <RatingSourceRow key={item.key} sourceKey={item.key} value={item.value} index={index} />
+      <ul className="mt-3 space-y-2">
+        {items.map((item) => (
+          <li key={item.key}>
+            <RatingSourceRow sourceKey={item.key} value={item.value} />
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </section>
   );
 }
 
 function RatingSourceRow({
   sourceKey,
   value,
-  index,
 }: {
   sourceKey: RatingSourceKey;
   value: string;
-  index: number;
 }) {
   const meta = platformMeta[sourceKey];
   const parsed = parseRatingValue(value);
@@ -78,7 +79,6 @@ function RatingSourceRow({
           ? "relative overflow-hidden rounded-md border border-dashed border-[color:var(--sz-border)] bg-[rgb(var(--sz-bg-rgb)/40%)]"
           : "relative overflow-hidden rounded-md border border-[color:var(--sz-border)] bg-[var(--sz-surface)] shadow-[inset_0_1px_0_var(--sz-inset)]"
       }
-      style={{ transitionDelay: `${index * 50}ms` }}
     >
       <span
         aria-hidden
@@ -100,7 +100,7 @@ function RatingSourceRow({
           </span>
           <div className="min-w-0 pt-0.5">
             <p className="text-sm font-medium leading-none text-[var(--sz-text-strong)]">{meta.label}</p>
-            <p className="mt-1 text-[10px] tracking-[0.08em] text-[var(--sz-muted)]">{meta.hint}</p>
+            <p className="mt-1 text-pretty text-[10px] tracking-[0.08em] text-[var(--sz-muted)]">{meta.hint}</p>
           </div>
         </div>
 
@@ -122,14 +122,22 @@ function RatingSourceRow({
       </div>
 
       {!missing && parsed.ratio !== null ? (
-        <div className="mx-3 mb-2.5 h-[3px] overflow-hidden rounded-full bg-[var(--sz-border)]">
+        <div
+          className="mx-3 mb-2.5 h-[3px] overflow-hidden rounded-full bg-[var(--sz-border)]"
+          role="progressbar"
+          aria-valuenow={Math.round(parsed.ratio * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`${meta.label} ${parsed.display}${parsed.suffix ?? ""}`}
+        >
           <div
-            className="rating-bar h-full rounded-full"
-            style={{
-              width: `${Math.min(parsed.ratio * 100, 100)}%`,
-              background: meta.accent,
-              transitionDelay: `${index * 50 + 80}ms`,
-            }}
+            className="rating-bar h-full w-full rounded-full"
+            style={
+              {
+                "--rating-scale": parsed.ratio,
+                background: meta.accent,
+              } as CSSProperties
+            }
           />
         </div>
       ) : null}
