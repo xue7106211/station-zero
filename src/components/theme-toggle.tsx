@@ -66,7 +66,7 @@ export function ThemeToggle() {
     <div
       role="group"
       aria-label="主题模式"
-      className="inline-flex items-center gap-0.5 rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] p-0.5"
+      className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] p-0.5 shadow-[inset_0_1px_0_var(--sz-inset)]"
     >
       {themeOptions.map(({ value, label, Icon }) => {
         const active = preference === value;
@@ -77,7 +77,7 @@ export function ThemeToggle() {
             aria-label={label}
             aria-pressed={active}
             onClick={() => applyPreference(value)}
-            className={`pressable flex size-8 items-center justify-center rounded-full transition-[color,background-color,box-shadow] duration-200 ${
+            className={`pressable flex size-7 items-center justify-center rounded-full transition-[color,background-color,box-shadow] duration-200 ${
               active
                 ? "bg-[var(--sz-card-strong)] text-[var(--sz-text-strong)] shadow-[0_1px_3px_var(--sz-shadow)]"
                 : "text-[var(--sz-muted)] hover:text-[var(--sz-text-soft)]"

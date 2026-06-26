@@ -46,10 +46,19 @@
   --sz-shadow: rgb(0 0 0 / 22%);
 
   /* 布局：吸顶头部高度（与 SiteHeader 内边距 + Logo 对齐）；供 sticky 侧栏等避让 */
-  --sz-header-height: 4.5rem;
+  --sz-header-height: 3.75rem;
+  --sz-header-height-compact: 3rem;
   --sz-sticky-top: calc(var(--sz-header-height) + 0.75rem);
+  --sz-sticky-top-compact: calc(var(--sz-header-height-compact) + 0.75rem);
   /* 吸顶头部滚动后的半透明背景（配合 backdrop-blur） */
   --sz-header-bg: rgb(9 9 11 / 72%);
+  /* 居中导航 pill：需压住海报等复杂背景，保证可读性 */
+  --sz-nav-pill-bg: rgb(9 9 11 / 90%);
+  --sz-nav-pill-border: rgb(255 255 255 / 16%);
+  --sz-nav-pill-shadow: 0 8px 24px rgb(0 0 0 / 36%), inset 0 1px 0 rgb(255 255 255 / 6%);
+  --sz-nav-pill-shadow-compact: 0 12px 32px rgb(0 0 0 / 42%), inset 0 1px 0 rgb(255 255 255 / 8%);
+  --sz-nav-link: rgb(248 243 232 / 82%);
+  --sz-nav-link-active-bg: rgb(255 255 255 / 14%);
 
   /* 装饰性背景光晕（全站 / 详情页） */
   --sz-page-glow: radial-gradient(circle at top left, rgb(244 201 93 / 10%), transparent 32%), radial-gradient(circle at 80% 20%, rgb(125 92 255 / 10%), transparent 28%), linear-gradient(180deg, rgb(255 255 255 / 3.5%), transparent 38%);
@@ -58,6 +67,10 @@
   /* 交互缓动曲线 */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-header-hide: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-header-show: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-header-hide: 260ms;
+  --duration-header-show: 380ms;
 }
 
 /* ── 浅色主题覆盖 ───────────────────────────────────────────────── */
@@ -91,6 +104,12 @@ html[data-theme="light"] {
   --sz-shadow: rgb(15 23 42 / 8%);
   --sz-inset: rgb(255 255 255 / 0%);
   --sz-header-bg: rgb(247 248 251 / 82%);
+  --sz-nav-pill-bg: rgb(255 255 255 / 94%);
+  --sz-nav-pill-border: rgb(15 23 42 / 14%);
+  --sz-nav-pill-shadow: 0 8px 24px rgb(15 23 42 / 14%), inset 0 1px 0 rgb(255 255 255 / 90%);
+  --sz-nav-pill-shadow-compact: 0 12px 32px rgb(15 23 42 / 18%), inset 0 1px 0 rgb(255 255 255 / 100%);
+  --sz-nav-link: rgb(55 65 81 / 92%);
+  --sz-nav-link-active-bg: rgb(15 23 42 / 8%);
   --sz-page-glow: radial-gradient(circle at top left, rgb(59 130 246 / 10%), transparent 34%), radial-gradient(circle at 80% 20%, rgb(124 58 237 / 8%), transparent 28%), linear-gradient(180deg, rgb(255 255 255 / 80%), transparent 42%);
   --sz-detail-glow: linear-gradient(180deg, rgb(15 23 42 / 5%) 0%, rgb(15 23 42 / 0%) 26%);
 }
@@ -98,8 +117,8 @@ html[data-theme="light"] {
 /* md 及以上加高头部，同步更新 sticky 避让距离 */
 @media (width >= 48rem) {
   :root {
-    --sz-header-height: 5rem;
-    --sz-sticky-top: calc(var(--sz-header-height) + 1rem);
+    --sz-header-height: 4rem;
+    --sz-sticky-top: calc(var(--sz-header-height) + 0.75rem);
   }
 }
 
@@ -109,6 +128,11 @@ html[data-theme="light"] {
 html[data-theme="light"] .poster-glow-img,
 html[data-theme="light"] .poster-glow-paint {
   display: none;
+}
+
+/* 头部紧凑模式：详情页侧栏 sticky 顶距随头部高度收缩 */
+html[data-header-compact="true"] {
+  --sz-sticky-top: var(--sz-sticky-top-compact);
 }
 
 /* Tailwind v4 主题桥接：把 CSS 变量映射为 Tailwind 色板与字体 */
@@ -143,6 +167,96 @@ a {
 }
 
 /* ── 交互工具类 ─────────────────────────────────────────────────── */
+
+/* 吸顶导航：紧凑模式仅保留居中 pill，两侧品牌与主题切换淡出 */
+.site-header {
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease;
+}
+
+.site-header__inner {
+  position: relative;
+  transition: min-height var(--duration-header-hide) var(--ease-header-hide);
+}
+
+.site-header[data-compact="true"] .site-header__inner {
+  min-height: var(--sz-header-height-compact);
+  transition-duration: var(--duration-header-show);
+  transition-timing-function: var(--ease-header-show);
+}
+
+.site-header__brand,
+.site-header__theme {
+  transition:
+    opacity var(--duration-header-hide) var(--ease-header-hide),
+    transform var(--duration-header-hide) var(--ease-header-hide);
+}
+
+.site-header[data-compact="false"] .site-header__brand,
+.site-header[data-compact="false"] .site-header__theme {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-duration: var(--duration-header-show);
+  transition-timing-function: var(--ease-header-show);
+  transition-delay: 40ms;
+}
+
+.site-header[data-compact="true"] .site-header__brand,
+.site-header[data-compact="true"] .site-header__theme {
+  opacity: 0;
+  transform: translate3d(0, -10px, 0) scale(0.96);
+  pointer-events: none;
+}
+
+.site-header__nav {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  transform: translate3d(-50%, -50%, 0);
+  border: 1px solid var(--sz-nav-pill-border);
+  background: var(--sz-nav-pill-bg);
+  box-shadow: var(--sz-nav-pill-shadow);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  transition:
+    transform var(--duration-header-show) var(--ease-header-show),
+    box-shadow var(--duration-header-show) var(--ease-header-show),
+    border-color 200ms ease,
+    background-color 200ms ease;
+}
+
+.site-header[data-compact="true"] .site-header__nav {
+  box-shadow: var(--sz-nav-pill-shadow-compact);
+  border-color: var(--sz-border-strong);
+}
+
+.site-header__nav-link {
+  color: var(--sz-nav-link);
+}
+
+.site-header__nav-link:hover,
+.site-header__nav-link:focus-visible {
+  color: var(--sz-text);
+}
+
+.site-header__nav-link[aria-current="page"] {
+  background: var(--sz-nav-link-active-bg);
+  color: var(--sz-text-strong);
+  font-weight: 500;
+  box-shadow: 0 1px 2px var(--sz-shadow);
+}
+
+.site-header__actions {
+  transition: opacity var(--duration-header-hide) var(--ease-header-hide);
+}
+
+@media (width < 48rem) {
+  .site-header[data-compact="true"] .site-header__actions {
+    justify-content: center;
+  }
+}
 
 /* 可按压控件（按钮、图标触发器）：按下微缩放反馈 */
 .pressable {
@@ -223,6 +337,24 @@ a {
 
 /* 减弱动效偏好：压缩过渡时长并禁用 transform 动画 */
 @media (prefers-reduced-motion: reduce) {
+  .site-header__brand,
+  .site-header__theme,
+  .site-header__inner {
+    transition-duration: 1ms;
+    transform: none;
+    opacity: 1;
+  }
+
+  .site-header__nav {
+    transition-duration: 1ms;
+  }
+
+  .site-header[data-compact="true"] .site-header__brand,
+  .site-header[data-compact="true"] .site-header__theme {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .pressable,
   .detail-surface,
   .detail-reveal,

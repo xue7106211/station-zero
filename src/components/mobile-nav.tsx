@@ -11,7 +11,7 @@ export function MobileNav({ pathname }: { pathname: string }) {
     <Drawer>
       <Drawer.Trigger
         aria-label="打开导航菜单"
-        className="pressable flex size-9 items-center justify-center rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] text-[var(--sz-text)] outline-none focus-visible:border-[color:var(--sz-accent-soft)] md:hidden"
+        className="pressable flex size-8 items-center justify-center rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] text-[var(--sz-text)] outline-none focus-visible:border-[color:var(--sz-accent-soft)] md:hidden"
       >
         <Menu className="size-5" aria-hidden />
       </Drawer.Trigger>
@@ -25,9 +25,15 @@ export function MobileNav({ pathname }: { pathname: string }) {
             {({ close }) => (
               <>
                 <Drawer.Header className="flex items-center justify-between px-6 pt-6">
-                  <span className="font-mono text-xs uppercase tracking-[0.28em] text-[var(--sz-accent)]">
-                    Station Zero
-                  </span>
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      aria-hidden
+                      className="flex size-8 items-center justify-center rounded-[0.55rem] border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] font-mono text-xs font-medium text-[var(--sz-accent)]"
+                    >
+                      0
+                    </span>
+                    <span className="text-sm font-semibold text-[var(--sz-text)]">Station Zero</span>
+                  </div>
                   <Drawer.CloseTrigger
                     aria-label="关闭菜单"
                     className="pressable flex size-9 items-center justify-center rounded-full border border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] text-[var(--sz-text)] outline-none"

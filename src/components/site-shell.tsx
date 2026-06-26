@@ -23,10 +23,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-[var(--sz-bg)] text-[var(--sz-text)]">
       {/* 全屏氛围光晕背景层：固定定位、纯装饰，pointer-events-none 不拦截点击 */}
       <div className="pointer-events-none fixed inset-0 bg-[var(--sz-page-glow)]" />
-      {/* 顶部吸顶导航（客户端组件，滚动后加 backdrop-blur + 底部细边框） */}
+      {/* 顶部固定导航：向下滚动进入紧凑模式（保留居中 pill）；main 顶部留白避让头部高度 */}
       <SiteHeader />
-      {/* 页面主体内容容器 */}
-      <main className="relative z-10">{children}</main>
+      <main className="relative z-10 pt-[var(--sz-header-height)]">{children}</main>
       <SiteFooter />
     </div>
   );

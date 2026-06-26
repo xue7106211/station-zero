@@ -26,45 +26,54 @@ export { navItems };
 export { isActiveRoute };
 
 /**
- * 站点顶部主导航。
- *
- * 客户端组件：用 `usePathname()` 计算激活态。桌面端（md 及以上）横向导航，当前路由用强调色
- * + 底部指示线高亮；移动端折叠为汉堡按钮，点击展开 HeroUI Drawer 抽屉菜单。主题切换按钮始终可见。
- *
- * @returns 顶部主导航右侧操作区
+ * 桌面端居中 pill 导航。
  */
-export function SiteNav() {
+export function DesktopNav() {
   const pathname = usePathname();
 
   return (
-    <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-6">
-      <nav aria-label="主导航" className="hidden items-center gap-6 text-sm md:flex">
-        {navItems.map((item) => {
-          const active = isActiveRoute(pathname, item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={`group relative py-1 transition-colors duration-200 ease-out motion-reduce:transition-none hover:text-[var(--sz-accent)] focus-visible:outline-none focus-visible:text-[var(--sz-accent)] ${
-                active ? "text-[var(--sz-accent)]" : "text-[var(--sz-muted)]"
-              }`}
-            >
-              {item.label}
-              <span
-                aria-hidden
-                className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left rounded-full bg-[var(--sz-accent)] transition-transform duration-200 ease-out motion-reduce:transition-none ${
-                  active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                }`}
-              />
-            </Link>
-          );
-        })}
-      </nav>
+    <nav aria-label="主导航" className="site-header__nav hidden shrink-0 items-center rounded-full p-0.5 md:inline-flex">
+      {navItems.map((item) => {
+        const active = isActiveRoute(pathname, item.href);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            className="site-header__nav-link pressable rounded-full px-3 py-1 text-sm transition-[color,background-color,box-shadow] duration-200 ease-out motion-reduce:transition-none focus-visible:outline-none"
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
 
-      <ThemeToggle />
+/**
+ * 头部右侧操作区：主题切换 + 移动端菜单。
+ */
+export function HeaderActions() {
+  const pathname = usePathname();
 
+  return (
+    <div className="site-header__actions flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-2.5">
+      <div className="site-header__theme hidden md:block">
+        <ThemeToggle />
+      </div>
       <MobileNav pathname={pathname} />
     </div>
+  );
+}
+
+/**
+ * 站点顶部主导航（兼容导出；布局由 `SiteHeader` 拆分承载）。
+ */
+export function SiteNav() {
+  return (
+    <>
+      <DesktopNav />
+      <HeaderActions />
+    </>
   );
 }
