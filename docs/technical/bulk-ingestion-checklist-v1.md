@@ -1,8 +1,17 @@
+---
+title: 万级影视批量录入 — 可执行清单（v1）
+type: runbook
+status: pending
+updated: 2026-06-25
+related:
+  - technical/bulk-ingestion-scheme.md
+  - technical/movie-images.md
+  - technical/mainland-topology.md
+---
+
 # 万级影视批量录入 — 可执行清单（v1）
 
-> **状态：待执行**（2026-06-25）
->
-> 本文是 [bulk-movie-ingestion-and-sql-migration.md](./bulk-movie-ingestion-and-sql-migration.md) 初版计划的**可执行落地版**：分阶段、可勾选的 TODO。决策依据与背景见原文档，本文只列动作。
+> 本文是 [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md) 的**可执行落地版**：分阶段、可勾选的 TODO。决策依据与背景见原文档，本文只列动作。
 
 ## 输入约束（本轮强调）
 
@@ -25,7 +34,7 @@
 ## Phase 0 — 决策与隐私边界（门禁，0.5–1 天）
 
 - [ ] **D0** 锁定数据层：Supabase（Postgres + Storage）作后端，**前端不直连**、仅 app server / 脚本访问
-- [ ] **D1** 锁定大陆拓扑：境外 VPS（HK/SG/JP）Docker + CDN 回源 + 源站隐藏；产出一页选型记录（CDN 供应商、线路、回源方式）
+- [ ] **D1** 锁定大陆拓扑：境外 VPS（HK/SG/JP）Docker + CDN 回源 + 源站隐藏；填写 [mainland-topology.md](./mainland-topology.md)（CDN 供应商、线路、回源方式）
 - [ ] **D2** 域名 + WHOIS 隐私：支持 Redaction 的注册商 + 项目专用邮箱
 - [ ] **D3** 身份隔离：VPS 账单 / 邮箱 / SSH 密钥全用项目专用身份，与个人分离；确认可接受实名程度（默认不走境内 ICP 备案）
 
@@ -88,7 +97,8 @@ Phase 0 ─┬─ Phase 1 ── Phase 2 ─┐
 
 ## 相关文档
 
-- [bulk-movie-ingestion-and-sql-migration.md](./bulk-movie-ingestion-and-sql-migration.md) — 完整方案与决策依据
-- [movie-image-ingestion-and-cache.md](./movie-image-ingestion-and-cache.md) — 当前文件型 MVP 与图片策略
+- [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md) — 完整方案与决策依据
+- [movie-images.md](./movie-images.md) — 当前文件型 MVP 与图片策略
+- [mainland-topology.md](./mainland-topology.md) — 大陆 CDN / VPS 选型
 - [AGENTS.md](../../AGENTS.md) — 仓库开发与录入约定
 

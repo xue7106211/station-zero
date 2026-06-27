@@ -1,6 +1,17 @@
+---
+title: Theme Modes Implementation Plan
+type: archive
+status: implemented
+updated: 2026-06-23
+related:
+  - ../../src/lib/theme.ts
+  - ../../src/components/theme-toggle.tsx
+  - ../../src/app/globals.css
+---
+
 # Theme Modes Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **状态：已落地。** 以 `src/lib/theme.ts`、`src/components/theme-toggle.tsx`、`globals.css` 为准。
 
 **Goal:** Add dark and light theme support with a persistent toggle, using Station Zero semantic design tokens and a HeroUI-like light palette.
 

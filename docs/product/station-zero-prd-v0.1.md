@@ -1,6 +1,18 @@
+---
+title: Station Zero 零号站产品需求文档 v0.1
+type: prd
+status: superseded
+superseded_by: station-zero-prd-v0.2.md
+updated: 2026-06-23
+related:
+  - ../index.md
+  - ../../AGENTS.md
+---
+
 # Station Zero 零号站产品需求文档 v0.1
 
-> 文档状态：讨论稿  
+> **已废止**：本版禁止展示网盘/磁力/迅雷链接，与当前产品方向不符。请以 [station-zero-prd-v0.2.md](./station-zero-prd-v0.2.md) 为准。
+
 > 当前阶段：产品定义与需求沉淀  
 > 重要边界：本文档不代表进入工程初始化或开发实施阶段。
 

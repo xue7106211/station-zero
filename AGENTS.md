@@ -18,14 +18,16 @@ station-zero/
 ├── .env.example              # 环境变量模板（TMDB、DATABASE_URL、代理）
 │
 ├── docs/
+│   ├── index.md              # 文档索引（Agent 按任务选读入口）
 │   ├── product/
-│   │   └── station-zero-prd-v0.1.md      # v0.1 产品方向基线
+│   │   ├── station-zero-prd-v0.2.md        # 当前产品方向基线（含资源索引）
+│   │   └── station-zero-prd-v0.1.md        # 已废止，仅供对照
 │   ├── technical/
-│   │   ├── bulk-movie-ingestion-and-sql-migration.md   # 万级录入 + SQL 迁移方案
-│   │   ├── 万级影视批量录入 — 可执行清单（v1）.md      # 分阶段实施清单
-│   │   ├── movie-image-ingestion-and-cache.md          # 图片本地化与缓存策略
-│   │   └── 大陆拓扑选型记录.md                          # 生产 CDN / VPS 选型
-│   └── superpowers/plans/                # 历史实施计划
+│   │   ├── bulk-ingestion-scheme.md          # 万级录入 + SQL 迁移方案
+│   │   ├── bulk-ingestion-checklist-v1.md    # 分阶段实施清单
+│   │   ├── movie-images.md                   # 图片本地化与缓存策略
+│   │   └── mainland-topology.md              # 生产 CDN / VPS 选型
+│   └── archive/plans/                        # 已归档实施计划
 │
 ├── data/
 │   ├── movies.json           # 文件型电影库（编辑源 + JSON 回退）
@@ -108,6 +110,7 @@ station-zero/
 | `data/` | 人工编辑与 TMDB 同步的文件型数据源 |
 | `scripts/` | 后台生产内容（TMDB、迁移、色板），不在用户请求时运行 |
 | `public/media/` | 本地化图片；路径写入库后前端只读 |
+| `docs/index.md` | 文档索引与按任务选读；涉及产品/录入/部署时先查此表 |
 | `docs/technical/` | 万级录入、部署与图片策略的技术决策 |
 
 ### 当前页面路由
@@ -205,7 +208,7 @@ station-zero/
 
 要让影片出现在列表与首页，将 `contentStatus` 设为 `published` 后重新执行第 2–4 步。
 
-万级批量录入与生产部署见 `docs/technical/bulk-movie-ingestion-and-sql-migration.md` 与 `docs/technical/万级影视批量录入 — 可执行清单（v1）.md`。
+文档总览与按任务选读见 `docs/index.md`。万级批量录入与生产部署见 `docs/technical/bulk-ingestion-scheme.md` 与 `docs/technical/bulk-ingestion-checklist-v1.md`。
 
 **当前实施进度：**
 

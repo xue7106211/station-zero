@@ -1,8 +1,17 @@
+---
+title: 大陆拓扑选型记录
+type: decision
+status: pending
+updated: 2026-06-25
+related:
+  - technical/bulk-ingestion-scheme.md
+  - technical/bulk-ingestion-checklist-v1.md
+  - technical/movie-images.md
+---
+
 # 大陆拓扑选型记录（一页）
 
-> **状态：待决策**（2026-06-25）
->
-> 对应 [bulk-movie-ingestion-and-sql-migration.md](./bulk-movie-ingestion-and-sql-migration.md) 任务 **D1**。锁定方案 A：**境外 VPS + CDN 回源 + 源站隐藏**；Supabase 仅数据层，不经 CDN 对访客暴露。
+> 对应 [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md) 任务 **D1** 与 [bulk-ingestion-checklist-v1.md](./bulk-ingestion-checklist-v1.md) **D1**。锁定方案 A：**境外 VPS + CDN 回源 + 源站隐藏**；Supabase 仅数据层，不经 CDN 对访客暴露。
 
 ## 锁定拓扑
 
@@ -128,5 +137,5 @@ flowchart LR
 
 ## 相关文档
 
-- [bulk-movie-ingestion-and-sql-migration.md](./bulk-movie-ingestion-and-sql-migration.md) — 总方案与 D1–D8
-- [movie-image-ingestion-and-cache.md](./movie-image-ingestion-and-cache.md) — 图片 CDN 缓存策略
+- [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md) — 总方案与 D1–D8
+- [movie-images.md](./movie-images.md) — 图片 CDN 缓存策略

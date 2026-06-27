@@ -1,3 +1,13 @@
+---
+title: 影片图片采集与缓存策略
+type: architecture
+status: active
+updated: 2026-06-27
+related:
+  - technical/bulk-ingestion-scheme.md
+  - technical/mainland-topology.md
+---
+
 # 影片图片采集与缓存策略
 
 ## 背景
@@ -188,6 +198,37 @@ Cache-Control: public, max-age=31536000, immutable
 
 页面数据可使用较短 revalidate，例如 1 天；图片则尽量不可变。
 
+## 生产环境海报 URL 策略
+
+关键不是「文件存在哪」，而是「用户浏览器请求的 URL 是什么」。
+
+用户打开 `/movies/dune-part-two` 时，页面里的 `<img src="???">` 只会向 `???` 发 HTTPS 请求。「存在哪」是运维/架构的事；「请求的 URL 是什么」才是大陆用户体感的事。
+
+| 模式 | 示例 | 评价 |
+|------|------|------|
+| **URL A：直连 Supabase** | `*.supabase.co/...` | 差：大陆可达性不稳，暴露 Storage 与 bucket 结构 |
+| **URL B：本站相对路径** | `/media/posters/dune-part-two.jpg` | 开发期 OK；大陆体验取决于整站部署与 CDN |
+| **URL C：媒体子域 + CDN** | `https://media.station-zero.com/posters/dune-part-two.webp` | **生产目标**：用户从不请求 `supabase.co`，快慢由 CDN PoP 决定 |
+
+```txt
+                    ┌─────────────────────────────────────┐
+                    │  后台（用户看不见）                    │
+                    │  sync 脚本 → 上传 → Supabase Storage │
+                    │           → 写 DB: poster_url         │
+                    └─────────────────────────────────────┘
+                                        │
+                    poster_url 存什么？  │
+                                        ▼
+┌──────────────┐    请求 URL     ┌──────────────┐    回源（仅 CDN 未命中）
+│ 大陆用户浏览器 │ ──────────────→ │ CDN 边缘节点  │ ──────────────→ Storage
+└──────────────┘                  └──────────────┘
+       │                                 │
+       │  只看见 media.xxx.com            │  用户不直连 Storage
+       └─────────────────────────────────┘
+```
+
+文件可仍在 Supabase Storage，但 `poster_url` 应写媒体子域 URL；CDN 与回源细节见 [mainland-topology.md](./mainland-topology.md)。
+
 ## 结论
 
 Station Zero 不应该在用户访问页面时实时依赖 TMDB 图片链路。
@@ -272,7 +313,7 @@ src/lib/movie-api.ts -> src/lib/movie-store.ts -> data/movies.json -> defaultMov
 
 ### 下一步建议
 
-- 万级批量录入与 SQL 迁移的完整方案见 [bulk-movie-ingestion-and-sql-migration.md](./bulk-movie-ingestion-and-sql-migration.md)（规划中，尚未实施）。
+- 万级批量录入与 SQL 迁移的完整方案见 [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md)（规划中，尚未实施）。
 - 把 `data/movies.json` 迁移到 SQLite 或 Postgres。
 - 为人工录入增加受保护的 `/admin` 表单。
 - 为图片增加压缩、尺寸统一和 WebP/AVIF 输出。

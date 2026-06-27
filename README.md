@@ -190,12 +190,16 @@ TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路
 - `verdict`、`bestWay`、`idealScene`、`notFor`、`versionSignals`、`deviceAdvice` 是 Station Zero 编辑判断层，应人工维护。
 - 同步完成后检查 `data/movies.json` 是否写入本地图片路径与色板；配置 `DATABASE_URL` 后运行 `npm run db:migrate:json` 同步到 SQL。
 
+### 产品与技术文档
+
+完整索引与按任务选读见 [`docs/index.md`](docs/index.md)。
+
 ### 万级批量录入（规划中）
 
 万级录入流水线、对象存储与生产部署方案见：
 
-- `docs/technical/bulk-movie-ingestion-and-sql-migration.md`
-- `docs/technical/万级影视批量录入 — 可执行清单（v1）.md`
+- `docs/technical/bulk-ingestion-scheme.md`
+- `docs/technical/bulk-ingestion-checklist-v1.md`
 
 当前已完成 Schema、Supabase 连通与读取层改造；批量 staging 录入脚本与生产 CDN 部署仍在推进中。
 

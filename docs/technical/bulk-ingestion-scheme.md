@@ -1,12 +1,22 @@
+---
+title: 万级影视批量录入与 SQL 迁移方案
+type: architecture
+status: draft
+updated: 2026-06-24
+related:
+  - technical/bulk-ingestion-checklist-v1.md
+  - technical/movie-images.md
+  - technical/mainland-topology.md
+  - product/station-zero-prd-v0.2.md
+---
+
 # 万级影视批量录入与 SQL 迁移方案
 
-> **状态：规划中，尚未实施**（2026-06-24）
->
-> 本文档沉淀批量录入 1 万+ 影片、来源链接，以及从当前文件型 MVP 迁移到 PostgreSQL + 对象存储的完整方案。执行前请先阅读并确认范围。
+> 本文档沉淀批量录入 1 万+ 影片、来源链接，以及从当前文件型 MVP 迁移到 PostgreSQL + 对象存储的完整方案。执行前请先阅读并确认范围。可执行动作见 [bulk-ingestion-checklist-v1.md](./bulk-ingestion-checklist-v1.md)。
 
 ## 背景与目标
 
-Station Zero 当前使用 `data/movies.json` + `public/media/` 作为电影库 MVP（见 [movie-image-ingestion-and-cache.md](./movie-image-ingestion-and-cache.md)）。下一步需要：
+Station Zero 当前使用 `data/movies.json` + `public/media/` 作为电影库 MVP（见 [movie-images.md](./movie-images.md)）。下一步需要：
 
 - **批量录入**约 1 万+ 条影视数据与来源链接（网盘 / 磁力等）
 - **原始数据形态**：片名 + 年份 + 链接，**通常没有 `tmdbId`**
@@ -250,7 +260,7 @@ flowchart LR
 
 | # | 事项 | 产出 |
 |---|------|------|
-| D1 | 确定生产方案（A/B）与 CDN 供应商 | [大陆拓扑选型记录.md](./大陆拓扑选型记录.md)（线路、回源方式） |
+| D1 | 确定生产方案（A/B）与 CDN 供应商 | [mainland-topology.md](./mainland-topology.md)（线路、回源方式） |
 | D2 | 注册项目域名 + 开启 WHOIS 隐私 | 域名 + DNS 托管 |
 | D3 | 采购 VPS / 云主机，创建**项目专用** SSH 密钥 | 源站 IP（不公开） |
 | D4 | 源站：Docker Compose（app + postgres + caddy） | `deploy/` 或 `docker-compose.prod.yml` 草案 |
@@ -496,6 +506,6 @@ flowchart LR
 
 ## 相关文档
 
-- [movie-image-ingestion-and-cache.md](./movie-image-ingestion-and-cache.md) — 当前文件型 MVP 与图片策略
+- [movie-images.md](./movie-images.md) — 当前文件型 MVP 与图片策略
 - [station-zero-prd-v0.1.md](../product/station-zero-prd-v0.1.md) — 产品方向基线
 - [AGENTS.md](../../AGENTS.md) — 仓库开发与录入约定
