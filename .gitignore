@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# bulk import — large/regenerable artifacts (see data/import/README.md)
+data/import/raw/
+data/import/*.csv

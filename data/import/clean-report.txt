@@ -1,0 +1,77 @@
+高清影视之家 TXT 清洗报告
+生成时间: 2026-06-28T08:13:16.921Z
+源文件: data/import/raw/高清影视之家-资源.txt
+
+== 汇总 ==
+源文件行数: 296202
+解析资源行: 58086
+去重后资源行: 58086
+重复资源: 0
+唯一影片 (title+year): 17940
+无英文片名片源: 2157
+解析异常: 89
+
+== 异常类型 ==
+missing_year: 89
+
+== CSV 列说明 ==
+title: TMDB 搜索用片名（优先英文，否则中文）
+title_zh: 中文片名
+original_title: 英文片名（若有）
+platform/type: 固定为 磁力
+note: 发布说明 + 上传日期 + 体积 + 片源标签
+slug: 由英文片名生成；无英文时留空，后续 TMDB 同步再定
+
+== 异常样本（最多 50 条）==
+L13832 [missing_year] 惊声尖叫3 (Scream.3.UHD.BluRay)
+L17673 [missing_year] 哈利·波特与魔法石
+L17677 [missing_year] 哈利·波特与魔法石
+L17681 [missing_year] 哈利·波特与魔法石
+L17685 [missing_year] 哈利·波特与魔法石
+L22852 [missing_year] 碟中谍8：最终清算
+L22856 [missing_year] 碟中谍8：最终清算
+L22860 [missing_year] 碟中谍8：最终清算
+L33596 [missing_year] 美丽小蜜桃2 (Pretty.Peach.2.BluRay)
+L35718 [missing_year] 西线无战事 (All.Quiet.on.the.Western.Front)
+L35725 [missing_year] 两杆大烟枪 (Lock.Stock.and.Two.Smoking.Barrels.BluRay)
+L43393 [missing_year] 神秘河 (Mystic.River)
+L43397 [missing_year] 神秘河 (Mystic.River)
+L43401 [missing_year] 神秘河 (Mystic.River)
+L43405 [missing_year] 神秘河 (Mystic.River)
+L43409 [missing_year] 神秘河 (Mystic.River)
+L45745 [missing_year] 成龙电影合集 (Jackie.Chan.package.BluRay)
+L47509 [missing_year] 无间道
+L47513 [missing_year] 无间道
+L57171 [missing_year] 家庭计划2 (The.Family.Plan.2)
+L57175 [missing_year] 家庭计划2 (The.Family.Plan.2)
+L57179 [missing_year] 家庭计划2 (The.Family.Plan.2)
+L57183 [missing_year] 家庭计划2 (The.Family.Plan.2)
+L68396 [missing_year] 冲上九重天 (Destination.9th.Heaven)
+L68400 [missing_year] 冲上九重天 (Destination.9th.Heaven)
+L92950 [missing_year] 这一刻，想见你 (In.My.Heart)
+L111237 [missing_year] 美国队长4 (Captain.America.Brave.New.World)
+L124134 [missing_year] 飞黄腾达 (The.Apprentice)
+L124138 [missing_year] 飞黄腾达 (The.Apprentice)
+L124142 [missing_year] 飞黄腾达 (The.Apprentice)
+L135007 [missing_year] 哈利·波特与密室
+L135011 [missing_year] 哈利·波特与密室
+L135015 [missing_year] 哈利·波特与密室
+L135022 [missing_year] 哈利·波特与阿兹卡班的囚徒
+L135026 [missing_year] 哈利·波特与阿兹卡班的囚徒
+L135030 [missing_year] 哈利·波特与阿兹卡班的囚徒
+L135037 [missing_year] 哈利·波特与火焰杯
+L135041 [missing_year] 哈利·波特与火焰杯
+L141213 [missing_year] 虎口巡航 (Cruising)
+L141217 [missing_year] 虎口巡航 (Cruising)
+L153300 [missing_year] 我是传奇 (I.Am.Legend)
+L153304 [missing_year] 我是传奇 (I.Am.Legend)
+L153308 [missing_year] 我是传奇 (I.Am.Legend)
+L153312 [missing_year] 我是传奇 (I.Am.Legend)
+L155010 [missing_year] 狼人 (Wolf.Man)
+L155014 [missing_year] 狼人 (Wolf.Man)
+L155018 [missing_year] 狼人 (Wolf.Man)
+L156617 [missing_year] 亲切的金子
+L156621 [missing_year] 亲切的金子
+L194753 [missing_year] 开罗宣言 (Cairo.Declaration)
+... 另有 39 条未列出
+
