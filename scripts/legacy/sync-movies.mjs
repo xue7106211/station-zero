@@ -1,13 +1,26 @@
 #!/usr/bin/env node
-// 同步影视资源数据脚本
+/**
+ * 【单部 / 少量录入 · 文件库】TMDB 同步 → data/movies.json
+ *
+ * 作用：读取 data/movie-seeds.json，逐条调 TMDB，合并写入 data/movies.json，
+ *       并下载海报/背景到 public/media/。
+ *
+ * 适用：人工维护 seeds、一次同步几部片的 MVP 流程。
+ * 不适用：万级批量（请用 scripts/bulk-ingest/ 流水线 + Supabase SQL）。
+ *
+ * npm run sync:movies
+ *
+ * 上游：data/movie-seeds.json（人工编辑）
+ * 下游：data/movies.json → 可选 npm run db:migrate:json 进 SQL
+ */
 
 import { createHash } from 'node:crypto'; // 计算图片字节的 SHA-1 短指纹（取前 8 位），仅用于日志标识缓存版本，非安全用途
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, extname, join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mergeMovieRecords, readMovieDatabase, toPublicMediaPath, writeMovieDatabase } from './movie-database.mjs';
-import { extractPalette } from './palette.mjs'; // 基于 node-vibrant 从本地海报取色
+import { mergeMovieRecords, readMovieDatabase, toPublicMediaPath, writeMovieDatabase } from '../lib/movie-database.mjs';
+import { extractPalette } from '../lib/palette.mjs'; // 基于 node-vibrant 从本地海报取色
 
 const execFileAsync = promisify(execFile);
 const databasePath = process.env.MOVIE_DATABASE_PATH || 'data/movies.json';

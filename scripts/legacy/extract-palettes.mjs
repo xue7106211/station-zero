@@ -1,19 +1,20 @@
 #!/usr/bin/env node
-// 调色板回填脚本（后台专用，无需网络）。
-//
-// 读取 data/movies.json，对每部影片「已缓存到本站的本地海报」用 node-vibrant 取色，
-// 把结果写回 palette 字段。适用于：海报早已同步、但库中还没有 palette 的历史数据补齐，
-// 或想在不触网 TMDB 的情况下单独重算取色。
-//
-// 用法：node scripts/extract-palettes.mjs            # 仅补齐缺失 palette 的影片
-//      node scripts/extract-palettes.mjs --force    # 强制对所有有本地海报的影片重新取色
-//
-// 与 sync-movies.mjs 的取色逻辑共用 scripts/palette.mjs，保证产出格式一致。
+/**
+ * 【单部 / 少量录入 · 文件库】离线海报取色 → data/movies.json
+ *
+ * 读取 data/movies.json，对已本地化海报用 node-vibrant 提取 palette 并回写。
+ * 不访问 TMDB，适合海报已有、仅补色板的场景。
+ *
+ * npm run extract:palettes
+ * npm run extract:palettes -- --force   # 强制全部重算
+ *
+ * 与 legacy/sync-movies.mjs 共用 scripts/lib/palette.mjs。
+ */
 
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { mergeMovieRecords, readMovieDatabase, writeMovieDatabase } from './movie-database.mjs';
-import { extractPalette } from './palette.mjs';
+import { mergeMovieRecords, readMovieDatabase, writeMovieDatabase } from '../lib/movie-database.mjs';
+import { extractPalette } from '../lib/palette.mjs';
 
 const databasePath = process.env.MOVIE_DATABASE_PATH || 'data/movies.json';
 const publicDir = process.env.PUBLIC_DIR || 'public';

@@ -6,7 +6,7 @@
 
 | 产物 | 路径 | 规模 | 进 Git |
 |------|------|------|--------|
-| 清洗脚本 | `scripts/clean-import-txt.mjs` | — | 是 |
+| 清洗脚本 | `scripts/bulk-ingest/clean-import-txt.mjs` | — | 是 |
 | 标准化 CSV | `movies-clean.csv` | ~22 MB / 58,086 行 | **否** |
 | 待复核 CSV | `movies-needs-review.csv` | 89 行（缺 year，已忽略） | **否** |
 | 原始 TXT | `raw/高清影视之家-资源.txt` | ~14 MB | **否** |
@@ -24,17 +24,47 @@
 
 1. **本地** — 当前 `data/import/`（本机备份即可）
 2. **对象存储** — 若需跨机共享，用 Supabase Storage / R2 / 又拍等私有 bucket（与生产海报策略同族）
-3. **Git 只保留** — 清洗脚本 + `clean-report.txt` 摘要 + 本 README
+3. **Git 只保留** — 清洗脚本 + `clean-report.txt` 摘要 + 本 index
 
 ## 重新生成
 
 ```bash
 # 将源 TXT 放入 raw/ 后执行
-node scripts/clean-import-txt.mjs data/import/raw/高清影视之家-资源.txt data/import/movies-clean.csv
+node scripts/bulk-ingest/clean-import-txt.mjs data/import/raw/高清影视之家-资源.txt data/import/movies-clean.csv
 ```
 
 产出：`movies-clean.csv`、`clean-report.txt`、`clean-issues.csv`、`movies-needs-review.csv`
 
 ## 下一步
 
-使用 `movies-clean.csv` 进入 `prepare-staging` → TMDB 消歧 → SQL 同步（见 `docs/technical/bulk-ingestion-checklist-v1.md`）。
+Pilot（100 部）端到端：
+
+```bash
+# 1. 确认 .env.local 已配置 DATABASE_URL 与 TMDB 凭证
+npm run check:database
+npm run check:tmdb
+
+# 2. 若 schema 未落库
+npm run db:migrate
+
+# 3. 跑 100 部 Pilot（CSV → staging → TMDB 消歧 → SQL + 海报）
+npm run ingest:pilot
+
+# 可选：Pilot 直接发布到列表页
+npm run ingest:pilot -- --publish
+```
+
+分步执行：
+
+```bash
+npm run ingest:staging -- --limit-movies 100 --batch-id pilot-20260628
+npm run ingest:resolve -- --batch-id pilot-20260628
+npm run ingest:resolve-ambiguous -- --batch-id pilot-20260628   # 若有 ambiguous
+npm run ingest:resolve-failed -- --batch-id pilot-20260628       # 若有 failed
+npm run ingest:sync -- --batch-id pilot-20260628
+npm run ingest:upload-media                                      # 补传 Storage（可选）
+```
+
+报告输出：`data/import/staging-report.txt`、`resolve-report.txt`、`sync-report.txt`、`pilot-summary.txt`
+
+全量录入见 [docs/technical/bulk-ingestion-runbook.md](../../docs/technical/bulk-ingestion-runbook.md) 与 [bulk-ingestion-checklist-v1.md](../../docs/technical/bulk-ingestion-checklist-v1.md)。

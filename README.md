@@ -13,7 +13,7 @@ MVP 基于 Next.js + TypeScript + Tailwind CSS 4 + HeroUI，包含：
 - 关于页：产品边界与合规声明。
 - 站点壳层：吸顶导航、移动端抽屉菜单、浅色/深色/跟随系统主题切换。
 - 电影数据层：前端经 `movie-api` 读取 **Supabase Postgres**（优先）或 `data/movies.json`（回退）。
-- 后台采集脚本：同步 TMDB 资料、下载海报/背景图、提取海报色板，并写入本地库与 SQL。
+- 后台采集脚本：同步 TMDB 资料、下载海报/背景图、提取海报色板；写入 JSON 或经 bulk-ingest 写入 SQL + Supabase Storage。
 
 ## 开发命令
 
@@ -24,7 +24,7 @@ npm run lint
 npm test
 ```
 
-### TMDB 后台同步
+### TMDB 后台同步（legacy · 单部 / 少量）
 
 ```bash
 npm run check:tmdb
@@ -33,14 +33,31 @@ npm run import:movies -- path/to/movies.json
 npm run extract:palettes
 ```
 
+### 万级批量录入（bulk-ingest）
+
+```bash
+npm run check:database
+npm run check:tmdb
+npm run check:storage      # 海报上传 Storage 时需 service_role
+
+npm run ingest:pilot       # 一键 Pilot（默认 100 部）
+# 或分步：ingest:staging → ingest:resolve → ingest:resolve-ambiguous / ingest:resolve-failed → ingest:sync
+npm run ingest:upload-media   # 补传本地海报到 Supabase Storage
+```
+
+操作手册：[`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md)  
+导入数据说明：[`data/import/index.md`](data/import/index.md)  
+脚本索引：[`scripts/index.md`](scripts/index.md)
+
 ### 数据库（Supabase Postgres）
 
 ```bash
 npm run check:database      # 验证 DATABASE_URL 连通与表状态
+npm run check:storage       # 验证 Supabase Storage 上传凭证
 npm run db:generate         # 根据 schema 生成 migration
 npm run db:migrate          # 应用 migration 到 Supabase
 npm run db:push             # 开发时快速推送 schema（可跳过 migration 文件）
-npm run db:migrate:json     # 将 data/movies.json upsert 到 SQL
+npm run db:migrate:json     # 将 data/movies.json upsert 到 SQL（legacy）
 ```
 
 ## 电影数据架构
@@ -48,27 +65,28 @@ npm run db:migrate:json     # 将 data/movies.json upsert 到 SQL
 Station Zero 采用「外部 API 后台生产内容，前端只读本站数据」的加载方案：
 
 ```txt
-TMDB / 人工录入
+TMDB / 人工录入 / CSV 批量
         ↓
-后台同步或批量导入
+legacy sync:movies  或  bulk-ingest 流水线
         ↓
-data/movies.json（编辑源 + JSON 回退）
+data/movies.json（legacy 编辑源 + JSON 回退）
         ↓
-db:migrate:json / 未来录入流水线
+db:migrate:json / ingest:sync
         ↓
-Supabase Postgres（movies / viewing_paths / media_assets）
+Supabase Postgres（movies / viewing_paths / media_assets / import_staging）
+        ↓
+Supabase Storage（bucket media · posters / backdrops）
         ↓
 movie-api.ts（SQL 优先，失败或无配置时回退 JSON）
         ↓
-Next.js 页面
-        ↓
-public/media/ 本地海报与 CDN 缓存
+Next.js 页面（img src = movies.poster_url，Supabase Storage 公网 URL）
 ```
 
 核心原则：
 
 - 前端页面不在用户访问时实时调用 TMDB、豆瓣或其他外部电影 API。
-- 浏览器不直连 Supabase；仅服务端与脚本通过 `DATABASE_URL` 访问数据库。
+- 浏览器不直连 Supabase Postgres；仅服务端与脚本通过 `DATABASE_URL` 访问数据库。
+- 配置 `DATABASE_URL` 时，海报 URL 来自 Supabase Storage（`movies.poster_url`）；`public/media/` 为脚本本地缓存。
 
 ### 读取层（当前）
 
@@ -90,9 +108,10 @@ public/media/ 本地海报与 CDN 缓存
 
 ### 本地文件库
 
-- `data/movies.json` — 文件型电影库，编辑与 JSON 回退源。
-- `data/movie-seeds.json` — 后台同步种子，保存 `slug`、`tmdbId` 和 Station Zero 策展判断字段。
-- `public/media/posters/` 与 `public/media/backdrops/` — 本地化海报和背景图。
+- `data/movies.json` — 文件型电影库，legacy 编辑与 JSON 回退源。
+- `data/movie-seeds.json` — legacy 后台同步种子。
+- `data/import/` — 万级批量清洗 CSV 与报告（见 [`index.md`](data/import/index.md)）。
+- `public/media/posters/` 与 `public/media/backdrops/` — sync 脚本本地缓存；页面以 DB 中 Storage URL 为准。
 
 ### 环境变量
 
@@ -104,8 +123,15 @@ TMDB_READ_ACCESS_TOKEN=
 TMDB_API_KEY=
 
 # Supabase Postgres（可选；配置后页面优先读 SQL）
-# 使用 Transaction pooler URI（端口 6543）
+# Transaction pooler URI，端口 6543
 DATABASE_URL=
+
+# Supabase Storage 上传（bulk-ingest / ingest:upload-media；仅脚本，勿暴露给浏览器）
+SUPABASE_SERVICE_ROLE_KEY=
+
+# 可选
+SUPABASE_URL=
+SUPABASE_MEDIA_BUCKET=media
 ```
 
 未配置 `DATABASE_URL` 时，应用仍可用 `data/movies.json` 与默认策展数据运行。
@@ -194,14 +220,15 @@ TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路
 
 完整索引与按任务选读见 [`docs/index.md`](docs/index.md)。
 
-### 万级批量录入（规划中）
+### 万级批量录入
 
-万级录入流水线、对象存储与生产部署方案见：
+Pilot 已验证端到端流水线（staging → TMDB 消歧 → SQL + Storage）。详见：
 
-- `docs/technical/bulk-ingestion-scheme.md`
-- `docs/technical/bulk-ingestion-checklist-v1.md`
+- [`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md) — **操作手册**（推荐起点）
+- [`docs/technical/bulk-ingestion-scheme.md`](docs/technical/bulk-ingestion-scheme.md) — 架构方案
+- [`docs/technical/bulk-ingestion-checklist-v1.md`](docs/technical/bulk-ingestion-checklist-v1.md) — 分阶段清单
 
-当前已完成 Schema、Supabase 连通与读取层改造；批量 staging 录入脚本与生产 CDN 部署仍在推进中。
+当前已完成：Schema、读取层、bulk-ingest 脚本、Supabase Storage 海报上传。生产 CDN / VPS 部署仍在推进中。
 
 ## UI 与主题
 

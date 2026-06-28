@@ -1,3 +1,12 @@
+/**
+ * 【预检】TMDB 凭证与网络连通性
+ *
+ * 确认 .env.local 中 TMDB_READ_ACCESS_TOKEN 或 TMDB_API_KEY 可用。
+ *
+ * npm run check:tmdb
+ *
+ * sync:movies 与 bulk-ingest 的 resolve/sync 步骤都依赖 TMDB。
+ */
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 

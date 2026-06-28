@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
- * 清洗「高清影视之家」regex_v3 导出 TXT → 标准化 CSV。
+ * 【批量录入 · 第 0 步】原始 TXT → 标准化 CSV
  *
- * 用法:
- *   node scripts/clean-import-txt.mjs [input.txt] [output.csv]
+ * 作用：解析「高清影视之家」regex_v3 导出格式，产出 movies-clean.csv。
+ * 这是 bulk-ingest 流水线的数据清洗入口（离线，不访问 DB / TMDB）。
  *
- * 默认输入: data/import/raw/高清影视之家-资源.txt
- * 默认输出: data/import/movies-clean.csv
+ * node scripts/bulk-ingest/clean-import-txt.mjs [input.txt] [output.csv]
+ *
+ * 下游：prepare-staging.mts 读取 movies-clean.csv
  */
 
 import { createReadStream, mkdirSync, writeFileSync } from "node:fs";

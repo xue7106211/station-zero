@@ -1,3 +1,12 @@
+/**
+ * 【预检】Supabase Postgres 连通性与核心表检查
+ *
+ * 确认 DATABASE_URL 可用，且 movies / viewing_paths / media_assets / import_staging 已 migration。
+ *
+ * npm run check:database
+ *
+ * 批量录入前建议先跑本脚本，再跑 check:tmdb。
+ */
 import postgres from "postgres";
 
 const databaseUrl = process.env.DATABASE_URL?.trim();

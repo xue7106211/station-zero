@@ -1,11 +1,9 @@
-// 海报取色辅助模块（后台专用）。
-//
-// 基于开源库 node-vibrant（https://vibrant.dev）从本地海报文件提取主色调色板，
-// 产出一个精简的 { vibrant, darkVibrant, ... } 十六进制色值对象，写入 data/movies.json。
-//
-// 架构约束：取色只在后台脚本（sync / 回填）阶段对「已下载到本地」的海报执行，
-// 前端运行时只读取落库后的色值，绝不在用户请求期间读图或跑取色（零 canvas / 零跨域 / 零运行时开销）。
-
+/**
+ * 【共享库】本地海报取色（node-vibrant）
+ *
+ * 供 legacy/sync-movies.mjs、legacy/extract-palettes.mjs、bulk-ingest/sync-movies-to-sql.mts 共用。
+ * 仅对「已下载到 public/media/」的海报执行，前端只读落库色值。
+ */
 import { Vibrant } from 'node-vibrant/node';
 
 // node-vibrant 的六个标准 swatch -> 落库字段名映射。

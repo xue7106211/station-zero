@@ -1,6 +1,15 @@
 #!/usr/bin/env node
+/**
+ * 【单部 / 少量录入 · 文件库】合并外部 JSON 到 data/movies.json
+ *
+ * 作用：把人工整理好的影片 JSON 片段合并进现有 movies.json（按 slug 去重合并）。
+ *
+ * npm run import:movies -- path/to/movies.json
+ *
+ * 常与 sync:movies 配合：先 import 策展字段，再 sync 补 TMDB 与图片。
+ */
 import { readFileSync } from 'node:fs';
-import { mergeMovieRecords, readMovieDatabase, writeMovieDatabase } from './movie-database.mjs';
+import { mergeMovieRecords, readMovieDatabase, writeMovieDatabase } from '../lib/movie-database.mjs';
 
 const databasePath = process.env.MOVIE_DATABASE_PATH || 'data/movies.json';
 const importPath = process.argv[2];

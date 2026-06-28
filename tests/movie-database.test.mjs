@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeMovieRecord, mergeMovieRecords, toPublicMediaPath } from '../scripts/movie-database.mjs';
+import { normalizeMovieRecord, mergeMovieRecords, toPublicMediaPath } from '../scripts/lib/movie-database.mjs';
 
 test('normalizeMovieRecord keeps stable local poster paths and timestamps', () => {
   const record = normalizeMovieRecord({
@@ -32,4 +32,5 @@ test('mergeMovieRecords upserts by slug and preserves existing createdAt', () =>
 test('toPublicMediaPath maps local media files to public URLs', () => {
   assert.equal(toPublicMediaPath('public/media/posters/inception.jpg'), '/media/posters/inception.jpg');
   assert.equal(toPublicMediaPath('/media/posters/inception.jpg'), '/media/posters/inception.jpg');
+  assert.equal(toPublicMediaPath('public\\media\\posters\\inception.jpg'), '/media/posters/inception.jpg');
 });

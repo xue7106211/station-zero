@@ -1,8 +1,18 @@
+/**
+ * 【迁移 · 一次性】data/movies.json → Supabase Postgres
+ *
+ * 作用：把文件型 MVP 库 upsert 到 movies / viewing_paths / media_assets 表。
+ * 批量万级录入请走 bulk-ingest 流水线，不要拿本脚本灌 CSV。
+ *
+ * npm run db:migrate:json
+ *
+ * 前置：DATABASE_URL、npm run db:migrate
+ */
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { eq } from "drizzle-orm";
-import { closeDatabaseClient, createDatabaseClient } from "../src/db/index";
-import { importStaging, mediaAssets, movies, viewingPaths } from "../src/db/schema";
+import { closeDatabaseClient, createDatabaseClient } from "../../src/db/index";
+import { importStaging, mediaAssets, movies, viewingPaths } from "../../src/db/schema";
 
 type MovieJsonRecord = {
   slug: string;

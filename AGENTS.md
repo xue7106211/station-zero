@@ -23,16 +23,18 @@ station-zero/
 │   │   ├── station-zero-prd-v0.2.md        # 当前产品方向基线（含资源索引）
 │   │   └── station-zero-prd-v0.1.md        # 已废止，仅供对照
 │   ├── technical/
-│   │   ├── bulk-ingestion-scheme.md          # 万级录入 + SQL 迁移方案
+│   │   ├── bulk-ingestion-scheme.md          # 万级录入架构方案
+│   │   ├── bulk-ingestion-runbook.md         # 批量录入操作手册（Pilot 经验）
 │   │   ├── bulk-ingestion-checklist-v1.md    # 分阶段实施清单
-│   │   ├── movie-images.md                   # 图片本地化与缓存策略
+│   │   ├── movie-images.md                   # 图片本地化与 Storage / CDN 策略
 │   │   └── mainland-topology.md              # 生产 CDN / VPS 选型
 │   └── archive/plans/                        # 已归档实施计划
 │
 ├── data/
 │   ├── movies.json           # 文件型电影库（编辑源 + JSON 回退）
 │   ├── movie-seeds.json      # TMDB 同步种子（slug、tmdbId、策展字段）
-│   └── seeds/                  # 单部影片种子片段（可选）
+│   ├── seeds/                # 单部影片种子片段（可选）
+│   └── import/               # 万级批量清洗产物（见 data/import/index.md）
 │
 ├── drizzle/
 │   ├── 0000_*.sql            # 已生成的 SQL migration
@@ -40,19 +42,16 @@ station-zero/
 │
 ├── public/
 │   ├── media/
-│   │   ├── posters/          # 本地化海报（前端只读本站路径）
-│   │   └── backdrops/        # 本地化背景图
+│   │   ├── posters/          # sync 脚本本地缓存；页面 poster_url 以 Supabase Storage 为准
+│   │   └── backdrops/
 │   └── …                     # 其他静态资源
 │
-├── scripts/                  # 后台脚本（Node，不经由页面调用）
-│   ├── sync-movies.mjs       # TMDB 同步 → movies.json + public/media
-│   ├── import-movies.mjs     # 批量导入人工整理 JSON
-│   ├── extract-palettes.mjs  # 离线提取海报色板
-│   ├── check-tmdb.mjs        # TMDB 连通性检查
-│   ├── check-database.mjs    # Supabase 连通与 schema 检查
-│   ├── migrate-json-to-sql.mts  # movies.json → Supabase upsert
-│   ├── movie-database.mjs    # JSON 库读写与合并工具
-│   └── palette.mjs           # 色板提取底层
+├── scripts/                  # 后台脚本（见 scripts/index.md）
+│   ├── index.md              # 脚本索引与流水线说明
+│   ├── checks/               # 预检：database / tmdb / storage
+│   ├── legacy/               # 单部 MVP：seeds → movies.json
+│   ├── bulk-ingest/          # 万级批量：CSV → staging → SQL + Storage
+│   └── lib/                  # 共享：movie-database、palette
 │
 ├── src/
 │   ├── app/                  # Next.js App Router
@@ -107,9 +106,10 @@ station-zero/
 | `src/lib/movie-sql-store.ts` | Supabase 列表分页、详情 JOIN，不供组件直接调用 |
 | `src/lib/movie-store.ts` | `data/movies.json` 读取与默认数据合并 |
 | `src/db/` | Drizzle schema 与 Postgres 连接；仅服务端 / 脚本 |
-| `data/` | 人工编辑与 TMDB 同步的文件型数据源 |
-| `scripts/` | 后台生产内容（TMDB、迁移、色板），不在用户请求时运行 |
-| `public/media/` | 本地化图片；路径写入库后前端只读 |
+| `data/` | 人工编辑与 TMDB 同步的文件型数据源；万级 CSV 见 `data/import/` |
+| `data/import/` | 批量清洗 CSV / 报告；大文件不进 Git（见 `index.md`） |
+| `scripts/` | 后台生产内容（TMDB、迁移、色板、批量录入），不在用户请求时运行 |
+| `public/media/` | sync 下载的本地海报缓存；DB 中 `poster_url` 指向 Supabase Storage |
 | `docs/index.md` | 文档索引与按任务选读；涉及产品/录入/部署时先查此表 |
 | `docs/technical/` | 万级录入、部署与图片策略的技术决策 |
 
@@ -145,12 +145,23 @@ station-zero/
 - `npm run import:movies -- path/to/movies.json` — 批量导入人工整理的影片 JSON。
 - `npm run extract:palettes` — 从已本地化海报离线提取色板并回写 `data/movies.json`。
 - `npm run check:database` — 验证 `DATABASE_URL` 连通与 schema 状态。
+- `npm run check:storage` — 验证 Supabase Storage 上传凭证（`SUPABASE_SERVICE_ROLE_KEY`）。
 - `npm run db:generate` — 根据 `src/db/schema.ts` 生成 migration。
 - `npm run db:migrate` — 应用 `drizzle/` migration 到 Supabase。
 - `npm run db:push` — 开发时快速推送 schema。
-- `npm run db:migrate:json` — 将 `data/movies.json` upsert 到 SQL。
+- `npm run db:migrate:json` — 将 `data/movies.json` upsert 到 SQL（legacy 路径）。
 
-环境变量见 `.env.example`：`TMDB_*` 用于后台同步；`DATABASE_URL` 用于 Supabase Postgres（Transaction pooler，端口 6543）。TMDB 只允许用于后台同步，不应在用户访问页面时实时调用。未配置 `DATABASE_URL` 时必须保持 JSON 与默认数据回退可用。
+**万级批量录入（bulk-ingest）：**
+
+- `npm run ingest:staging` — CSV → `import_staging`。
+- `npm run ingest:resolve` — TMDB 初轮消歧。
+- `npm run ingest:resolve-ambiguous` — ambiguous 自动 / 半自动消歧。
+- `npm run ingest:resolve-failed` — failed 重试（中文片名 + 年份容差）。
+- `npm run ingest:sync` — TMDB 详情 + 磁力 → SQL；下载海报并上传 Storage（需 service_role）。
+- `npm run ingest:upload-media` — 补传本地海报到 Storage。
+- `npm run ingest:pilot` — 一键 Pilot（默认 100 部）。
+
+环境变量见 `.env.example`：`TMDB_*` 用于后台同步；`DATABASE_URL` 用于 Supabase Postgres（Transaction pooler，端口 6543）；`SUPABASE_SERVICE_ROLE_KEY` 用于脚本上传海报到 Storage（仅服务端，勿暴露给浏览器）。TMDB 只允许用于后台同步，不应在用户访问页面时实时调用。未配置 `DATABASE_URL` 时必须保持 JSON 与默认数据回退可用。
 
 ## 编码风格与命名规范
 
@@ -175,7 +186,7 @@ station-zero/
 - `slug` 是本站公开 URL 标识，优先英文小写 kebab-case；`tmdbId` 只用于后台同步。
 - 人工编辑字段应保留 Station Zero 判断层（`verdict`、`bestWay`、`idealScene`、`notFor`、`versionSignals`、`deviceAdvice`），不要被 TMDB 覆盖。
 - TMDB 可同步客观资料字段（`writers`、`countries`、`languages`、`releaseDate`、`aka` 等）；缺省时详情页对应行不渲染。
-- 本地化海报和背景图写入 `public/media/posters/` 与 `public/media/backdrops/`；海报色板 `palette` 由 `extract:palettes` 提取，前端只读。
+- 本地化海报由 sync 脚本下载到 `public/media/` 并上传 Supabase Storage；`movies.poster_url` 存 Storage 公网 URL，前端经 `movie-api` 只读 DB 字段。
 - Supabase 仅作数据层；浏览器永不直连 Postgres 或 Storage API。
 
 ## 测试指南
@@ -186,7 +197,7 @@ station-zero/
 - `npm run lint`
 - `npm run build`
 
-涉及数据库读取层变更时，本地有 `DATABASE_URL` 还应运行 `npm run check:database`。
+涉及数据库或 Storage 变更时，本地有 `DATABASE_URL` 还应运行 `npm run check:database`；涉及海报上传还应运行 `npm run check:storage`。
 
 ## 提交与 Pull Request 指南
 
@@ -208,9 +219,18 @@ station-zero/
 
 要让影片出现在列表与首页，将 `contentStatus` 设为 `published` 后重新执行第 2–4 步。
 
-文档总览与按任务选读见 `docs/index.md`。万级批量录入与生产部署见 `docs/technical/bulk-ingestion-scheme.md` 与 `docs/technical/bulk-ingestion-checklist-v1.md`。
+**万级 CSV / 磁力批量录入：**
+
+1. 清洗 TXT → `data/import/movies-clean.csv`（见 `data/import/index.md`）。
+2. `npm run ingest:staging` → `ingest:resolve` →（按需）`resolve-ambiguous` / `resolve-failed` → `ingest:sync`。
+3. 海报需 `SUPABASE_SERVICE_ROLE_KEY`；可单独 `npm run ingest:upload-media` 补传。
+4. 验收后 `npm run ingest:sync -- --publish` 上列表页。
+
+操作手册见 `docs/technical/bulk-ingestion-runbook.md`；架构见 `bulk-ingestion-scheme.md`；勾选清单见 `bulk-ingestion-checklist-v1.md`。
+
+文档总览与按任务选读见 `docs/index.md`。
 
 **当前实施进度：**
 
-- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`。
-- 未完成：批量 staging 录入脚本、海报上传 Supabase Storage、生产 CDN 自托管部署。
+- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 100+ 部验证）、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）。
+- 未完成：生产 CDN / VPS 自托管部署；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）。

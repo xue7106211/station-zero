@@ -2,7 +2,7 @@
 title: Station Zero 文档索引
 type: index
 status: active
-updated: 2026-06-27
+updated: 2026-06-28
 ---
 
 # Station Zero 文档索引
@@ -39,7 +39,7 @@ updated: 2026-06-27
 | 理解产品是什么、详情页要展示什么 | [station-zero-prd-v0.2.md](./product/station-zero-prd-v0.2.md) | `AGENTS.md` 页面路由与组件表 |
 | 日常改页面 / 组件 / 读取层 | `AGENTS.md` | [movie-images.md](./technical/movie-images.md)（数据与图片原则） |
 | 人工录入单部或少量影片 | `AGENTS.md` → Agent 专用说明 | [movie-images.md](./technical/movie-images.md) § 当前项目落地状态 |
-| 规划或实现万级批量录入 | [bulk-ingestion-checklist-v1.md](./technical/bulk-ingestion-checklist-v1.md) | [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md) |
+| 规划或实现万级批量录入 | [bulk-ingestion-runbook.md](./technical/bulk-ingestion-runbook.md) | [bulk-ingestion-checklist-v1.md](./technical/bulk-ingestion-checklist-v1.md) → [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md) |
 | 选型 CDN / VPS / 大陆访问与隐私 | [mainland-topology.md](./technical/mainland-topology.md) | [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md) § 生产部署 |
 | 理解海报 URL、Storage、CDN 关系 | [movie-images.md](./technical/movie-images.md) § 生产环境海报 URL 策略 | [mainland-topology.md](./technical/mainland-topology.md) |
 | 查某次功能的历史实施步骤 | `docs/archive/plans/` 对应文件 | 以 `src/` 与 `tests/` 实际代码为准 |
@@ -75,7 +75,7 @@ updated: 2026-06-27
 | type / status | `architecture` / `active` |
 | 何时读 | 改图片路径、同步脚本、缓存头、`movie-api` 读取原则、海报 URL 策略 |
 | 核心内容 | 外部 API 仅后台同步，前端只读本站 URL；`data/movies.json` / `movie-seeds.json`；`/media` 长缓存；生产 URL A/B/C |
-| 关键路径 | `scripts/sync-movies.mjs`、`src/lib/movie-api.ts`、`next.config.ts` |
+| 关键路径 | `scripts/legacy/sync-movies.mjs`、`scripts/bulk-ingest/`、`src/lib/movie-api.ts`、`next.config.ts` |
 
 #### [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md)
 
@@ -85,6 +85,15 @@ updated: 2026-06-27
 | 何时读 | 需要完整背景、竞品分析、Schema 草案、流水线设计、风险对策 |
 | 核心内容 | 1 万+ 条录入；Supabase 作数据层、浏览器不直连；`import_staging` 流水线；大陆可访问 + 隐私隔离 |
 | 章节导航 | 背景与目标 → 竞品 → 现状瓶颈 → 目标架构 → 生产部署 → 数据模型 → 读取层 → 批量流水线 → 风险 |
+
+#### [bulk-ingestion-runbook.md](./technical/bulk-ingestion-runbook.md)
+
+| 属性 | 值 |
+|------|-----|
+| type / status | `runbook` / `active` |
+| 何时读 | **实际操作** bulk-ingest 流水线、Pilot 复跑、消歧 / failed 人工介入 |
+| 核心内容 | Step 0–3 命令；ambiguous / failed 三轮消歧；Pilot 数据与经验；报告路径；复用 Checklist |
+| 与上篇关系 | 本文是操作手册；架构见 `bulk-ingestion-scheme`；勾选进度见 `bulk-ingestion-checklist-v1` |
 
 #### [bulk-ingestion-checklist-v1.md](./technical/bulk-ingestion-checklist-v1.md)
 
@@ -126,12 +135,15 @@ flowchart TB
   img[movie-images.md]
   bulk[bulk-ingestion-scheme.md]
   checklist[bulk-ingestion-checklist-v1.md]
+  runbook[bulk-ingestion-runbook.md]
   topo[mainland-topology.md]
   agents[AGENTS.md]
 
   prd --> agents
   img --> bulk
   bulk --> checklist
+  bulk --> runbook
+  runbook --> checklist
   bulk --> topo
   img --> topo
   agents --> img
@@ -139,7 +151,7 @@ flowchart TB
 ```
 
 **阅读顺序建议（万级录入主线）：**  
-`movie-images`（现状）→ `bulk-ingestion-scheme`（方案）→ `bulk-ingestion-checklist-v1`（执行）→ `mainland-topology`（部署）
+`movie-images`（现状）→ `bulk-ingestion-scheme`（方案）→ **`bulk-ingestion-runbook`（操作）** → `bulk-ingestion-checklist-v1`（进度勾选）→ `mainland-topology`（部署）
 
 ## 方案状态 vs 仓库实现（2026-06）
 
@@ -150,8 +162,8 @@ flowchart TB
 | SQL 读取层（Supabase） | `bulk-ingestion` Phase 2 | ✅ Drizzle、`movie-sql-store`、`movie-api` 优先 SQL |
 | JSON → SQL 迁移 | 可执行清单 S3 | ✅ `db:migrate:json` |
 | 列表 SQL 分页、详情 JOIN | 可执行清单 R1–R3 | ✅ `/movies`、`/movies/[slug]` |
-| 批量 staging 录入脚本 | 可执行清单 P1–P4 | ❌ 未实现 |
-| 海报上传 Supabase Storage | 可执行清单 S4 | ❌ 仍为本地 `public/media/` |
+| 批量 staging 录入脚本 | 可执行清单 P1–P4 | ✅ `scripts/bulk-ingest/`（Pilot 已验证 100 部） |
+| 海报上传 Supabase Storage | 可执行清单 S4 | ✅ `ingest:sync` + `ingest:upload-media`（需 `SUPABASE_SERVICE_ROLE_KEY`） |
 | 生产 VPS + CDN 部署 | `mainland-topology` + Phase 6 | ❌ 待决策与实施 |
 
 更细的命令与路径约定以 [AGENTS.md](../AGENTS.md) 文末「当前实施进度」为准；文档与代码冲突时，**以代码与 `AGENTS.md` 为权威**，并应反馈更新文档。

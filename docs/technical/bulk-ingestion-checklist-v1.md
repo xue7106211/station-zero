@@ -5,8 +5,8 @@ status: pending
 updated: 2026-06-25
 related:
   - technical/bulk-ingestion-scheme.md
+  - technical/bulk-ingestion-runbook.md
   - technical/movie-images.md
-  - technical/mainland-topology.md
 ---
 
 # 万级影视批量录入 — 可执行清单（v1）

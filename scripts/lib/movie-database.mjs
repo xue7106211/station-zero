@@ -1,3 +1,9 @@
+/**
+ * 【共享库】data/movies.json 读写与记录合并
+ *
+ * 供 legacy/ 下文件型 MVP 脚本使用：sync-movies、import-movies、extract-palettes。
+ * bulk-ingest 的 SQL 同步不经过本模块。
+ */
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, relative } from 'node:path';
 
@@ -99,9 +105,10 @@ export function normalizeMovieRecord(record, now = new Date().toISOString()) {
 
 export function toPublicMediaPath(filePath) {
   if (!filePath) return undefined;
-  if (filePath.startsWith('/')) return filePath;
-  const publicRelative = relative('public', filePath).replaceAll('\\\\', '/');
-  return publicRelative.startsWith('..') ? filePath : `/${publicRelative}`;
+  const normalized = String(filePath).replace(/\\/g, '/');
+  if (normalized.startsWith('/')) return normalized;
+  const publicRelative = relative('public', filePath).replace(/\\/g, '/');
+  return publicRelative.startsWith('..') ? normalized : `/${publicRelative}`;
 }
 
 function normalizeStringArray(value, fallback) {
