@@ -48,7 +48,7 @@ flowchart LR
 
 | 商家类型 | 代表 | 大陆线路 | 隐私 | 备注 |
 |----------|------|----------|------|------|
-| 低 KYC 境外 VPS | Bandwagon、DMIT、Akile 等 | 因套餐而异（CN2 GIA / CMI 等） | 较高 | 看是否接受支付宝/实名 |
+| 低 KYC 境外 VPS | Bandwagon、DMIT、Akile 等 | 因套餐而异（CN2 GIA / CMI 等） | 较高 | 看是否接受支付宝/实名；操作纪律见 [identity-isolation-notes.md](./identity-isolation-notes.md) |
 | 港云（强实名） | 阿里云/腾讯云 HK | 较稳 | 低 | 与隐私目标冲突，不默认 |
 
 **本项决策（填写）：**

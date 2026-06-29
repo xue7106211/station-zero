@@ -40,7 +40,7 @@ updated: 2026-06-29
 | 日常改页面 / 组件 / 读取层 | `AGENTS.md` | [movie-images.md](./technical/movie-images.md)（数据与图片原则） |
 | 人工录入单部或少量影片 | `AGENTS.md` → Agent 专用说明 | [movie-images.md](./technical/movie-images.md) § 当前项目落地状态 |
 | 规划或实现万级批量录入 | [bulk-ingestion-runbook.md](./technical/bulk-ingestion-runbook.md) | [bulk-ingestion-checklist-v1.md](./technical/bulk-ingestion-checklist-v1.md) → [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md) |
-| 选型 CDN / VPS / 大陆访问与隐私 | [mainland-topology.md](./technical/mainland-topology.md) | [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md) § 生产部署 |
+| 选型 CDN / VPS / 大陆访问与隐私 | [mainland-topology.md](./technical/mainland-topology.md) | [identity-isolation-notes.md](./technical/identity-isolation-notes.md) → [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md) § 生产部署 |
 | 配置 CDN 回源、Tunnel、源站隐藏 | [cdn-origin-setup.md](./technical/cdn-origin-setup.md) | [mainland-topology.md](./technical/mainland-topology.md) |
 | 理解海报 URL、Storage、CDN 关系 | [movie-images.md](./technical/movie-images.md) § 生产环境海报 URL 策略 | [cdn-origin-setup.md](./technical/cdn-origin-setup.md) § 媒体子域 |
 | 查某次功能的历史实施步骤 | `docs/archive/plans/` 对应文件 | 以 `src/` 与 `tests/` 实际代码为准 |
@@ -114,6 +114,15 @@ updated: 2026-06-29
 | 核心内容 | 境外 VPS + CDN 回源 + 源站隐藏；VPS/CDN 对比；回源 Header / mTLS；`media.` 子域出图 |
 | 对应清单任务 | **D1**、Phase 6 **G1–G5** |
 | 配置实操 | 见 [cdn-origin-setup.md](./technical/cdn-origin-setup.md) |
+
+#### [identity-isolation-notes.md](./technical/identity-isolation-notes.md)
+
+| 属性 | 值 |
+|------|-----|
+| type / status | `decision` / `active` |
+| 何时读 | 使用低 KYC VPS（如 Akile）时的账户、网络、支付隔离纪律 |
+| 核心内容 | 专用邮箱/浏览器；TUN VPN + Kill Switch；支付隔离；2FA；工单信息最小化 |
+| 与上篇关系 | 补充 `mainland-topology` § VPS 隐私/KYC 的操作细则 |
 
 #### [cdn-origin-setup.md](./technical/cdn-origin-setup.md)
 
