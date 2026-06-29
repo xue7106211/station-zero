@@ -67,6 +67,16 @@ flowchart LR
 |------|----------|------|
 | `checks/check-database.mjs` | `npm run check:database` | `DATABASE_URL` + 四张核心表 |
 | `checks/check-tmdb.mjs` | `npm run check:tmdb` | TMDB 凭证与网络 |
+| `checks/check-storage.mjs` | `npm run check:storage` | Supabase Storage 上传凭证（`SUPABASE_SERVICE_ROLE_KEY`） |
+
+## 相关文档
+
+| 主题 | 文档 |
+|------|------|
+| 文档总览 | [docs/index.md](../docs/index.md) |
+| 万级录入操作手册 | [docs/technical/bulk-ingestion-runbook.md](../docs/technical/bulk-ingestion-runbook.md) |
+| 图片与 Storage 策略 | [docs/technical/movie-images.md](../docs/technical/movie-images.md) |
+| 海报体积优化（draft） | [docs/technical/poster-compression-scheme.md](../docs/technical/poster-compression-scheme.md) |
 
 ## 共享库（lib）
 
@@ -84,4 +94,4 @@ npm run db:migrate          # 若 schema 未落库
 npm run ingest:pilot        # 100 部端到端
 ```
 
-报告见 `data/import/*-report.txt`。本目录说明见 [data/import/index.md](../data/import/index.md)。细节见 [bulk-ingest/index.md](./bulk-ingest/index.md)；操作手册见 [docs/technical/bulk-ingestion-runbook.md](../docs/technical/bulk-ingestion-runbook.md)。
+报告见 `data/import/*-report.txt`。本目录说明见 [data/import/index.md](../data/import/index.md)。细节见 [bulk-ingest/index.md](./bulk-ingest/index.md)；操作手册见 [docs/technical/bulk-ingestion-runbook.md](../docs/technical/bulk-ingestion-runbook.md)；文档总览见 [docs/index.md](../docs/index.md)。

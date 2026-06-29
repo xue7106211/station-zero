@@ -2,9 +2,10 @@
 title: 影片图片采集与缓存策略
 type: architecture
 status: active
-updated: 2026-06-27
+updated: 2026-06-29
 related:
   - technical/bulk-ingestion-scheme.md
+  - technical/poster-compression-scheme.md
   - technical/mainland-topology.md
   - technical/cdn-origin-setup.md
 ---
@@ -317,6 +318,6 @@ src/lib/movie-api.ts -> src/lib/movie-store.ts -> data/movies.json -> defaultMov
 - 万级批量录入操作见 [bulk-ingestion-runbook.md](./bulk-ingestion-runbook.md)；架构见 [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md)。
 - 把 `data/movies.json` 迁移到 SQLite 或 Postgres。
 - 为人工录入增加受保护的 `/admin` 表单。
-- 为图片增加压缩、尺寸统一和 WebP/AVIF 输出。
+- 为图片增加压缩、尺寸统一和 WebP/AVIF 输出 → 决策与实施路径见 [poster-compression-scheme.md](./poster-compression-scheme.md)（`draft`）。
 - 为同步任务增加失败报告和单片刷新能力。
 - 生产环境把 `public/media/` 替换为对象存储与 Cloudflare CDN。

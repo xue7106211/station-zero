@@ -43,6 +43,7 @@ updated: 2026-06-29
 | 选型 CDN / VPS / 大陆访问与隐私 | [mainland-topology.md](./technical/mainland-topology.md) | [identity-isolation-notes.md](./technical/identity-isolation-notes.md) → [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md) § 生产部署 |
 | 配置 CDN 回源、Tunnel、源站隐藏 | [cdn-origin-setup.md](./technical/cdn-origin-setup.md) | [mainland-topology.md](./technical/mainland-topology.md) |
 | 理解海报 URL、Storage、CDN 关系 | [movie-images.md](./technical/movie-images.md) § 生产环境海报 URL 策略 | [cdn-origin-setup.md](./technical/cdn-origin-setup.md) § 媒体子域 |
+| 评估 Supabase 海报体积优化（100+ 存量） | [poster-compression-scheme.md](./technical/poster-compression-scheme.md) | [movie-images.md](./technical/movie-images.md) § 图片处理建议 |
 | 查某次功能的历史实施步骤 | `docs/archive/plans/` 对应文件 | 以 `src/` 与 `tests/` 实际代码为准 |
 
 ## 文档目录
@@ -133,6 +134,16 @@ updated: 2026-06-29
 | 核心内容 | 回源时序；主站与 `media.` 双链路；方案 A/D 配置步骤；上线检查清单 |
 | 与上篇关系 | 选型见 `mainland-topology`；图片策略见 `movie-images` |
 
+#### [poster-compression-scheme.md](./technical/poster-compression-scheme.md)
+
+| 属性 | 值 |
+|------|-----|
+| type / status | `architecture` / `draft` |
+| 何时读 | Supabase 海报 ~200KB、要对齐竞品 ~30KB、规划存量 100+ 重压缩与入库规则 |
+| 核心内容 | 现状与问题；方案 A–D 对比；推荐「480px WebP + 存量 recompress」；Pilot 流程与验收 SQL |
+| 关键路径 | `scripts/bulk-ingest/sync-movies-to-sql.mts`、`storage-media.mts`、`media_assets.byte_size` |
+| 与上篇关系 | 落实 [movie-images.md](./technical/movie-images.md) § 图片处理建议；万级前建议先落地 |
+
 ---
 
 ### 归档 `docs/archive/plans/`
@@ -153,28 +164,36 @@ updated: 2026-06-29
 flowchart TB
   prd[product/station-zero-prd-v0.2.md]
   img[movie-images.md]
+  poster[poster-compression-scheme.md]
   bulk[bulk-ingestion-scheme.md]
   checklist[bulk-ingestion-checklist-v1.md]
   runbook[bulk-ingestion-runbook.md]
   topo[mainland-topology.md]
+  identity[identity-isolation-notes.md]
   cdn[cdn-origin-setup.md]
   agents[AGENTS.md]
 
   prd --> agents
   img --> bulk
+  img --> poster
+  poster --> img
   bulk --> checklist
   bulk --> runbook
   runbook --> checklist
   bulk --> topo
   img --> topo
+  topo --> identity
   topo --> cdn
   cdn --> img
   agents --> img
   checklist --> agents
 ```
 
-**阅读顺序建议（万级录入主线）：**  
-`movie-images`（现状）→ `bulk-ingestion-scheme`（方案）→ **`bulk-ingestion-runbook`（操作）** → `bulk-ingestion-checklist-v1`（进度勾选）→ `mainland-topology`（部署选型）→ **`cdn-origin-setup`（回源配置）**
+**阅读顺序建议：**
+
+- **万级录入主线：** `movie-images`（现状）→ `bulk-ingestion-scheme`（方案）→ **`bulk-ingestion-runbook`（操作）** → `bulk-ingestion-checklist-v1`（进度勾选）→ `mainland-topology`（部署选型）→ **`cdn-origin-setup`（回源配置）**
+- **海报体积优化：** `movie-images` § 图片处理建议 → `poster-compression-scheme`（draft）
+- **低 KYC VPS：** `mainland-topology` → `identity-isolation-notes`
 
 ## 方案状态 vs 仓库实现（2026-06）
 
@@ -187,6 +206,7 @@ flowchart TB
 | 列表 SQL 分页、详情 JOIN | 可执行清单 R1–R3 | ✅ `/movies`、`/movies/[slug]` |
 | 批量 staging 录入脚本 | 可执行清单 P1–P4 | ✅ `scripts/bulk-ingest/`（Pilot 已验证 100 部） |
 | 海报上传 Supabase Storage | 可执行清单 S4 | ✅ `ingest:sync` + `ingest:upload-media`（需 `SUPABASE_SERVICE_ROLE_KEY`） |
+| 海报入库压缩（WebP / 480px） | `poster-compression-scheme` | ❌ 方案 `draft`；当前默认 `w780` 原图上传 |
 | 生产 VPS + CDN 部署 | `mainland-topology` + Phase 6 | ❌ 待决策与实施；配置步骤见 `cdn-origin-setup` |
 
 更细的命令与路径约定以 [AGENTS.md](../AGENTS.md) 文末「当前实施进度」为准；文档与代码冲突时，**以代码与 `AGENTS.md` 为权威**，并应反馈更新文档。

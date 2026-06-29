@@ -67,4 +67,4 @@ npm run ingest:upload-media                                      # 补传 Storag
 
 报告输出：`data/import/staging-report.txt`、`resolve-report.txt`、`sync-report.txt`、`pilot-summary.txt`
 
-全量录入见 [docs/technical/bulk-ingestion-runbook.md](../../docs/technical/bulk-ingestion-runbook.md) 与 [bulk-ingestion-checklist-v1.md](../../docs/technical/bulk-ingestion-checklist-v1.md)。
+全量录入见 [docs/technical/bulk-ingestion-runbook.md](../../docs/technical/bulk-ingestion-runbook.md) 与 [docs/technical/bulk-ingestion-checklist-v1.md](../../docs/technical/bulk-ingestion-checklist-v1.md)。文档总览见 [docs/index.md](../../docs/index.md)。

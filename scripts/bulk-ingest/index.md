@@ -23,7 +23,8 @@ clean-import-txt  →  prepare-staging  →  resolve-tmdb-ids  →  sync-movies-
 | `run-pilot-ingest.mts` | 上面 3 步一键跑（不含 TXT 清洗） |
 | `shared.mts` | 公共工具，不要直接运行 |
 
-操作手册与 Pilot 经验：[docs/technical/bulk-ingestion-runbook.md](../../docs/technical/bulk-ingestion-runbook.md)
+操作手册与 Pilot 经验：[docs/technical/bulk-ingestion-runbook.md](../../docs/technical/bulk-ingestion-runbook.md)  
+图片与 Storage：[docs/technical/movie-images.md](../../docs/technical/movie-images.md) · 文档总览：[docs/index.md](../../docs/index.md)
 
 ## 常用命令
 

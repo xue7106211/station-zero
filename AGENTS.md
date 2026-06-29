@@ -27,7 +27,10 @@ station-zero/
 │   │   ├── bulk-ingestion-runbook.md         # 批量录入操作手册（Pilot 经验）
 │   │   ├── bulk-ingestion-checklist-v1.md    # 分阶段实施清单
 │   │   ├── movie-images.md                   # 图片本地化与 Storage / CDN 策略
-│   │   └── mainland-topology.md              # 生产 CDN / VPS 选型
+│   │   ├── poster-compression-scheme.md    # Supabase 海报体积优化方案（draft）
+│   │   ├── mainland-topology.md              # 生产 CDN / VPS 选型
+│   │   ├── cdn-origin-setup.md               # CDN 回源与媒体子域配置
+│   │   └── identity-isolation-notes.md       # 低 KYC VPS 身份隔离纪律
 │   └── archive/plans/                        # 已归档实施计划
 │
 ├── data/
@@ -110,8 +113,8 @@ station-zero/
 | `data/import/` | 批量清洗 CSV / 报告；大文件不进 Git（见 `index.md`） |
 | `scripts/` | 后台生产内容（TMDB、迁移、色板、批量录入），不在用户请求时运行 |
 | `public/media/` | sync 下载的本地海报缓存；DB 中 `poster_url` 指向 Supabase Storage |
-| `docs/index.md` | 文档索引与按任务选读；涉及产品/录入/部署时先查此表 |
-| `docs/technical/` | 万级录入、部署与图片策略的技术决策 |
+| `docs/index.md` | 文档索引与按任务选读；涉及产品/录入/部署/图片时先查此表 |
+| `docs/technical/` | 万级录入、图片策略、海报压缩、生产 CDN/VPS 与回源配置 |
 
 ### 当前页面路由
 
@@ -226,11 +229,24 @@ station-zero/
 3. 海报需 `SUPABASE_SERVICE_ROLE_KEY`；可单独 `npm run ingest:upload-media` 补传。
 4. 验收后 `npm run ingest:sync -- --publish` 上列表页。
 
-操作手册见 `docs/technical/bulk-ingestion-runbook.md`；架构见 `bulk-ingestion-scheme.md`；勾选清单见 `bulk-ingestion-checklist-v1.md`。
+操作手册见 `docs/technical/bulk-ingestion-runbook.md`；架构见 `docs/technical/bulk-ingestion-scheme.md`；勾选清单见 `docs/technical/bulk-ingestion-checklist-v1.md`。
 
-文档总览与按任务选读见 `docs/index.md`。
+**文档按主题（完整列表见 `docs/index.md`）：**
+
+| 主题 | 文档 |
+|------|------|
+| 文档总览 / 按任务选读 | `docs/index.md` |
+| 产品 PRD（当前） | `docs/product/station-zero-prd-v0.2.md` |
+| 图片、Storage、CDN URL | `docs/technical/movie-images.md` |
+| 海报体积优化（draft） | `docs/technical/poster-compression-scheme.md` |
+| 万级录入操作手册 | `docs/technical/bulk-ingestion-runbook.md` |
+| 万级录入架构方案 | `docs/technical/bulk-ingestion-scheme.md` |
+| 万级录入勾选清单 | `docs/technical/bulk-ingestion-checklist-v1.md` |
+| 大陆 CDN / VPS 选型 | `docs/technical/mainland-topology.md` |
+| CDN 回源与媒体子域 | `docs/technical/cdn-origin-setup.md` |
+| VPS 身份隔离纪律 | `docs/technical/identity-isolation-notes.md` |
 
 **当前实施进度：**
 
 - 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 100+ 部验证）、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）。
-- 未完成：生产 CDN / VPS 自托管部署；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）。
+- 未完成：生产 CDN / VPS 自托管部署（见 `mainland-topology.md`、`cdn-origin-setup.md`）；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）；海报入库压缩 WebP/480px（见 `poster-compression-scheme.md`，`draft`）。

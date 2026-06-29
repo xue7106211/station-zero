@@ -218,17 +218,29 @@ TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路
 
 ### 产品与技术文档
 
-完整索引与按任务选读见 [`docs/index.md`](docs/index.md)。
+完整索引与**按任务选读**见 [`docs/index.md`](docs/index.md)（Agent 与协作者首选入口）。开发约定见 [`AGENTS.md`](AGENTS.md)。
+
+| 主题 | 文档 |
+|------|------|
+| 产品 PRD（当前） | [`docs/product/station-zero-prd-v0.2.md`](docs/product/station-zero-prd-v0.2.md) |
+| 图片、Storage、CDN URL | [`docs/technical/movie-images.md`](docs/technical/movie-images.md) |
+| 海报体积优化（draft） | [`docs/technical/poster-compression-scheme.md`](docs/technical/poster-compression-scheme.md) |
+| 万级批量录入 · 操作手册 | [`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md) |
+| 万级批量录入 · 架构方案 | [`docs/technical/bulk-ingestion-scheme.md`](docs/technical/bulk-ingestion-scheme.md) |
+| 万级批量录入 · 勾选清单 | [`docs/technical/bulk-ingestion-checklist-v1.md`](docs/technical/bulk-ingestion-checklist-v1.md) |
+| 大陆 CDN / VPS 选型 | [`docs/technical/mainland-topology.md`](docs/technical/mainland-topology.md) |
+| CDN 回源与媒体子域 | [`docs/technical/cdn-origin-setup.md`](docs/technical/cdn-origin-setup.md) |
+| VPS 身份隔离纪律 | [`docs/technical/identity-isolation-notes.md`](docs/technical/identity-isolation-notes.md) |
 
 ### 万级批量录入
 
-Pilot 已验证端到端流水线（staging → TMDB 消歧 → SQL + Storage）。详见：
+Pilot 已验证端到端流水线（staging → TMDB 消歧 → SQL + Storage）。**推荐从操作手册入手**：
 
-- [`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md) — **操作手册**（推荐起点）
+- [`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md) — 操作手册
 - [`docs/technical/bulk-ingestion-scheme.md`](docs/technical/bulk-ingestion-scheme.md) — 架构方案
 - [`docs/technical/bulk-ingestion-checklist-v1.md`](docs/technical/bulk-ingestion-checklist-v1.md) — 分阶段清单
 
-当前已完成：Schema、读取层、bulk-ingest 脚本、Supabase Storage 海报上传。生产 CDN / VPS 部署仍在推进中。
+当前已完成：Schema、读取层、bulk-ingest 脚本、Supabase Storage 海报上传。待推进：生产 CDN / VPS 部署、海报入库压缩（见 `poster-compression-scheme.md`）。
 
 ## UI 与主题
 
