@@ -2,7 +2,7 @@
 title: Station Zero 文档索引
 type: index
 status: active
-updated: 2026-06-28
+updated: 2026-06-29
 ---
 
 # Station Zero 文档索引
@@ -41,7 +41,8 @@ updated: 2026-06-28
 | 人工录入单部或少量影片 | `AGENTS.md` → Agent 专用说明 | [movie-images.md](./technical/movie-images.md) § 当前项目落地状态 |
 | 规划或实现万级批量录入 | [bulk-ingestion-runbook.md](./technical/bulk-ingestion-runbook.md) | [bulk-ingestion-checklist-v1.md](./technical/bulk-ingestion-checklist-v1.md) → [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md) |
 | 选型 CDN / VPS / 大陆访问与隐私 | [mainland-topology.md](./technical/mainland-topology.md) | [bulk-ingestion-scheme.md](./technical/bulk-ingestion-scheme.md) § 生产部署 |
-| 理解海报 URL、Storage、CDN 关系 | [movie-images.md](./technical/movie-images.md) § 生产环境海报 URL 策略 | [mainland-topology.md](./technical/mainland-topology.md) |
+| 配置 CDN 回源、Tunnel、源站隐藏 | [cdn-origin-setup.md](./technical/cdn-origin-setup.md) | [mainland-topology.md](./technical/mainland-topology.md) |
+| 理解海报 URL、Storage、CDN 关系 | [movie-images.md](./technical/movie-images.md) § 生产环境海报 URL 策略 | [cdn-origin-setup.md](./technical/cdn-origin-setup.md) § 媒体子域 |
 | 查某次功能的历史实施步骤 | `docs/archive/plans/` 对应文件 | 以 `src/` 与 `tests/` 实际代码为准 |
 
 ## 文档目录
@@ -112,6 +113,16 @@ updated: 2026-06-28
 | 何时读 | 定 CDN、VPS 区域、回源方式、防火墙与拨测 |
 | 核心内容 | 境外 VPS + CDN 回源 + 源站隐藏；VPS/CDN 对比；回源 Header / mTLS；`media.` 子域出图 |
 | 对应清单任务 | **D1**、Phase 6 **G1–G5** |
+| 配置实操 | 见 [cdn-origin-setup.md](./technical/cdn-origin-setup.md) |
+
+#### [cdn-origin-setup.md](./technical/cdn-origin-setup.md)
+
+| 属性 | 值 |
+|------|-----|
+| type / status | `architecture` / `active` |
+| 何时读 | 理解 CDN 回源逻辑；配置 Cloudflare Tunnel / Header 鉴权；媒体子域与缓存规则 |
+| 核心内容 | 回源时序；主站与 `media.` 双链路；方案 A/D 配置步骤；上线检查清单 |
+| 与上篇关系 | 选型见 `mainland-topology`；图片策略见 `movie-images` |
 
 ---
 
@@ -137,6 +148,7 @@ flowchart TB
   checklist[bulk-ingestion-checklist-v1.md]
   runbook[bulk-ingestion-runbook.md]
   topo[mainland-topology.md]
+  cdn[cdn-origin-setup.md]
   agents[AGENTS.md]
 
   prd --> agents
@@ -146,12 +158,14 @@ flowchart TB
   runbook --> checklist
   bulk --> topo
   img --> topo
+  topo --> cdn
+  cdn --> img
   agents --> img
   checklist --> agents
 ```
 
 **阅读顺序建议（万级录入主线）：**  
-`movie-images`（现状）→ `bulk-ingestion-scheme`（方案）→ **`bulk-ingestion-runbook`（操作）** → `bulk-ingestion-checklist-v1`（进度勾选）→ `mainland-topology`（部署）
+`movie-images`（现状）→ `bulk-ingestion-scheme`（方案）→ **`bulk-ingestion-runbook`（操作）** → `bulk-ingestion-checklist-v1`（进度勾选）→ `mainland-topology`（部署选型）→ **`cdn-origin-setup`（回源配置）**
 
 ## 方案状态 vs 仓库实现（2026-06）
 
@@ -164,7 +178,7 @@ flowchart TB
 | 列表 SQL 分页、详情 JOIN | 可执行清单 R1–R3 | ✅ `/movies`、`/movies/[slug]` |
 | 批量 staging 录入脚本 | 可执行清单 P1–P4 | ✅ `scripts/bulk-ingest/`（Pilot 已验证 100 部） |
 | 海报上传 Supabase Storage | 可执行清单 S4 | ✅ `ingest:sync` + `ingest:upload-media`（需 `SUPABASE_SERVICE_ROLE_KEY`） |
-| 生产 VPS + CDN 部署 | `mainland-topology` + Phase 6 | ❌ 待决策与实施 |
+| 生产 VPS + CDN 部署 | `mainland-topology` + Phase 6 | ❌ 待决策与实施；配置步骤见 `cdn-origin-setup` |
 
 更细的命令与路径约定以 [AGENTS.md](../AGENTS.md) 文末「当前实施进度」为准；文档与代码冲突时，**以代码与 `AGENTS.md` 为权威**，并应反馈更新文档。
 

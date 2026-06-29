@@ -6,6 +6,7 @@ updated: 2026-06-27
 related:
   - technical/bulk-ingestion-scheme.md
   - technical/mainland-topology.md
+  - technical/cdn-origin-setup.md
 ---
 
 # 影片图片采集与缓存策略

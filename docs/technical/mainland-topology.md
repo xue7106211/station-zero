@@ -7,6 +7,7 @@ related:
   - technical/bulk-ingestion-scheme.md
   - technical/bulk-ingestion-checklist-v1.md
   - technical/movie-images.md
+  - technical/cdn-origin-setup.md
 ---
 
 # 大陆拓扑选型记录（一页）
@@ -137,5 +138,6 @@ flowchart LR
 
 ## 相关文档
 
+- [cdn-origin-setup.md](./cdn-origin-setup.md) — CDN 回源逻辑与 Cloudflare 配置步骤
 - [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md) — 总方案与 D1–D8
 - [movie-images.md](./movie-images.md) — 图片 CDN 缓存策略
