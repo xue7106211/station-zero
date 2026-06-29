@@ -44,6 +44,7 @@ updated: 2026-06-29
 | 配置 CDN 回源、Tunnel、源站隐藏 | [cdn-origin-setup.md](./technical/cdn-origin-setup.md) | [mainland-topology.md](./technical/mainland-topology.md) |
 | 理解海报 URL、Storage、CDN 关系 | [movie-images.md](./technical/movie-images.md) § 生产环境海报 URL 策略 | [cdn-origin-setup.md](./technical/cdn-origin-setup.md) § 媒体子域 |
 | 评估 Supabase 海报体积优化（100+ 存量） | [poster-compression-scheme.md](./technical/poster-compression-scheme.md) | [movie-images.md](./technical/movie-images.md) § 图片处理建议 |
+| 规划或实现站点电影搜索（片名 / IMDB / 影人） | [movie-search-scheme.md](./technical/movie-search-scheme.md) | `AGENTS.md` → `movie-api`；[station-zero-prd-v0.2.md](./product/station-zero-prd-v0.2.md) §11.2 |
 | 查某次功能的历史实施步骤 | `docs/archive/plans/` 对应文件 | 以 `src/` 与 `tests/` 实际代码为准 |
 
 ## 文档目录
@@ -134,6 +135,16 @@ updated: 2026-06-29
 | 核心内容 | 回源时序；主站与 `media.` 双链路；方案 A/D 配置步骤；上线检查清单 |
 | 与上篇关系 | 选型见 `mainland-topology`；图片策略见 `movie-images` |
 
+#### [movie-search-scheme.md](./technical/movie-search-scheme.md)
+
+| 属性 | 值 |
+|------|-----|
+| type / status | `architecture` / `draft` |
+| 何时读 | 规划访客搜索：片名、IMDB 编号、影人；Schema / API / UI 分期 |
+| 核心内容 | 现状缺口（无 `imdb_id`）；Postgres `pg_trgm`；`/search` + `/api/movies/search`；JSON 回退 |
+| 关键路径 | `movie-api.ts`、`movie-sql-store.ts`、`src/app/search/`（规划）、`ingest:sync` 补 `imdb_id` |
+| 与上篇关系 | 对齐 PRD 搜索指标；数据来自 bulk-ingest / SQL 片库，不实时 TMDB |
+
 #### [poster-compression-scheme.md](./technical/poster-compression-scheme.md)
 
 | 属性 | 值 |
@@ -165,6 +176,7 @@ flowchart TB
   prd[product/station-zero-prd-v0.2.md]
   img[movie-images.md]
   poster[poster-compression-scheme.md]
+  search[movie-search-scheme.md]
   bulk[bulk-ingestion-scheme.md]
   checklist[bulk-ingestion-checklist-v1.md]
   runbook[bulk-ingestion-runbook.md]
@@ -174,6 +186,8 @@ flowchart TB
   agents[AGENTS.md]
 
   prd --> agents
+  prd --> search
+  agents --> search
   img --> bulk
   img --> poster
   poster --> img
@@ -193,6 +207,7 @@ flowchart TB
 
 - **万级录入主线：** `movie-images`（现状）→ `bulk-ingestion-scheme`（方案）→ **`bulk-ingestion-runbook`（操作）** → `bulk-ingestion-checklist-v1`（进度勾选）→ `mainland-topology`（部署选型）→ **`cdn-origin-setup`（回源配置）**
 - **海报体积优化：** `movie-images` § 图片处理建议 → `poster-compression-scheme`（新入库已落地；存量迁移后续）
+- **电影搜索：** `movie-search-scheme`（draft）→ 实施时改 `movie-api` / Schema
 - **低 KYC VPS：** `mainland-topology` → `identity-isolation-notes`
 
 ## 方案状态 vs 仓库实现（2026-06）
@@ -208,6 +223,7 @@ flowchart TB
 | 批量 staging 录入脚本 | 可执行清单 P1–P4 | ✅ `scripts/bulk-ingest/`（Pilot 已验证 100 部） |
 | 海报上传 Supabase Storage | 可执行清单 S4 | ✅ `ingest:sync` + `ingest:upload-media`（需 `SUPABASE_SERVICE_ROLE_KEY`） |
 | 海报入库压缩（WebP / 480px） | `poster-compression-scheme` | ✅ bulk-ingest 新入库（w500 + 480px WebP）；存量 recompress 未做 |
+| 站点电影搜索 | `movie-search-scheme` | ❌ 方案 `draft`；无 `/search`、无 `imdb_id` 列 |
 | 生产 VPS + CDN 部署 | `mainland-topology` + Phase 6 | ❌ 待决策与实施；配置步骤见 `cdn-origin-setup` |
 
 更细的命令与路径约定以 [AGENTS.md](../AGENTS.md) 文末「当前实施进度」为准；文档与代码冲突时，**以代码与 `AGENTS.md` 为权威**，并应反馈更新文档。

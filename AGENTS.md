@@ -27,7 +27,8 @@ station-zero/
 │   │   ├── bulk-ingestion-runbook.md         # 批量录入操作手册（Pilot 经验）
 │   │   ├── bulk-ingestion-checklist-v1.md    # 分阶段实施清单
 │   │   ├── movie-images.md                   # 图片本地化与 Storage / CDN 策略
-│   │   ├── poster-compression-scheme.md    # Supabase 海报体积优化方案（draft）
+│   │   ├── poster-compression-scheme.md    # Supabase 海报体积优化方案
+│   │   ├── movie-search-scheme.md          # 站点电影搜索方案（draft）
 │   │   ├── mainland-topology.md              # 生产 CDN / VPS 选型
 │   │   ├── cdn-origin-setup.md               # CDN 回源与媒体子域配置
 │   │   └── identity-isolation-notes.md       # 低 KYC VPS 身份隔离纪律
@@ -245,7 +246,8 @@ station-zero/
 | 文档总览 / 按任务选读 | `docs/index.md` |
 | 产品 PRD（当前） | `docs/product/station-zero-prd-v0.2.md` |
 | 图片、Storage、CDN URL | `docs/technical/movie-images.md` |
-| 海报体积优化（draft） | `docs/technical/poster-compression-scheme.md` |
+| 海报体积优化 | `docs/technical/poster-compression-scheme.md` |
+| 站点电影搜索（draft） | `docs/technical/movie-search-scheme.md` |
 | 万级录入操作手册 | `docs/technical/bulk-ingestion-runbook.md` |
 | 万级录入架构方案 | `docs/technical/bulk-ingestion-scheme.md` |
 | 万级录入勾选清单 | `docs/technical/bulk-ingestion-checklist-v1.md` |
