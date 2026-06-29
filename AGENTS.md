@@ -255,5 +255,5 @@ station-zero/
 
 **当前实施进度：**
 
-- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 100+ 部验证）、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）。
-- 未完成：生产 CDN / VPS 自托管部署（见 `mainland-topology.md`、`cdn-origin-setup.md`）；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）；海报入库压缩 WebP/480px（见 `poster-compression-scheme.md`，`draft`）。
+- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 100+ 部验证）、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）、bulk-ingest 新入库海报压缩（TMDB w500 + 480px WebP，见 `poster-compression-scheme.md`）。
+- 未完成：生产 CDN / VPS 自托管部署（见 `mainland-topology.md`、`cdn-origin-setup.md`）；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）；存量海报 recompress（100+ 部仍可为 `.jpg` ~200KB）；legacy `sync:movies` 未接入 WebP 压缩。

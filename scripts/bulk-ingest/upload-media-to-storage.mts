@@ -16,6 +16,11 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { eq, sql } from "drizzle-orm";
 import { mediaAssets, movies } from "../../src/db/schema";
+import {
+  buildWebpOutputPath,
+  compressBackdropToWebp,
+  compressPosterToWebp,
+} from "./compress-image.mts";
 import { parseCliArgs, withDatabase } from "./shared.mts";
 import {
   isSupabaseStorageConfigured,
@@ -40,16 +45,35 @@ function needsUpload(url: string | null | undefined) {
 }
 
 function resolveLocalMediaFile(slug: string, kind: "poster" | "backdrop", currentUrl: string | null) {
+  const folder = kind === "poster" ? "posters" : "backdrops";
+  const outputDir = `public/media/${folder}`;
+  const webpPath = buildWebpOutputPath(outputDir, slug);
+  if (existsSync(webpPath)) return webpPath;
+
   const fromUrl = localPathFromMediaUrl(currentUrl, kind);
   if (fromUrl && existsSync(fromUrl)) return fromUrl;
 
-  const folder = kind === "poster" ? "posters" : "backdrops";
-  for (const extension of ["jpg", "jpeg", "webp", "png"]) {
-    const candidate = `public/media/${folder}/${slug}.${extension}`;
+  for (const extension of ["jpg", "jpeg", "png"]) {
+    const candidate = `${outputDir}/${slug}.${extension}`;
     if (existsSync(candidate)) return candidate;
   }
 
   return fromUrl;
+}
+
+async function ensureCompressedUploadFile(
+  localFile: string,
+  kind: "poster" | "backdrop",
+  slug: string,
+) {
+  if (localFile.toLowerCase().endsWith(".webp")) {
+    return localFile;
+  }
+
+  const outputDir = kind === "poster" ? "public/media/posters" : "public/media/backdrops";
+  return kind === "poster"
+    ? compressPosterToWebp(localFile, outputDir, slug)
+    : compressBackdropToWebp(localFile, outputDir, slug);
 }
 
 async function loadTargets(slugFilter: string) {
@@ -175,7 +199,8 @@ async function main() {
       if (needsUpload(movie.posterUrl)) {
         const localPoster = resolveLocalMediaFile(movie.slug, "poster", movie.posterUrl);
         if (localPoster && existsSync(localPoster)) {
-          posterUpload = await publishLocalMediaFile(config, localPoster, "poster", movie.slug);
+          const compressedPoster = await ensureCompressedUploadFile(localPoster, "poster", movie.slug);
+          posterUpload = await publishLocalMediaFile(config, compressedPoster, "poster", movie.slug);
         } else {
           console.warn(`[skip] ${movie.slug} poster file missing: ${localPoster ?? "unknown"}`);
         }
@@ -184,7 +209,8 @@ async function main() {
       if (needsUpload(movie.backdropUrl)) {
         const localBackdrop = resolveLocalMediaFile(movie.slug, "backdrop", movie.backdropUrl);
         if (localBackdrop && existsSync(localBackdrop)) {
-          backdropUpload = await publishLocalMediaFile(config, localBackdrop, "backdrop", movie.slug);
+          const compressedBackdrop = await ensureCompressedUploadFile(localBackdrop, "backdrop", movie.slug);
+          backdropUpload = await publishLocalMediaFile(config, compressedBackdrop, "backdrop", movie.slug);
         } else {
           console.warn(`[skip] ${movie.slug} backdrop file missing: ${localBackdrop ?? "unknown"}`);
         }

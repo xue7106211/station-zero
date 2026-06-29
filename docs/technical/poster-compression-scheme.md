@@ -1,7 +1,7 @@
 ---
 title: Supabase 海报体积优化方案
 type: architecture
-status: draft
+status: active
 updated: 2026-06-29
 related:
   - technical/movie-images.md
@@ -12,7 +12,7 @@ related:
 
 # Supabase 海报体积优化方案
 
-> 本文档沉淀 Station Zero 在 Supabase Storage 已存 100+ 部影片海报、单张约 **200KB** 背景下的体积优化决策与实施路径。**不含实现代码**，供后续评估与排期。图片 URL 策略与前端原则仍以 [movie-images.md](./movie-images.md) 为准。
+> 本文档沉淀 Station Zero 在 Supabase Storage 已存 100+ 部影片海报、单张约 **200KB** 背景下的体积优化决策与实施路径。图片 URL 策略与前端原则仍以 [movie-images.md](./movie-images.md) 为准。**bulk-ingest 新入库已接入 w500 + 480px WebP**；存量迁移与 legacy `sync:movies` 对齐见下文决策记录。
 
 ## 背景与问题
 
@@ -237,7 +237,7 @@ WHERE kind = 'poster';
 | 压缩模块 | `scripts/bulk-ingest/compress-image.mts`（新） | `resize` + `webp`；海报/背景不同 preset |
 | 同步入库 | `sync-movies-to-sql.mts` | 下载后 `compress` 再 `publishLocalMediaFile` |
 | Legacy | `sync-movies.mjs` | 可选对齐，避免双轨 |
-| 存量迁移 | `recompress-media-to-storage.mts`（**规划中**） | `npm run ingest:recompress-media`（尚未实现） |
+| 存量迁移 | `recompress-media-to-storage.mts`（**规划中**） | `npm run ingest:recompress-media`（尚未实现；本轮未做） |
 | 环境变量 | `.env.example` | `TMDB_IMAGE_BASE_URL`、`POSTER_MAX_WIDTH`、`POSTER_WEBP_QUALITY` |
 | 文档 | `movie-images.md`、`AGENTS.md` | 实施后更新「下一步」与命令表 |
 | 测试 | `tests/` | 压缩后路径、`mimeType`、`byteSize` 映射（可选） |
@@ -273,14 +273,15 @@ WHERE kind = 'poster';
 
 ---
 
-## 决策记录（待填）
+## 决策记录
 
 | 日期 | 决策 | 备注 |
 |------|------|------|
-| 2026-06-29 | 文档初稿，status `draft` | 基于 100+ 部、~200KB 实测与竞品 ~30KB 对比 |
-| | 是否实施方案 B | 待定 |
-| | Pilot slug 列表 | 待定 |
-| | 是否删除 Storage 旧 `.jpg` | 待定 |
+| 2026-06-29 | 文档初稿 | 基于 100+ 部、~200KB 实测与竞品 ~30KB 对比 |
+| 2026-06-29 | **新入库实施方案 B** | `ingest:sync` / `ingest:upload-media`：TMDB w500 + sharp 480px WebP |
+| 2026-06-29 | 存量迁移暂缓 | 100+ 部 `.jpg` 不本轮重压缩；后续可加 `ingest:recompress-media` |
+| 2026-06-29 | legacy `sync:movies` 未改 | 人工单部录入仍 w780 原图；万级走 bulk-ingest |
+| | 是否删除 Storage 旧 `.jpg` | 待定（新片为 `.webp`，与存量混存可接受） |
 
 ---
 

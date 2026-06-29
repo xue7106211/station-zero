@@ -38,8 +38,8 @@ flowchart LR
 | 2 消歧 | `bulk-ingest/resolve-tmdb-ids.mts` | `npm run ingest:resolve` | staging → 写入 `tmdb_id` |
 | 2b ambiguous | `bulk-ingest/resolve-ambiguous.mts` | `npm run ingest:resolve-ambiguous` | 自动/半自动消歧 |
 | 2c failed | `bulk-ingest/resolve-failed.mts` | `npm run ingest:resolve-failed` | 中文片名 + 年份容差重试 |
-| 3 落库 | `bulk-ingest/sync-movies-to-sql.mts` | `npm run ingest:sync` | TMDB + 磁力 → `movies` + 海报（可选 Storage） |
-| 3b Storage | `bulk-ingest/upload-media-to-storage.mts` | `npm run ingest:upload-media` | 本地海报补传到 Supabase Storage |
+| 3 落库 | `bulk-ingest/sync-movies-to-sql.mts` | `npm run ingest:sync` | TMDB w500/w1280 → 480px WebP → `movies` + Storage |
+| 3b Storage | `bulk-ingest/upload-media-to-storage.mts` | `npm run ingest:upload-media` | 本地海报压缩后补传到 Supabase Storage |
 | 一键 Pilot | `bulk-ingest/run-pilot-ingest.mts` | `npm run ingest:pilot` | 串联 1→2→3（默认 100 部） |
 
 共享逻辑在 `bulk-ingest/shared.mts`（CSV 解析、TMDB 客户端、SQL 字段映射）。
@@ -76,7 +76,9 @@ flowchart LR
 | 文档总览 | [docs/index.md](../docs/index.md) |
 | 万级录入操作手册 | [docs/technical/bulk-ingestion-runbook.md](../docs/technical/bulk-ingestion-runbook.md) |
 | 图片与 Storage 策略 | [docs/technical/movie-images.md](../docs/technical/movie-images.md) |
-| 海报体积优化（draft） | [docs/technical/poster-compression-scheme.md](../docs/technical/poster-compression-scheme.md) |
+| 海报体积优化 | [docs/technical/poster-compression-scheme.md](../docs/technical/poster-compression-scheme.md) |
+
+**bulk-ingest 图片 env（可选，见 `.env.example`）：** `TMDB_IMAGE_BASE_URL`（默认 w500）、`TMDB_BACKDROP_IMAGE_BASE_URL`（默认 w1280）、`POSTER_MAX_WIDTH`、`POSTER_WEBP_QUALITY`、`BACKDROP_MAX_WIDTH`、`BACKDROP_WEBP_QUALITY`。
 
 ## 共享库（lib）
 
@@ -84,6 +86,7 @@ flowchart LR
 |------|----------|
 | `lib/movie-database.mjs` | legacy 三脚本 |
 | `lib/palette.mjs` | legacy/sync、legacy/extract-palettes、bulk-ingest/sync |
+| `bulk-ingest/compress-image.mts` | bulk-ingest/sync、upload-media（sharp → WebP） |
 
 ## 推荐执行顺序（Pilot）
 

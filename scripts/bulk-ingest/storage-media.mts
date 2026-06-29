@@ -1,8 +1,8 @@
 /**
  * Supabase Storage 上传（bulk-ingest 脚本专用，仅服务端）
  *
- * bucket 默认 `media`，对象路径 `posters/{slug}.jpg` / `backdrops/{slug}.jpg`。
- * 公网 URL 与原先 16 部一致：`{SUPABASE_URL}/storage/v1/object/public/media/posters/...`
+ * bucket 默认 `media`，对象路径 `posters/{slug}.webp` / `backdrops/{slug}.webp`（bulk-ingest 压缩入库）。
+ * 公网 URL：`{SUPABASE_URL}/storage/v1/object/public/media/posters/...`
  */
 import { readFileSync } from "node:fs";
 import { extname } from "node:path";

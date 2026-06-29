@@ -2,8 +2,8 @@
  * 【批量录入 · 第 3 步】staging + TMDB → movies / viewing_paths / 海报
  *
  * 作用：读取 resolved 的 staging 行，拉 TMDB 详情 UPSERT 到 movies 表，
- *       写入磁力 viewing_paths（优先于 TMDB 正版路径），下载海报到 public/media/，
- *       若配置了 SUPABASE_SERVICE_ROLE_KEY 则上传到 Supabase Storage。
+ *       写入磁力 viewing_paths（优先于 TMDB 正版路径），下载海报（w500/w1280）并压缩为 WebP，
+ *       写入 public/media/；若配置了 SUPABASE_SERVICE_ROLE_KEY 则上传到 Supabase Storage。
  *
  * npm run ingest:sync -- --batch-id pilot-20260628
  * npm run ingest:sync -- --batch-id pilot-20260628 --publish   # 写入 published，上列表页
@@ -31,6 +31,11 @@ import {
   withDatabase,
 } from "./shared.mts";
 import {
+  buildWebpOutputPath,
+  compressBackdropToWebp,
+  compressPosterToWebp,
+} from "./compress-image.mts";
+import {
   publishLocalMediaFile,
   resolveSupabaseStorageConfig,
 } from "./storage-media.mts";
@@ -38,7 +43,9 @@ import {
 const execFileAsync = promisify(execFile);
 const posterDir = process.env.MOVIE_POSTER_DIR || "public/media/posters";
 const backdropDir = process.env.MOVIE_BACKDROP_DIR || "public/media/backdrops";
-const imageBase = process.env.TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/w780";
+const imageBase = process.env.TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/w500";
+const backdropImageBase =
+  process.env.TMDB_BACKDROP_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/w1280";
 const curlFallback = cleanEnv(process.env.TMDB_CURL_FALLBACK).toLowerCase() !== "false";
 
 type StagingRow = {
@@ -120,10 +127,14 @@ async function main() {
       const slug = await pickSlug(details, rows);
       const seedPaths = dedupeViewingPaths(rows);
       const sourcePosterUrl = details.poster_path ? `${imageBase}${details.poster_path}` : undefined;
-      const sourceBackdropUrl = details.backdrop_path ? `${imageBase}${details.backdrop_path}` : undefined;
-      const posterFile = sourcePosterUrl ? await downloadImage(sourcePosterUrl, posterDir, slug, "poster") : undefined;
+      const sourceBackdropUrl = details.backdrop_path
+        ? `${backdropImageBase}${details.backdrop_path}`
+        : undefined;
+      const posterFile = sourcePosterUrl
+        ? await ensureCompressedMedia(sourcePosterUrl, posterDir, slug, "poster")
+        : undefined;
       const backdropFile = sourceBackdropUrl
-        ? await downloadImage(sourceBackdropUrl, backdropDir, slug, "backdrop")
+        ? await ensureCompressedMedia(sourceBackdropUrl, backdropDir, slug, "backdrop")
         : undefined;
 
       let posterUrl = posterFile ? toPublicMediaPath(posterFile) : undefined;
@@ -373,6 +384,25 @@ async function safeExtractPalette(posterFile: string, slug: string) {
     console.warn(`Palette extraction failed for ${slug}: ${error instanceof Error ? error.message : error}`);
     return undefined;
   }
+}
+
+async function ensureCompressedMedia(
+  url: string,
+  outputDir: string,
+  slug: string,
+  kind: "poster" | "backdrop",
+) {
+  const webpPath = buildWebpOutputPath(outputDir, slug);
+  if (existsSync(webpPath)) {
+    return webpPath;
+  }
+
+  const rawFile = await downloadImage(url, outputDir, slug, kind);
+  if (!rawFile) return undefined;
+
+  return kind === "poster"
+    ? compressPosterToWebp(rawFile, outputDir, slug)
+    : compressBackdropToWebp(rawFile, outputDir, slug);
 }
 
 async function downloadImage(url: string, outputDir: string, slug: string, kind: string) {
