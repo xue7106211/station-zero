@@ -237,7 +237,7 @@ WHERE kind = 'poster';
 | 压缩模块 | `scripts/bulk-ingest/compress-image.mts`（新） | `resize` + `webp`；海报/背景不同 preset |
 | 同步入库 | `sync-movies-to-sql.mts` | 下载后 `compress` 再 `publishLocalMediaFile` |
 | Legacy | `sync-movies.mjs` | 可选对齐，避免双轨 |
-| 存量迁移 | `recompress-media-to-storage.mts`（新） | `npm run ingest:recompress-media` |
+| 存量迁移 | `recompress-media-to-storage.mts`（**规划中**） | `npm run ingest:recompress-media`（尚未实现） |
 | 环境变量 | `.env.example` | `TMDB_IMAGE_BASE_URL`、`POSTER_MAX_WIDTH`、`POSTER_WEBP_QUALITY` |
 | 文档 | `movie-images.md`、`AGENTS.md` | 实施后更新「下一步」与命令表 |
 | 测试 | `tests/` | 压缩后路径、`mimeType`、`byteSize` 映射（可选） |

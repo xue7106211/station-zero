@@ -60,7 +60,8 @@ station-zero/
 │   ├── app/                  # Next.js App Router
 │   │   ├── layout.tsx        # 根布局、主题首屏脚本
 │   │   ├── globals.css       # 全局样式与 `--sz-*` 设计 token
-│   │   ├── page.tsx          # 首页
+│   │   ├── page.tsx          # 首页（影片网格 SSR + 加载更多）
+│   │   ├── api/movies/route.ts  # GET 分页 JSON（首页加载更多）
 │   │   ├── about/page.tsx
 │   │   ├── collections/page.tsx
 │   │   ├── knowledge/page.tsx
@@ -69,11 +70,14 @@ station-zero/
 │   │       └── [slug]/page.tsx  # 影片详情（决策页核心）
 │   │
 │   ├── components/           # UI 组件
-│   │   ├── site-shell.tsx    # 页面外壳、页脚
+│   │   ├── site-shell.tsx    # 页面外壳、背景光晕、内容容器
 │   │   ├── site-header.tsx   # 吸顶头部
-│   │   ├── site-nav.tsx      # 主导航与移动端 Drawer
+│   │   ├── site-footer.tsx   # 页脚
+│   │   ├── site-nav.tsx      # 主导航（桌面 pill + 动态加载 MobileNav）
+│   │   ├── mobile-nav.tsx    # 移动端 Drawer 菜单
 │   │   ├── theme-toggle.tsx  # 浅/深/跟随系统主题
 │   │   ├── movie-card.tsx    # 影片卡片（懒加载海报）
+│   │   ├── movie-load-more-grid.tsx  # 首页影片网格（加载更多）
 │   │   ├── movie-pagination.tsx
 │   │   ├── decision-tags.tsx # verdict + bestWay 标签
 │   │   ├── poster-ambient-glow.tsx
@@ -91,6 +95,7 @@ station-zero/
 │       ├── movie-store.ts    # JSON 文件读取
 │       ├── movie-mapper.ts   # SQL 行 → Movie 映射
 │       ├── movies-pagination.ts # 列表分页工具
+│       ├── nav-items.ts      # 主导航项配置
 │       ├── theme.ts          # 主题偏好逻辑
 │       └── theme.mjs         # 主题工具（供 Node 测试复用）
 │
@@ -118,7 +123,7 @@ station-zero/
 
 ### 当前页面路由
 
-- `/` — 首页：产品定位、精选影片（`published`）、片单与高清知识入口。
+- `/` — 首页：已发布影片网格（`getMoviesPage` SSR 首屏 + `/api/movies` 加载更多）。
 - `/movies` — 影片库列表（SQL 分页，30 条/页，仅 `published`）。
 - `/movies/[slug]` — 影片详情页（Top 50 `published` SSG 预热，其余 ISR）。
 - `/collections` — 策展片单。
@@ -127,9 +132,11 @@ station-zero/
 
 ### 关键前端组件
 
-- `src/components/site-shell.tsx` — 站点外壳（背景光晕、页脚）。
+- `src/components/site-shell.tsx` — 站点外壳（背景光晕、内容容器）。
 - `src/components/site-header.tsx` — 吸顶头部（滚动后 `backdrop-blur`）。
-- `src/components/site-nav.tsx` — 主导航（路由激活态、移动端 Drawer、主题切换入口）。
+- `src/components/site-nav.tsx` — 主导航（桌面 pill、主题切换入口；移动端 Drawer 由 `mobile-nav.tsx` 承担）。
+- `src/components/site-footer.tsx` — 页脚（合规声明与次要导航）。
+- `src/components/movie-load-more-grid.tsx` — 首页影片网格与「加载更多」。
 - `src/components/theme-toggle.tsx` — 三段式主题切换（浅色 / 深色 / 跟随系统）。
 - `src/components/decision-tags.tsx` — 详情页决策标签（`verdict` + `bestWay`）。
 - `src/components/poster-ambient-glow.tsx` — 详情页海报氛围光晕（读取 `palette` 或回退模糊海报）。

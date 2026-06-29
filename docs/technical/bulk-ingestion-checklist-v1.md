@@ -98,7 +98,12 @@ Phase 0 ─┬─ Phase 1 ── Phase 2 ─┐
 ## 相关文档
 
 - [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md) — 完整方案与决策依据
+- [bulk-ingestion-runbook.md](./bulk-ingestion-runbook.md) — 批量录入操作手册
 - [movie-images.md](./movie-images.md) — 当前文件型 MVP 与图片策略
+- [poster-compression-scheme.md](./poster-compression-scheme.md) — 海报体积优化（draft）
 - [mainland-topology.md](./mainland-topology.md) — 大陆 CDN / VPS 选型
+- [cdn-origin-setup.md](./cdn-origin-setup.md) — CDN 回源配置
+- [identity-isolation-notes.md](./identity-isolation-notes.md) — VPS 身份隔离纪律
+- [docs/index.md](../index.md) — 文档总览
 - [AGENTS.md](../../AGENTS.md) — 仓库开发与录入约定
 

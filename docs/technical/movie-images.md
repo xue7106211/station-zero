@@ -298,25 +298,26 @@ npm run import:movies -- path/to/movies.json
 
 ### 前端读取原则
 
-前端统一从 `src/lib/movie-api.ts` 读取电影数据，但该文件现在只是本地内容库的门面：
+前端统一从 `src/lib/movie-api.ts` 读取电影数据：
 
 ```txt
-src/lib/movie-api.ts -> src/lib/movie-store.ts -> data/movies.json -> defaultMovies fallback
+movie-api.ts
+  → 有 DATABASE_URL：movie-sql-store.ts（Supabase SQL，优先）
+  → 无库 / SQL 失败：movie-store.ts → data/movies.json → content.ts 默认策展回退
 ```
 
-这保留了页面调用方式，同时切断了前台实时外部 API 依赖。
+首页「加载更多」经 `GET /api/movies?page=` 调用同一 `getMoviesPage` 门面。页面不在用户访问时请求 TMDB 或其他外部电影 API。
 
 ### 缓存策略
 
 - `/media/:path*` 设置 `Cache-Control: public, max-age=31536000, immutable`。
 - 首页、影片列表页、影片详情页设置 `revalidate = 86400`。
-- 影片列表中的非首屏图片使用懒加载。
-- 首页主推影片保留 `priority`，优先加载首屏主视觉。
+- 列表与首页网格中的非首屏图片使用懒加载；首页首屏前 6 张海报保留 `priority`。
 
 ### 下一步建议
 
 - 万级批量录入操作见 [bulk-ingestion-runbook.md](./bulk-ingestion-runbook.md)；架构见 [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md)。
-- 把 `data/movies.json` 迁移到 SQLite 或 Postgres。
+- 把 `data/movies.json` 迁移到 Postgres（Supabase 已落地；JSON 仍作编辑源与回退）。
 - 为人工录入增加受保护的 `/admin` 表单。
 - 为图片增加压缩、尺寸统一和 WebP/AVIF 输出 → 决策与实施路径见 [poster-compression-scheme.md](./poster-compression-scheme.md)（`draft`）。
 - 为同步任务增加失败报告和单片刷新能力。

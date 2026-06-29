@@ -204,6 +204,7 @@ flowchart TB
 | SQL 读取层（Supabase） | `bulk-ingestion` Phase 2 | ✅ Drizzle、`movie-sql-store`、`movie-api` 优先 SQL |
 | JSON → SQL 迁移 | 可执行清单 S3 | ✅ `db:migrate:json` |
 | 列表 SQL 分页、详情 JOIN | 可执行清单 R1–R3 | ✅ `/movies`、`/movies/[slug]` |
+| 首页加载更多 | `movie-api` + `/api/movies` | ✅ `MovieLoadMoreGrid`、`src/app/api/movies/route.ts` |
 | 批量 staging 录入脚本 | 可执行清单 P1–P4 | ✅ `scripts/bulk-ingest/`（Pilot 已验证 100 部） |
 | 海报上传 Supabase Storage | 可执行清单 S4 | ✅ `ingest:sync` + `ingest:upload-media`（需 `SUPABASE_SERVICE_ROLE_KEY`） |
 | 海报入库压缩（WebP / 480px） | `poster-compression-scheme` | ❌ 方案 `draft`；当前默认 `w780` 原图上传 |
