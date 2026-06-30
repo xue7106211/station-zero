@@ -75,6 +75,7 @@ flowchart LR
 |------|------|
 | 文档总览 | [docs/index.md](../docs/index.md) |
 | 万级录入操作手册 | [docs/technical/bulk-ingestion-runbook.md](../docs/technical/bulk-ingestion-runbook.md) |
+| 站点电影搜索 | [docs/technical/movie-search-scheme.md](../docs/technical/movie-search-scheme.md) |
 | 图片与 Storage 策略 | [docs/technical/movie-images.md](../docs/technical/movie-images.md) |
 | 海报体积优化 | [docs/technical/poster-compression-scheme.md](../docs/technical/poster-compression-scheme.md) |
 

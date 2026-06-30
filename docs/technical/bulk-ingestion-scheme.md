@@ -2,7 +2,7 @@
 title: 万级影视批量录入与 SQL 迁移方案
 type: architecture
 status: draft
-updated: 2026-06-24
+updated: 2026-06-30
 related:
   - technical/bulk-ingestion-checklist-v1.md
   - technical/movie-images.md
@@ -429,7 +429,7 @@ flowchart LR
 
 | 顺序 | 动作 |
 |------|------|
-| 1 | Schema + 迁移现有 ~16 条 `movies.json` → SQL + 海报上传对象存储 |
+| 1 | Schema + `movies.json` → SQL + 海报上传 Supabase Storage |
 | 2 | `movie-store` 改读 SQL；列表分页 + 懒加载 |
 | 3 | 100 条 pilot 端到端 |
 | 4 | 全量 1 万+ 分批录入 |
@@ -454,16 +454,24 @@ flowchart LR
 
 ---
 
-## 待实现脚本（规划）
+## 已实现脚本（`scripts/bulk-ingest/`）
 
-| 脚本 | 职责 |
-|------|------|
-| `scripts/prepare-staging.mjs` | CSV → `import_staging` |
-| `scripts/resolve-tmdb-ids.mjs` | TMDB year 消歧 + 复核报告 |
-| `scripts/sync-movies-to-sql.mjs` | 改造 sync sink：SQL + 对象存储 |
-| `scripts/migrate-json-to-sql.mjs` | 一次性迁移现有 `movies.json` |
+| 脚本 | npm 命令 | 职责 |
+|------|----------|------|
+| `clean-import-txt.mjs` | （手动 `node`） | 原始 TXT → `movies-clean.csv` |
+| `prepare-staging.mts` | `npm run ingest:staging` | CSV → `import_staging` |
+| `resolve-tmdb-ids.mts` | `npm run ingest:resolve` | TMDB 年份消歧 + 复核报告 |
+| `resolve-ambiguous.mts` | `npm run ingest:resolve-ambiguous` | ambiguous 自动 / 半自动消歧 |
+| `resolve-failed.mts` | `npm run ingest:resolve-failed` | failed 重试（中文片名 + 年份容差） |
+| `sync-movies-to-sql.mts` | `npm run ingest:sync` | SQL UPSERT + w500 海报压缩 WebP → Storage |
+| `upload-media-to-storage.mts` | `npm run ingest:upload-media` | 本地海报补传 Storage |
+| `compress-image.mts` | （模块） | sharp resize + WebP |
+| `run-pilot-ingest.mts` | `npm run ingest:pilot` | 一键 Pilot（默认 100 部） |
+| `scripts/legacy/migrate-json-to-sql.mts` | `npm run db:migrate:json` | 一次性迁移 `movies.json` → SQL |
 
-现有命令在过渡期仍可用：`npm run sync:movies`、`npm run import:movies`（写入 JSON，非本方案终点）。
+索引与命令表见 [scripts/index.md](../../scripts/index.md)、[bulk-ingestion-runbook.md](./bulk-ingestion-runbook.md)。
+
+过渡期 legacy 命令仍可用：`npm run sync:movies`、`npm run import:movies`（写入 JSON，非万级录入终点）。
 
 ---
 

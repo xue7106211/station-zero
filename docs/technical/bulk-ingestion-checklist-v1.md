@@ -2,7 +2,7 @@
 title: 万级影视批量录入 — 可执行清单（v1）
 type: runbook
 status: pending
-updated: 2026-06-25
+updated: 2026-06-30
 related:
   - technical/bulk-ingestion-scheme.md
   - technical/bulk-ingestion-runbook.md
@@ -12,6 +12,8 @@ related:
 # 万级影视批量录入 — 可执行清单（v1）
 
 > 本文是 [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md) 的**可执行落地版**：分阶段、可勾选的 TODO。决策依据与背景见原文档，本文只列动作。
+>
+> **实施进度（2026-06-30）**：Phase 1–4 工程项已在仓库落地（Pilot 100+ 验证）；Phase 0 部署决策、Phase 5 全量录入、Phase 6 生产部署仍待推进。勾选状态以代码与 [AGENTS.md](../../AGENTS.md) 为准。
 
 ## 输入约束（本轮强调）
 
@@ -33,36 +35,36 @@ related:
 
 ## Phase 0 — 决策与隐私边界（门禁，0.5–1 天）
 
-- [ ] **D0** 锁定数据层：Supabase（Postgres + Storage）作后端，**前端不直连**、仅 app server / 脚本访问
+- [x] **D0** 锁定数据层：Supabase（Postgres + Storage）作后端，**前端不直连**、仅 app server / 脚本访问
 - [ ] **D1** 锁定大陆拓扑：境外 VPS（HK/SG/JP）Docker + CDN 回源 + 源站隐藏；填写 [mainland-topology.md](./mainland-topology.md)（CDN 供应商、线路、回源方式）
 - [ ] **D2** 域名 + WHOIS 隐私：支持 Redaction 的注册商 + 项目专用邮箱
 - [ ] **D3** 身份隔离：VPS 账单 / 邮箱 / SSH 密钥全用项目专用身份，与个人分离；确认可接受实名程度（默认不走境内 ICP 备案）
 
 ## Phase 1 — Schema + 迁移基建（2–3 天）
 
-- [ ] **S1** Drizzle schema：`movies` / `viewing_paths` / `media_assets` / `import_staging`（字段照原文档草案）
+- [x] **S1** Drizzle schema：`movies` / `viewing_paths` / `media_assets` / `import_staging`（字段照原文档草案）
 - [ ] **S2** Supabase 项目 + `drizzle-kit` migration 落库；DB 仅内网 / IP 白名单，**禁公网 `0.0.0.0/0`**
-- [ ] **S3** `migrate-json-to-sql.mjs`：现有 ~16 条 `data/movies.json` → SQL
-- [ ] **S4** 海报上传 Supabase Storage（私有 bucket）→ 写 `media_assets` + `movies.poster_url`
+- [x] **S3** `scripts/legacy/migrate-json-to-sql.mts`：`data/movies.json` → SQL（`npm run db:migrate:json`）
+- [x] **S4** 海报上传 Supabase Storage → 写 `media_assets` + `movies.poster_url`（`ingest:sync` / `ingest:upload-media`）
 
 ## Phase 2 — 读取层改造（2–3 天）
 
-- [ ] **R1** `movie-store` 改读 SQL；`/movies` 列表 SQL 分页（30/页，`ORDER BY updated_at DESC`），海报 `loading="lazy"`
-- [ ] **R2** `/movies/[slug]` 详情：`movies` JOIN `viewing_paths` 单次查询，按平台分组
-- [ ] **R3** 构建策略：published Top N（~50）预热，其余 ISR / 动态，**不全量 SSG**
-- [ ] **R4** 保留 `DATABASE_URL` 缺失时的 JSON fallback
+- [x] **R1** `movie-api` SQL 优先；`/movies` 列表 SQL 分页（30/页，`ORDER BY updated_at DESC`），海报 `loading="lazy"`
+- [x] **R2** `/movies/[slug]` 详情：`movies` JOIN `viewing_paths` 单次查询，按平台分组
+- [x] **R3** 构建策略：published Top N（~50）预热，其余 ISR / 动态，**不全量 SSG**
+- [x] **R4** 保留 `DATABASE_URL` 缺失时的 JSON fallback
 
 ## Phase 3 — 录入流水线脚本（2–3 天，可与 Phase 2 并行）
 
-- [ ] **P1** `prepare-staging.mjs`：解析"片名+年份+链接"原始串（含 magnet / 体积 / 字幕格式）→ 拆出 `title/year/url/platform/type`，`COPY` 进 `import_staging`，`batch_id` 每 500 条
-- [ ] **P2** `resolve-tmdb-ids.mjs`：`/search/movie?query=&year=` **带年份消歧**；唯一→采纳，多候选→`ambiguous-report.csv`，无果→`failed`；`--concurrency 3 --delay-ms 250`，checkpoint + `--resume`
-- [ ] **P3** 人工复核 ambiguous 队列，回写 `tmdb_id`
-- [ ] **P4** `sync-movies-to-sql.mjs`：TMDB detail UPSERT（`ON CONFLICT slug`）+ `viewing_paths` 批量 INSERT（**staging 链接优先，不被 TMDB 覆盖**）+ 图片压 WebP→Storage + 事务断点 + `sync_failures`
+- [x] **P1** `scripts/bulk-ingest/prepare-staging.mts`：解析原始串 → `import_staging`（`npm run ingest:staging`）
+- [x] **P2** `scripts/bulk-ingest/resolve-tmdb-ids.mts`：TMDB 带年份消歧（`npm run ingest:resolve`）
+- [x] **P3** 人工复核 ambiguous 队列，回写 `tmdb_id`（`resolve-ambiguous` + 报告 CSV）
+- [x] **P4** `scripts/bulk-ingest/sync-movies-to-sql.mts`：TMDB UPSERT + viewing_paths + WebP→Storage（`npm run ingest:sync`）
 
 ## Phase 4 — Pilot（0.5–1 天）
 
-- [ ] **T1** 100 条端到端：CSV→staging→resolve→sync→分页列表 + CDN 海报 + 详情链接分组
-- [ ] **T2** 统计错配率、单条耗时；**在大陆网络实测**列表 / 详情 / 图片可用率
+- [x] **T1** 100 条端到端：CSV→staging→resolve→sync→分页列表 + Storage 海报 + 详情链接分组
+- [ ] **T2** 统计错配率、单条耗时；**在大陆网络实测**列表 / 详情 / 图片可用率（依赖 Phase 6 生产部署）
 
 ## Phase 5 — 全量录入（2–4 天）
 
@@ -86,21 +88,21 @@ Phase 0 ─┬─ Phase 1 ── Phase 2 ─┐
          └─ Phase 3 ────────────┴─ Phase 4 ── Phase 5 ── Phase 6
 ```
 
-- Phase 0 是门禁，不定无法进 Phase 1。
+- Phase 0 **D1**（大陆拓扑 / CDN）仍是生产门禁；工程侧 Phase 1–4 已落地。
 - Phase 2（读取层）与 Phase 3（录入脚本）可并行。
 - 合计约 **10–17 个工作日**（与原文档时间预期一致）。
 
-## 待拍板（阻塞 Phase 1）
+## 待拍板（阻塞全量与生产）
 
-1. **数据层**：确认 Supabase + 前端不直连？还是全自建 PG + S3？
-2. **CDN 供应商方向**（Bunny / Cloudflare / 其他）→ 影响 G2 回源认证方式。
+1. **CDN 供应商方向**（Bunny / Cloudflare / 其他）→ 影响 G2 回源认证方式（**D1**）。
+2. **Supabase DB 网络策略**：是否收紧 IP 白名单（**S2**，运维项）。
 
 ## 相关文档
 
 - [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md) — 完整方案与决策依据
 - [bulk-ingestion-runbook.md](./bulk-ingestion-runbook.md) — 批量录入操作手册
 - [movie-images.md](./movie-images.md) — 当前文件型 MVP 与图片策略
-- [poster-compression-scheme.md](./poster-compression-scheme.md) — 海报体积优化（draft）
+- [poster-compression-scheme.md](./poster-compression-scheme.md) — 海报体积优化（bulk-ingest 新入库已落地）
 - [mainland-topology.md](./mainland-topology.md) — 大陆 CDN / VPS 选型
 - [cdn-origin-setup.md](./cdn-origin-setup.md) — CDN 回源配置
 - [identity-isolation-notes.md](./identity-isolation-notes.md) — VPS 身份隔离纪律

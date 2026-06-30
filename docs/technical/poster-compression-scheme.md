@@ -2,7 +2,7 @@
 title: Supabase 海报体积优化方案
 type: architecture
 status: active
-updated: 2026-06-29
+updated: 2026-06-30
 related:
   - technical/movie-images.md
   - technical/bulk-ingestion-scheme.md
@@ -18,19 +18,19 @@ related:
 
 ### 现状
 
-| 项目 | 当前值 |
-|------|--------|
-| 已入库影片 | 100+（Pilot / bulk-ingest） |
-| Storage 单张海报体积 | 约 **150–250KB**（典型 ~200KB） |
-| TMDB 拉取尺寸 | 默认 **`w780`**（宽 780px JPEG） |
-| 入库处理 | 下载 → 原样上传 Supabase（**无压缩**） |
-| 页面展示宽度 | 列表卡片约 **150–220px**；详情页 `sizes="230px"` |
-| 前端交付 | `next/image` 默认开启优化（`unoptimized: false`） |
+| 项目 | legacy / 存量 | bulk-ingest 新入库（当前默认） |
+|------|----------------|--------------------------------|
+| 已入库影片 | 100+（Pilot 前多为 w780 JPEG） | Pilot 100+ 已走压缩管线 |
+| Storage 单张海报体积 | 约 **150–250KB**（典型 ~200KB） | 约 **30–50KB**（480px WebP） |
+| TMDB 拉取尺寸 | **`w780`**（`sync:movies`） | **`w500`**（`ingest:sync`） |
+| 入库处理 | 下载 → 原样上传 | sharp 压缩 → WebP → Storage |
+| 页面展示宽度 | 列表卡片约 **150–220px**；详情页 `sizes="230px"` | 同上 |
+| 前端交付 | `next/image` 默认开启优化（`unoptimized: false`） | 同上 |
 
 关键脚本与配置：
 
-- `scripts/bulk-ingest/sync-movies-to-sql.mts` — `TMDB_IMAGE_BASE_URL` 默认 `w780`
-- `scripts/legacy/sync-movies.mjs` — 同上
+- `scripts/bulk-ingest/sync-movies-to-sql.mts` — `TMDB_IMAGE_BASE_URL` 默认 **`w500`**；`compress-image.mts` → WebP
+- `scripts/legacy/sync-movies.mjs` — 仍默认 **`w780`**，无压缩
 - `scripts/bulk-ingest/storage-media.mts` — 原文件 `readFileSync` 后 `x-upsert` 上传
 - `scripts/bulk-ingest/upload-media-to-storage.mts` — 补传本地 → Storage
 - `src/db/schema.ts` — `media_assets.byte_size` 已记录体积
@@ -41,7 +41,7 @@ related:
 1. **Storage 存的是「展示尺寸的 3–5 倍」大图**，万级规模时带宽、存储与同步成本线性放大。
 2. **竞品同类海报约 20–30KB**（见 [movie-images.md](./movie-images.md) 竞品观察），差距主要来自 **入库时按展示尺寸导出**，而非 CDN 本身。
 3. **开发环境**若开启 `NEXT_IMAGE_UNOPTIMIZED=true`，浏览器会直连 200KB 原图，列表滚动体感明显变差。
-4. [movie-images.md](./movie-images.md) § 图片处理建议 已写明「海报统一 480/640px、WebP/AVIF」，**工程侧尚未落地**。
+4. [movie-images.md](./movie-images.md) § 图片处理建议 已写明「海报统一 480/640px、WebP/AVIF」；**bulk-ingest 新入库已落地**，legacy `sync:movies` 与存量 recompress 仍待做。
 
 ### 非目标（本方案不做）
 

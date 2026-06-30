@@ -13,7 +13,7 @@ related:
 # 站点电影搜索方案
 
 > 本文档描述 Station Zero **访客侧电影搜索**的技术方案：支持片名、IMDB 编号、影人（导演 / 主演 / 编剧）查询。  
-> **不含实现代码**；实施前以本文 + [AGENTS.md](../../AGENTS.md) 数据读取原则为准。产品成功指标见 [station-zero-prd-v0.2.md](../product/station-zero-prd-v0.2.md) §11.2「搜索与筛选使用率」。
+> **Phase A 已落地**（2026-06-30）；Phase B/C 规划见下文分期。实施细节以 `src/lib/movie-api.ts`、`src/lib/movie-search.ts` 与 [AGENTS.md](../../AGENTS.md) 为准。产品成功指标见 [station-zero-prd-v0.2.md](../product/station-zero-prd-v0.2.md) §11.2「搜索与筛选使用率」。
 
 ## 背景与目标
 
@@ -45,7 +45,7 @@ related:
 
 ---
 
-## 现状与缺口
+## 现状与缺口（2026-06-30）
 
 ### 可直接用于搜索的字段
 
@@ -61,29 +61,31 @@ related:
 | `writers` | text[] | 编剧 |
 | `year` | text | 结果展示、消歧 |
 | `slug` | text | 详情页链接 |
+| `imdb_id` | text | IMDB 外部 ID（`tt…` 精确搜索） |
 | `tmdb_id` | integer | 后台同步，访客一般不搜 |
 
-已有索引：`movies_content_status_updated_at_idx`、`movies_tmdb_id_idx`。
+已有索引：`movies_content_status_updated_at_idx`、`movies_tmdb_id_idx`、`movies_imdb_id_unique_idx`（部分唯一）、`pg_trgm` 相关索引（见 `drizzle/0001_movie_search.sql`）。
 
-### 关键缺口：IMDB 编号
+### IMDB 编号（Phase A 已补列；存量 backfill 待做）
 
-当前 `ratings.imdb`（jsonb）存的是 **评分展示字符串**，bulk-ingest 同步时甚至用 TMDB `vote_average` 填充，**不是** `tt0137523` 这种外部 ID。
+`ratings.imdb`（jsonb）存的是 **评分展示字符串**，与 `movies.imdb_id` 外部 ID **无关**。
 
-- Schema **无** `imdb_id` 列。
-- 同步脚本 **未** 拉取 TMDB `external_ids.imdb_id`。
+- Schema 已有 `imdb_id` 列；`ingest:sync` 写入 TMDB `external_ids.imdb_id`。
+- **存量** Pilot 前入库的影片可能仍缺 `imdb_id`；`backfill-imdb-ids.mts` 尚未实现。
 
-**结论：** 「按 IMDB 编号搜索」必须先补数据层，不能仅靠现有字段。
+**结论：** 新入库影片支持 IMDB 搜索；存量需 backfill 后 IMDB 直搜才全覆盖。
 
 ### 影人数据形态
 
 导演 / 主演 / 编剧为 **扁平文本**（`director` + 数组），无独立 `people` 表。首版可做「按名字搜到相关影片」，无法做影人作品全集页。
 
-### 读取层现状
+### 读取层现状（Phase A 已落地）
 
-- 门面：`src/lib/movie-api.ts`（SQL 优先 + JSON 回退）。
-- SQL：`src/lib/movie-sql-store.ts` — 仅有列表分页、slug 详情，**无 search**。
-- API：`GET /api/movies?page=` — 仅分页，供首页加载更多。
-- UI：头部导航无搜索框；无 `/search` 路由。
+- 门面：`src/lib/movie-api.ts` → `searchMovies`（SQL 优先 + JSON 回退）。
+- SQL：`src/lib/movie-sql-store.ts` → `searchPublishedMoviesFromSql`（`pg_trgm` + IMDB 精确）。
+- 工具：`src/lib/movie-search.ts` — 查询规范化、IMDB 解析、JSON 子串匹配。
+- API：`GET /api/movies/search` — 搜索 JSON（联想下拉 Phase B 待接 UI）。
+- UI：`/search` 页面；`movie-search-input.tsx` 接入 `site-nav` / `mobile-nav`。
 
 ---
 
@@ -108,7 +110,7 @@ flowchart LR
 
 ---
 
-## 数据层改造
+## 数据层改造（已实施 · `drizzle/0001_movie_search.sql`）
 
 ### 新增字段
 
@@ -241,7 +243,7 @@ type SearchMoviesResult = MoviesPageResult & {
 
 ```mermaid
 flowchart TB
-  header[SiteHeader] --> input[MovieSearch 客户端组件]
+  header[SiteHeader] --> input[MovieSearchInput 客户端组件]
   input -->|Enter| searchPage["/search?q="]
   input -->|debounce 300ms| suggest["GET /api/movies/search?limit=8"]
   suggest --> dropdown[下拉候选]
@@ -267,7 +269,7 @@ flowchart TB
 | JSON 回退 | `src/lib/movie-store.ts` |
 | Route Handler | `src/app/api/movies/search/route.ts` |
 | 页面 | `src/app/search/page.tsx` |
-| 组件 | `src/components/movie-search.tsx`（client） |
+| 组件 | `src/components/movie-search-input.tsx`（client）；分页 `movie-search-pagination.tsx` |
 | 头部接入 | `src/components/site-header.tsx` / `site-nav.tsx` |
 | 入库 | `scripts/bulk-ingest/sync-movies-to-sql.mts` 写 `imdb_id` |
 | 存量 | `scripts/bulk-ingest/backfill-imdb-ids.mts`（规划） |
@@ -279,7 +281,7 @@ flowchart TB
 ### Phase A — MVP（约 2–3 天）
 
 - [x] Migration：`imdb_id` + `pg_trgm` 索引
-- [x] Sync 写入 `imdb_id`；可选存量 backfill
+- [x] Sync 写入 `imdb_id`；存量 backfill 脚本待实现（见下表「规划」）
 - [x] `searchMovies` + `/search` 页面
 - [x] 头部搜索框（提交跳转 `/search`，可无联想）
 - [x] 测试：IMDB 解析、JSON fallback

@@ -28,7 +28,7 @@ station-zero/
 │   │   ├── bulk-ingestion-checklist-v1.md    # 分阶段实施清单
 │   │   ├── movie-images.md                   # 图片本地化与 Storage / CDN 策略
 │   │   ├── poster-compression-scheme.md    # Supabase 海报体积优化方案
-│   │   ├── movie-search-scheme.md          # 站点电影搜索方案（draft）
+│   │   ├── movie-search-scheme.md          # 站点电影搜索方案（Phase A 已落地）
 │   │   ├── mainland-topology.md              # 生产 CDN / VPS 选型
 │   │   ├── cdn-origin-setup.md               # CDN 回源与媒体子域配置
 │   │   └── identity-isolation-notes.md       # 低 KYC VPS 身份隔离纪律
@@ -41,7 +41,8 @@ station-zero/
 │   └── import/               # 万级批量清洗产物（见 data/import/index.md）
 │
 ├── drizzle/
-│   ├── 0000_*.sql            # 已生成的 SQL migration
+│   ├── 0000_*.sql            # 初始 schema migration
+│   ├── 0001_movie_search.sql # imdb_id + pg_trgm 搜索索引
 │   └── meta/                 # Drizzle migration 快照与日志
 │
 ├── public/
@@ -62,7 +63,10 @@ station-zero/
 │   │   ├── layout.tsx        # 根布局、主题首屏脚本
 │   │   ├── globals.css       # 全局样式与 `--sz-*` 设计 token
 │   │   ├── page.tsx          # 首页（影片网格 SSR + 加载更多）
-│   │   ├── api/movies/route.ts  # GET 分页 JSON（首页加载更多）
+│   │   ├── search/page.tsx   # 影片搜索（片名 / IMDB / 影人）
+│   │   ├── api/movies/
+│   │   │   ├── route.ts      # GET 分页 JSON（首页加载更多）
+│   │   │   └── search/route.ts  # GET 搜索 JSON
 │   │   ├── about/page.tsx
 │   │   ├── collections/page.tsx
 │   │   ├── knowledge/page.tsx
@@ -80,6 +84,8 @@ station-zero/
 │   │   ├── movie-card.tsx    # 影片卡片（懒加载海报）
 │   │   ├── movie-load-more-grid.tsx  # 首页影片网格（加载更多）
 │   │   ├── movie-pagination.tsx
+│   │   ├── movie-search-input.tsx    # 头部 / 搜索页搜索框
+│   │   ├── movie-search-pagination.tsx
 │   │   ├── decision-tags.tsx # verdict + bestWay 标签
 │   │   ├── poster-ambient-glow.tsx
 │   │   ├── watch-providers.tsx  # 观看路径（客户端，含复制链接）
@@ -95,6 +101,7 @@ station-zero/
 │       ├── movie-sql-store.ts   # Supabase 查询
 │       ├── movie-store.ts    # JSON 文件读取
 │       ├── movie-mapper.ts   # SQL 行 → Movie 映射
+│       ├── movie-search.ts   # 搜索查询规范化与 JSON 回退匹配
 │       ├── movies-pagination.ts # 列表分页工具
 │       ├── nav-items.ts      # 主导航项配置
 │       ├── theme.ts          # 主题偏好逻辑
@@ -103,6 +110,8 @@ station-zero/
 └── tests/
     ├── movie-database.test.mjs
     ├── movie-mapper.test.mts
+    ├── movie-search.test.mts
+    ├── compress-image.test.mts
     └── theme.test.mjs
 ```
 
@@ -249,7 +258,7 @@ station-zero/
 | 产品 PRD（当前） | `docs/product/station-zero-prd-v0.2.md` |
 | 图片、Storage、CDN URL | `docs/technical/movie-images.md` |
 | 海报体积优化 | `docs/technical/poster-compression-scheme.md` |
-| 站点电影搜索（draft） | `docs/technical/movie-search-scheme.md` |
+| 站点电影搜索 | `docs/technical/movie-search-scheme.md` |
 | 万级录入操作手册 | `docs/technical/bulk-ingestion-runbook.md` |
 | 万级录入架构方案 | `docs/technical/bulk-ingestion-scheme.md` |
 | 万级录入勾选清单 | `docs/technical/bulk-ingestion-checklist-v1.md` |
