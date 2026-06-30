@@ -10,7 +10,11 @@
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
-import { buildSearchPageHref, isSearchQueryValid, normalizeSearchQuery } from "@/lib/movie-search";
+import {
+  buildSearchPageHref,
+  isSearchQueryValid,
+  normalizeSearchQuery,
+} from "@/lib/movie-search";
 
 /** `MovieSearchInput` 组件的属性。 */
 type MovieSearchInputProps = {
@@ -36,7 +40,11 @@ type MovieSearchInputProps = {
  * @param props.onSubmitted - 成功提交后的副作用回调
  * @returns 带图标与提交控件的 `<form role="search">`
  */
-export function MovieSearchInput({ defaultValue = "", compact = false, onSubmitted }: MovieSearchInputProps) {
+export function MovieSearchInput({
+  defaultValue = "",
+  compact = false,
+  onSubmitted,
+}: MovieSearchInputProps) {
   const router = useRouter();
   /** 受控输入值；与 `<input value>` 绑定。 */
   const [value, setValue] = useState(defaultValue);
@@ -82,7 +90,10 @@ export function MovieSearchInput({ defaultValue = "", compact = false, onSubmitt
           compact ? "px-2 py-1" : "px-3 py-2"
         }`}
       >
-        <Search className="size-4 shrink-0 text-[var(--sz-muted)]" aria-hidden />
+        <Search
+          className="size-4 shrink-0 text-[var(--sz-muted)]"
+          aria-hidden
+        />
         <input
           id={inputId}
           name="q"
@@ -118,7 +129,9 @@ export function MovieSearchInput({ defaultValue = "", compact = false, onSubmitt
         )}
       </div>
 
-      {error ? <p className="mt-1 text-xs text-[var(--sz-warn)]">{error}</p> : null}
+      {error ? (
+        <p className="mt-1 text-xs text-[var(--sz-warn)]">{error}</p>
+      ) : null}
     </form>
   );
 }
