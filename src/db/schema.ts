@@ -1,3 +1,18 @@
+/**
+ * Supabase Postgres 表定义（Drizzle ORM）。
+ *
+ * 本文件是数据库 schema 的单一来源：`npm run db:generate` 据此生成 `drizzle/*.sql`，
+ * `movie-sql-store` 与 bulk-ingest 脚本通过 Drizzle 读写这些表。
+ *
+ * 表职责速查：
+ * - `movies` — 影片主记录（资料 + 策展判断 + 发布状态）
+ * - `viewing_paths` — 每部片的观看/资源路径（磁力、正版平台等）
+ * - `media_assets` — Supabase Storage 海报/背景图元数据
+ * - `import_staging` — 万级 CSV 批量录入暂存（页面不读）
+ *
+ * 页面列表/搜索仅展示 `content_status = published`；详情页不按状态过滤。
+ */
+
 import { relations, sql } from "drizzle-orm";
 import {
   index,
@@ -11,8 +26,21 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const contentStatusEnum = pgEnum("content_status", ["draft", "review", "published"]);
-export const sourceProviderEnum = pgEnum("source_provider", ["tmdb", "manual", "other"]);
+/** 影片发布状态：列表与搜索仅包含 `published`。 */
+export const contentStatusEnum = pgEnum("content_status", [
+  "draft",
+  "review",
+  "published",
+]);
+
+/** 资料来源：TMDB 同步、人工录入或其他。 */
+export const sourceProviderEnum = pgEnum("source_provider", [
+  "tmdb",
+  "manual",
+  "other",
+]);
+
+/** 观看路径类型（与前端 `ViewingPath.type` 对齐）。 */
 export const viewingPathTypeEnum = pgEnum("viewing_path_type", [
   "订阅",
   "租赁/购买",
@@ -21,8 +49,20 @@ export const viewingPathTypeEnum = pgEnum("viewing_path_type", [
   "磁力",
   "资料来源",
 ]);
-export const viewingPathVisibilityEnum = pgEnum("viewing_path_visibility", ["public", "hidden"]);
-export const mediaAssetKindEnum = pgEnum("media_asset_kind", ["poster", "backdrop"]);
+
+/** 观看路径是否在详情页公开展示。 */
+export const viewingPathVisibilityEnum = pgEnum("viewing_path_visibility", [
+  "public",
+  "hidden",
+]);
+
+/** Storage 媒体资源种类。 */
+export const mediaAssetKindEnum = pgEnum("media_asset_kind", [
+  "poster",
+  "backdrop",
+]);
+
+/** bulk-ingest 流水线中 TMDB 片名消歧状态。 */
 export const tmdbResolveStatusEnum = pgEnum("tmdb_resolve_status", [
   "pending",
   "resolved",
@@ -30,6 +70,18 @@ export const tmdbResolveStatusEnum = pgEnum("tmdb_resolve_status", [
   "failed",
 ]);
 
+/**
+ * 影片主表。
+ *
+ * 合并 TMDB 客观资料与 Station Zero 策展字段；`slug` 为公开 URL 标识。
+ *
+ * 字段分组：
+ * - 标识：`slug`、`tmdbId`、`imdbId`（IMDB 外部 ID，用于搜索；与 `ratings.imdb` 评分无关）
+ * - 客观资料：`title`、`originalTitle`、`year`、`director`、`cast`、`genres` 等
+ * - 策展判断：`verdict`、`bestWay`、`idealScene`、`notFor`、`versionSignals`、`deviceAdvice`
+ * - 媒体：`posterUrl` / `backdropUrl` 为页面直链；`source*Url` 为 TMDB 图源备份
+ * - 发布：`contentStatus` 控制是否出现在列表/首页/搜索
+ */
 export const movies = pgTable(
   "movies",
   {
@@ -40,9 +92,15 @@ export const movies = pgTable(
     title: text("title").notNull(),
     originalTitle: text("original_title").notNull(),
     year: text("year").notNull(),
-    genres: text("genres").array().notNull().default(sql`'{}'::text[]`),
+    genres: text("genres")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     director: text("director").notNull(),
-    cast: text("cast").array().notNull().default(sql`'{}'::text[]`),
+    cast: text("cast")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     runtime: text("runtime").notNull(),
     writers: text("writers").array(),
     countries: text("countries").array(),
@@ -77,17 +135,40 @@ export const movies = pgTable(
       .$type<Array<{ label: string; value: string; verdict: string }>>()
       .notNull()
       .default(sql`'[]'::jsonb`),
-    deviceAdvice: text("device_advice").array().notNull().default(sql`'{}'::text[]`),
-    related: text("related").array().notNull().default(sql`'{}'::text[]`),
-    contentStatus: contentStatusEnum("content_status").notNull().default("draft"),
-    sourceProvider: sourceProviderEnum("source_provider").notNull().default("manual"),
-    sourceUpdatedAt: timestamp("source_updated_at", { withTimezone: true, mode: "string" }).notNull(),
-    imageCachedAt: timestamp("image_cached_at", { withTimezone: true, mode: "string" }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+    deviceAdvice: text("device_advice")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    related: text("related")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    contentStatus: contentStatusEnum("content_status")
+      .notNull()
+      .default("draft"),
+    sourceProvider: sourceProviderEnum("source_provider")
+      .notNull()
+      .default("manual"),
+    sourceUpdatedAt: timestamp("source_updated_at", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    imageCachedAt: timestamp("image_cached_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
-    index("movies_content_status_updated_at_idx").on(table.contentStatus, table.updatedAt),
+    index("movies_content_status_updated_at_idx").on(
+      table.contentStatus,
+      table.updatedAt,
+    ),
     index("movies_tmdb_id_idx").on(table.tmdbId),
     uniqueIndex("movies_imdb_id_unique_idx")
       .on(table.imdbId)
@@ -95,6 +176,11 @@ export const movies = pgTable(
   ],
 );
 
+/**
+ * 观看路径表（一对多挂在 `movies` 下）。
+ *
+ * 同一部片可有多条记录（多平台、多磁力等）；详情页按 `sortOrder` 展示，`visibility = public` 才渲染。
+ */
 export const viewingPaths = pgTable(
   "viewing_paths",
   {
@@ -106,13 +192,27 @@ export const viewingPaths = pgTable(
     type: viewingPathTypeEnum("type").notNull(),
     note: text("note").notNull(),
     url: text("url"),
-    visibility: viewingPathVisibilityEnum("visibility").notNull().default("public"),
+    visibility: viewingPathVisibilityEnum("visibility")
+      .notNull()
+      .default("public"),
     sortOrder: integer("sort_order").notNull().default(0),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
   },
-  (table) => [index("viewing_paths_movie_id_sort_order_idx").on(table.movieId, table.sortOrder)],
+  (table) => [
+    index("viewing_paths_movie_id_sort_order_idx").on(
+      table.movieId,
+      table.sortOrder,
+    ),
+  ],
 );
 
+/**
+ * Supabase Storage 媒体资源索引（一对多挂在 `movies` 下）。
+ *
+ * 页面海报以 `movies.poster_url` 为准；本表记录 bucket 内 `storage_key`、体积与 TMDB 图源，供入库脚本对账。
+ */
 export const mediaAssets = pgTable(
   "media_assets",
   {
@@ -127,7 +227,9 @@ export const mediaAssets = pgTable(
     byteSize: integer("byte_size"),
     sha1: text("sha1"),
     sourceUrl: text("source_url"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     index("media_assets_movie_id_kind_idx").on(table.movieId, table.kind),
@@ -135,6 +237,12 @@ export const mediaAssets = pgTable(
   ],
 );
 
+/**
+ * 万级 CSV 批量录入暂存表。
+ *
+ * 由 `ingest:staging` 写入、`ingest:resolve` 消歧、`ingest:sync` 同步到 `movies` / `viewing_paths`。
+ * 访客页面不读取；保留 staging 行便于审计与重跑。
+ */
 export const importStaging = pgTable(
   "import_staging",
   {
@@ -146,10 +254,14 @@ export const importStaging = pgTable(
     note: text("note"),
     url: text("url"),
     batchId: text("batch_id").notNull(),
-    tmdbResolveStatus: tmdbResolveStatusEnum("tmdb_resolve_status").notNull().default("pending"),
+    tmdbResolveStatus: tmdbResolveStatusEnum("tmdb_resolve_status")
+      .notNull()
+      .default("pending"),
     tmdbId: integer("tmdb_id"),
     candidatesJson: jsonb("candidates_json"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     index("import_staging_batch_id_idx").on(table.batchId),
@@ -157,11 +269,13 @@ export const importStaging = pgTable(
   ],
 );
 
+/** `movies` → `viewing_paths` / `media_assets` 一对多关系（供 Drizzle relational query 使用）。 */
 export const moviesRelations = relations(movies, ({ many }) => ({
   viewingPaths: many(viewingPaths),
   mediaAssets: many(mediaAssets),
 }));
 
+/** `viewing_paths` → `movies` 多对一。 */
 export const viewingPathsRelations = relations(viewingPaths, ({ one }) => ({
   movie: one(movies, {
     fields: [viewingPaths.movieId],
@@ -169,6 +283,7 @@ export const viewingPathsRelations = relations(viewingPaths, ({ one }) => ({
   }),
 }));
 
+/** `media_assets` → `movies` 多对一。 */
 export const mediaAssetsRelations = relations(mediaAssets, ({ one }) => ({
   movie: one(movies, {
     fields: [mediaAssets.movieId],
