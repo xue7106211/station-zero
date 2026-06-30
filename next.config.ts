@@ -6,6 +6,8 @@ import type { NextConfig } from "next";
 const unoptimizedImages = process.env.NEXT_IMAGE_UNOPTIMIZED === "true";
 
 const nextConfig: NextConfig = {
+  // 允许 Cloudflare trycloudflare 等临时隧道域名访问 dev server（手机预览）
+  allowedDevOrigins: ["*.trycloudflare.com"],
   async headers() {
     return [
       {
