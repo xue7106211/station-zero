@@ -1,13 +1,17 @@
 import { Chip } from "@heroui/react";
+import {
+  type DecisionTagFallback,
+  resolveDecisionTags,
+} from "@/lib/decision-tags";
 
-type DecisionTag = {
-  text: string;
-  emphasis: boolean;
-};
+export type { DecisionTagFallback } from "@/lib/decision-tags";
+export { CURATION_PLACEHOLDER, isCurationPlaceholder, resolveDecisionTags } from "@/lib/decision-tags";
 
 export type DecisionTagsProps = {
   verdict: string;
   bestWay: string;
+  /** 策展字段为占位时，用已入库的客观资料生成 Tag。 */
+  fallback?: DecisionTagFallback;
   className?: string;
 };
 
@@ -21,10 +25,10 @@ const tagMuted = `${tagBase} border-[color:var(--sz-border)] bg-[rgb(var(--sz-bg
 
 /**
  * 将 verdict 与 bestWay 拆成独立 Tag：结论用强调色，观看规格用次要标签。
- * bestWay 按 `+`、`/`、`·` 分段（兼容人工录入的多种写法）。
+ * 策展占位时不展示占位文案，改读 fallback（类型、片长、评分等已入库字段）。
  */
-export function DecisionTags({ verdict, bestWay, className }: DecisionTagsProps) {
-  const tags = buildDecisionTags(verdict, bestWay);
+export function DecisionTags({ verdict, bestWay, fallback, className }: DecisionTagsProps) {
+  const tags = resolveDecisionTags(verdict, bestWay, fallback);
   if (!tags.length) return null;
 
   return (
@@ -40,18 +44,4 @@ export function DecisionTags({ verdict, bestWay, className }: DecisionTagsProps)
       ))}
     </div>
   );
-}
-
-function buildDecisionTags(verdict: string, bestWay: string): DecisionTag[] {
-  const tags: DecisionTag[] = [];
-  const trimmedVerdict = verdict.trim();
-  if (trimmedVerdict) tags.push({ text: trimmedVerdict, emphasis: true });
-
-  bestWay
-    .split(/\s*[+/·]\s*/)
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .forEach((part) => tags.push({ text: part, emphasis: false }));
-
-  return tags;
 }

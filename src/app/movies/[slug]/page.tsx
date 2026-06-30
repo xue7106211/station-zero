@@ -129,7 +129,15 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               </h1>
             </div>
             {/* 决策标签：结论 + 最佳观看方式拆成 Tag，突出视觉层次 */}
-            <DecisionTags verdict={movie.verdict} bestWay={movie.bestWay} />
+            <DecisionTags
+              verdict={movie.verdict}
+              bestWay={movie.bestWay}
+              fallback={{
+                genres: movie.genres,
+                runtime: movie.runtime,
+                rating: movie.rating,
+              }}
+            />
             <p className="mt-5 text-[15px] leading-7 text-[var(--sz-text-soft)]">
               {movie.summary}
             </p>
