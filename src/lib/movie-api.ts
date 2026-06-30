@@ -10,6 +10,7 @@ import {
   getMovieSlugsFromStore,
   listPublishedMovieSlugsFromStore,
   listPublishedMoviesFromStore,
+  searchPublishedMoviesFromStore,
 } from "./movie-store";
 import {
   getMovieBySlugFromSql,
@@ -17,7 +18,9 @@ import {
   listPublishedMovieSlugsFromSql,
   listPublishedMoviesFromSql,
   listPublishedMoviesPageFromSql,
+  searchPublishedMoviesFromSql,
 } from "./movie-sql-store";
+import { inferSearchMatchKind, isSearchQueryValid, normalizeSearchQuery, type SearchMatchKind } from "./movie-search";
 import { MOVIES_PAGE_SIZE, paginateMovies } from "./movies-pagination";
 
 /** 构建期 `generateStaticParams` 预热的 published 影片上限，避免万级库全量 SSG。 */
@@ -30,6 +33,12 @@ export type MoviesPageResult = {
   totalPages: number;
   totalItems: number;
   pageSize: number;
+};
+
+/** `/search` 查询结果。 */
+export type SearchMoviesResult = MoviesPageResult & {
+  query: string;
+  matchKind: SearchMatchKind;
 };
 
 /**
@@ -111,6 +120,69 @@ export async function getMoviesPage(page: number, pageSize = MOVIES_PAGE_SIZE): 
       const movies = await listPublishedMoviesFromStore();
       const { items, currentPage, totalPages, totalItems } = paginateMovies(movies, page, pageSize);
       return { items, currentPage, totalPages, totalItems, pageSize };
+    },
+  );
+}
+
+/**
+ * 搜索已发布影片（片名 / IMDB / 影人）。
+ *
+ * SQL 路径使用 `pg_trgm`；无库时回退 JSON 内存过滤。
+ *
+ * @param rawQuery - 用户输入
+ * @param page - 页码，从 1 开始
+ * @param pageSize - 每页条数，默认 30
+ */
+export async function searchMovies(
+  rawQuery: string,
+  page: number,
+  pageSize = MOVIES_PAGE_SIZE,
+): Promise<SearchMoviesResult> {
+  const query = normalizeSearchQuery(rawQuery);
+  const emptyResult: SearchMoviesResult = {
+    query,
+    matchKind: inferSearchMatchKind(query),
+    items: [],
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    pageSize,
+  };
+
+  if (!isSearchQueryValid(query)) {
+    return emptyResult;
+  }
+
+  return withStoreFallback(
+    async () => {
+      const { items, totalItems, matchKind } = await searchPublishedMoviesFromSql(query, page, pageSize);
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      const currentPage = Math.min(Math.max(1, page), totalPages);
+
+      return {
+        query,
+        matchKind,
+        items,
+        currentPage,
+        totalPages,
+        totalItems,
+        pageSize,
+      };
+    },
+    async () => {
+      const { items, totalItems, matchKind } = await searchPublishedMoviesFromStore(query, page, pageSize);
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      const currentPage = Math.min(Math.max(1, page), totalPages);
+
+      return {
+        query,
+        matchKind,
+        items,
+        currentPage,
+        totalPages,
+        totalItems,
+        pageSize,
+      };
     },
   );
 }

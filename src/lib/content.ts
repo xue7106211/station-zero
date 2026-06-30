@@ -31,6 +31,7 @@ export type MoviePalette = {
 export type Movie = {
   slug: string;
   tmdbId?: number;
+  imdbId?: string;
   title: string;
   originalTitle: string;
   year: string;

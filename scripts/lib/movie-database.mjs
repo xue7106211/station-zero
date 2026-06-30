@@ -107,7 +107,7 @@ export function toPublicMediaPath(filePath) {
   if (!filePath) return undefined;
   const normalized = String(filePath).replace(/\\/g, '/');
   if (normalized.startsWith('/')) return normalized;
-  const publicRelative = relative('public', filePath).replace(/\\/g, '/');
+  const publicRelative = relative('public', normalized).replace(/\\/g, '/');
   return publicRelative.startsWith('..') ? normalized : `/${publicRelative}`;
 }
 

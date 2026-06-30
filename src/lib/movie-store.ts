@@ -1,12 +1,15 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { defaultMovies, type Movie, type VersionSignal, type ViewingPath } from "./content";
+import { inferSearchMatchKind, matchMovieForSearch } from "./movie-search";
+import { paginateMovies } from "./movies-pagination";
 
 export type MovieContentStatus = "draft" | "review" | "published";
 export type MovieSourceProvider = "tmdb" | "manual" | "other";
 
 export type MovieRecord = Movie & {
   tmdbId?: number;
+  imdbId?: string;
   sourcePosterUrl?: string;
   sourceBackdropUrl?: string;
   contentStatus: MovieContentStatus;
@@ -56,6 +59,19 @@ export async function listPublishedMovieSlugsFromStore(): Promise<string[]> {
     .map((movie) => movie.slug);
 }
 
+export async function searchPublishedMoviesFromStore(
+  rawQuery: string,
+  page: number,
+  pageSize: number,
+): Promise<{ items: Movie[]; totalItems: number; matchKind: ReturnType<typeof inferSearchMatchKind> }> {
+  const query = rawQuery.trim();
+  const matchKind = inferSearchMatchKind(query);
+  const published = (await listPublishedMoviesFromStore()).filter((movie) => matchMovieForSearch(movie, query));
+  const { items, totalItems } = paginateMovies(published, page, pageSize);
+
+  return { items, totalItems, matchKind };
+}
+
 export async function readStoredMovies(): Promise<MovieRecord[]> {
   try {
     const raw = await readFile(movieDatabasePath, "utf8");
@@ -74,6 +90,7 @@ function toPublicMovie(record: MovieRecord): Movie {
   return {
     slug: record.slug,
     tmdbId: record.tmdbId,
+    imdbId: record.imdbId,
     title: record.title,
     originalTitle: record.originalTitle,
     year: record.year,
@@ -151,6 +168,7 @@ function normalizeMovieRecord(record: Partial<MovieRecord>): MovieRecord {
     deviceAdvice: normalizeStringArray(record.deviceAdvice, ["先确认片源规格", "大屏观看前检查 HDR 标识"]),
     related: normalizeStringArray(record.related, []),
     tmdbId: record.tmdbId,
+    imdbId: record.imdbId,
     sourcePosterUrl: record.sourcePosterUrl,
     sourceBackdropUrl: record.sourceBackdropUrl,
     contentStatus: record.contentStatus ?? "draft",

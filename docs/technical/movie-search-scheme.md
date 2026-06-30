@@ -1,8 +1,8 @@
 ---
 title: 站点电影搜索方案
 type: architecture
-status: draft
-updated: 2026-06-29
+status: implemented
+updated: 2026-06-30
 related:
   - product/station-zero-prd-v0.2.md
   - technical/bulk-ingestion-scheme.md
@@ -278,11 +278,11 @@ flowchart TB
 
 ### Phase A — MVP（约 2–3 天）
 
-- [ ] Migration：`imdb_id` + `pg_trgm` 索引
-- [ ] Sync 写入 `imdb_id`；可选存量 backfill
-- [ ] `searchMovies` + `/search` 页面
-- [ ] 头部搜索框（提交跳转 `/search`，可无联想）
-- [ ] 测试：IMDB 解析、SQL 查询、JSON fallback
+- [x] Migration：`imdb_id` + `pg_trgm` 索引
+- [x] Sync 写入 `imdb_id`；可选存量 backfill
+- [x] `searchMovies` + `/search` 页面
+- [x] 头部搜索框（提交跳转 `/search`，可无联想）
+- [x] 测试：IMDB 解析、JSON fallback
 
 ### Phase B — 体验（约 1 天）
 

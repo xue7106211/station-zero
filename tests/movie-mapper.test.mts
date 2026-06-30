@@ -26,6 +26,7 @@ test("mapMovieRowToMovie maps SQL row into public Movie shape", () => {
       id: "00000000-0000-4000-8000-000000000003",
       slug: "dune-part-two",
       tmdbId: 693134,
+      imdbId: null,
       title: "沙丘 2",
       originalTitle: "Dune: Part Two",
       year: "2024",

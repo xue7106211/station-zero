@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -35,6 +36,7 @@ export const movies = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     slug: text("slug").notNull().unique(),
     tmdbId: integer("tmdb_id"),
+    imdbId: text("imdb_id"),
     title: text("title").notNull(),
     originalTitle: text("original_title").notNull(),
     year: text("year").notNull(),
@@ -87,6 +89,9 @@ export const movies = pgTable(
   (table) => [
     index("movies_content_status_updated_at_idx").on(table.contentStatus, table.updatedAt),
     index("movies_tmdb_id_idx").on(table.tmdbId),
+    uniqueIndex("movies_imdb_id_unique_idx")
+      .on(table.imdbId)
+      .where(sql`${table.imdbId} is not null`),
   ],
 );
 

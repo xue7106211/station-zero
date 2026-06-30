@@ -6,6 +6,7 @@
  */
 import { readFileSync } from "node:fs";
 import { createDatabaseClient, closeDatabaseClient } from "../../src/db/index";
+import { imdbIdFromTmdbExternalIds } from "../../src/lib/movie-search";
 
 export type CsvRow = {
   title: string;
@@ -494,6 +495,7 @@ export function mapTmdbDetailsToMovieValues(
     vote_average?: number;
     overview?: string;
     genres?: Array<{ name?: string }>;
+    external_ids?: { imdb_id?: string | null };
     credits?: {
       crew?: Array<{ job?: string; name?: string }>;
       cast?: Array<{ name?: string }>;
@@ -542,6 +544,7 @@ export function mapTmdbDetailsToMovieValues(
   return {
     slug: options.slug,
     tmdbId: movie.id,
+    imdbId: imdbIdFromTmdbExternalIds(movie.external_ids),
     title,
     originalTitle,
     year: movie.release_date?.slice(0, 4) || "未知",

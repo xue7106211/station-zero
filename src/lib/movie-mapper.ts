@@ -59,6 +59,7 @@ export function mapMovieRowToMovie(row: MovieRow, pathRows: ViewingPathRow[] = [
   return {
     slug: row.slug,
     tmdbId: row.tmdbId ?? undefined,
+    imdbId: row.imdbId ?? undefined,
     title: row.title,
     originalTitle: row.originalTitle,
     year: row.year,

@@ -122,7 +122,7 @@ async function main() {
   for (const [index, [tmdbId, rows]] of [...groups.entries()].entries()) {
     try {
       const details = await tmdbFetch(
-        `/movie/${tmdbId}?language=zh-CN&append_to_response=credits,alternative_titles`,
+        `/movie/${tmdbId}?language=zh-CN&append_to_response=credits,alternative_titles,external_ids`,
       );
       const slug = await pickSlug(details, rows);
       const seedPaths = dedupeViewingPaths(rows);
@@ -173,6 +173,7 @@ async function main() {
           .values({
             slug: mapped.slug,
             tmdbId: mapped.tmdbId,
+            imdbId: mapped.imdbId,
             title: mapped.title,
             originalTitle: mapped.originalTitle,
             year: mapped.year,
@@ -211,6 +212,7 @@ async function main() {
             target: movies.slug,
             set: {
               tmdbId: mapped.tmdbId,
+              imdbId: mapped.imdbId,
               title: mapped.title,
               originalTitle: mapped.originalTitle,
               year: mapped.year,

@@ -17,6 +17,7 @@ import { importStaging, mediaAssets, movies, viewingPaths } from "../../src/db/s
 type MovieJsonRecord = {
   slug: string;
   tmdbId?: number;
+  imdbId?: string;
   title: string;
   originalTitle: string;
   year: string;
@@ -92,6 +93,7 @@ async function main() {
       .values({
         slug: record.slug,
         tmdbId: record.tmdbId,
+        imdbId: record.imdbId,
         title: record.title,
         originalTitle: record.originalTitle,
         year: record.year,
@@ -131,6 +133,7 @@ async function main() {
         target: movies.slug,
         set: {
           tmdbId: record.tmdbId,
+          imdbId: record.imdbId,
           title: record.title,
           originalTitle: record.originalTitle,
           year: record.year,

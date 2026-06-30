@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Drawer } from "@heroui/react";
 import { Menu, X } from "lucide-react";
+import { MovieSearchInput } from "@/components/movie-search-input";
 import { isActiveRoute, navItems } from "@/lib/nav-items";
 
 /** 移动端抽屉导航（HeroUI Drawer），仅客户端渲染以避免 React Aria ID hydration 不一致。 */
@@ -42,6 +43,9 @@ export function MobileNav({ pathname }: { pathname: string }) {
                   </Drawer.CloseTrigger>
                 </Drawer.Header>
                 <Drawer.Body className="px-4 py-6">
+                  <div className="mb-6">
+                    <MovieSearchInput onSubmitted={() => close()} />
+                  </div>
                   <nav className="flex flex-col gap-1">
                     {navItems.map((item) => {
                       const active = isActiveRoute(pathname, item.href);

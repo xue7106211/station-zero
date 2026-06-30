@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isActiveRoute, navItems, type NavItem } from "@/lib/nav-items";
+import { MovieSearchInput } from "./movie-search-input";
 import { ThemeToggle } from "./theme-toggle";
 
 const MobileNav = dynamic(() => import("./mobile-nav").then((mod) => ({ default: mod.MobileNav })), {
@@ -58,6 +59,9 @@ export function HeaderActions() {
 
   return (
     <div className="site-header__actions flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-2.5">
+      <div className="site-header__search hidden min-w-0 md:flex">
+        <MovieSearchInput compact />
+      </div>
       <div className="site-header__theme hidden md:block">
         <ThemeToggle />
       </div>

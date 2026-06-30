@@ -10,6 +10,7 @@ import { getDb } from "@/db";
 import { movies, viewingPaths } from "@/db/schema";
 import type { Movie } from "./content";
 import { mapMovieRowToMovie } from "./movie-mapper";
+import { inferSearchMatchKind, normalizeSearchQuery, parseImdbId } from "./movie-search";
 
 /**
  * 统计已发布影片总数。
@@ -141,4 +142,103 @@ export async function listPublishedMovieSlugsFromSql(limit: number): Promise<str
  */
 export function isSqlStoreAvailable() {
   return Boolean(process.env.DATABASE_URL?.trim());
+}
+
+function publishedTextSearchWhere(query: string) {
+  return sql`
+    ${movies.contentStatus} = 'published'
+    and (
+      ${movies.title} % ${query}
+      or ${movies.originalTitle} % ${query}
+      or ${movies.director} % ${query}
+      or exists (
+        select 1 from unnest(${movies.cast}) as cast_name
+        where cast_name % ${query}
+      )
+      or exists (
+        select 1 from unnest(coalesce(${movies.writers}, '{}'::text[])) as writer_name
+        where writer_name % ${query}
+      )
+      or exists (
+        select 1 from unnest(coalesce(${movies.aka}, '{}'::text[])) as aka_name
+        where aka_name % ${query}
+      )
+    )
+  `;
+}
+
+function publishedTextSearchOrder(query: string) {
+  return sql`
+    greatest(
+      similarity(${movies.title}, ${query}),
+      similarity(${movies.originalTitle}, ${query})
+    ) desc,
+    ${movies.updatedAt} desc
+  `;
+}
+
+/**
+ * 搜索已发布影片（Postgres `pg_trgm` + `imdb_id` 精确匹配）。
+ *
+ * @param rawQuery - 用户输入：片名 / IMDB / 影人
+ * @param page - 页码，从 1 开始
+ * @param pageSize - 每页条数
+ */
+export async function searchPublishedMoviesFromSql(
+  rawQuery: string,
+  page: number,
+  pageSize: number,
+): Promise<{ items: Movie[]; totalItems: number; matchKind: ReturnType<typeof inferSearchMatchKind> }> {
+  const db = getDb();
+  const query = normalizeSearchQuery(rawQuery);
+  const matchKind = inferSearchMatchKind(query);
+
+  if (!db || !query) {
+    return { items: [], totalItems: 0, matchKind };
+  }
+
+  const imdbId = parseImdbId(query);
+  const offset = (page - 1) * pageSize;
+
+  if (imdbId) {
+    const whereClause = sql`${movies.contentStatus} = 'published' and ${movies.imdbId} = ${imdbId}`;
+    const [{ count }] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(movies)
+      .where(whereClause);
+
+    const rows = await db
+      .select()
+      .from(movies)
+      .where(whereClause)
+      .orderBy(desc(movies.updatedAt))
+      .limit(pageSize)
+      .offset(offset);
+
+    return {
+      items: rows.map((row) => mapMovieRowToMovie(row)),
+      totalItems: count,
+      matchKind: "imdb",
+    };
+  }
+
+  const whereClause = publishedTextSearchWhere(query);
+  const [{ count }] = await db
+    .select({ count: sql<number>`cast(count(*) as int)` })
+    .from(movies)
+    .where(whereClause);
+
+  const rows = await db
+    .select()
+    .from(movies)
+    .where(whereClause)
+    .orderBy(publishedTextSearchOrder(query))
+    .limit(pageSize)
+    .offset(offset);
+
+  return {
+    items: rows.map((row) => mapMovieRowToMovie(row)),
+    totalItems: count,
+    matchKind,
+  };
 }

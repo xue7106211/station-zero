@@ -127,6 +127,7 @@ station-zero/
 - `/` — 首页：已发布影片网格（`getMoviesPage` SSR 首屏 + `/api/movies` 加载更多）。
 - `/movies` — 影片库列表（SQL 分页，30 条/页，仅 `published`）。
 - `/movies/[slug]` — 影片详情页（Top 50 `published` SSG 预热，其余 ISR）。
+- `/search` — 影片搜索（片名 / IMDB / 影人；`pg_trgm` + JSON 回退）。
 - `/collections` — 策展片单。
 - `/knowledge` — 高清知识库。
 - `/about` — 关于页与合规边界说明。
@@ -138,6 +139,7 @@ station-zero/
 - `src/components/site-nav.tsx` — 主导航（桌面 pill、主题切换入口；移动端 Drawer 由 `mobile-nav.tsx` 承担）。
 - `src/components/site-footer.tsx` — 页脚（合规声明与次要导航）。
 - `src/components/movie-load-more-grid.tsx` — 首页影片网格与「加载更多」。
+- `src/components/movie-search-input.tsx` — 头部 / 搜索页影片搜索框（GET → `/search`）。
 - `src/components/theme-toggle.tsx` — 三段式主题切换（浅色 / 深色 / 跟随系统）。
 - `src/components/decision-tags.tsx` — 详情页决策标签（`verdict` + `bestWay`）。
 - `src/components/poster-ambient-glow.tsx` — 详情页海报氛围光晕（读取 `palette` 或回退模糊海报）。
@@ -257,5 +259,5 @@ station-zero/
 
 **当前实施进度：**
 
-- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 100+ 部验证）、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）、bulk-ingest 新入库海报压缩（TMDB w500 + 480px WebP，见 `poster-compression-scheme.md`）。
-- 未完成：生产 CDN / VPS 自托管部署（见 `mainland-topology.md`、`cdn-origin-setup.md`）；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）；存量海报 recompress（100+ 部仍可为 `.jpg` ~200KB）；legacy `sync:movies` 未接入 WebP 压缩。
+- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 100+ 部验证）、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）、bulk-ingest 新入库海报压缩（TMDB w500 + 480px WebP，见 `poster-compression-scheme.md`）、站点电影搜索 Phase A（`imdb_id` + `pg_trgm`、`/search`、头部搜索框、`GET /api/movies/search`）。
+- 未完成：生产 CDN / VPS 自托管部署（见 `mainland-topology.md`、`cdn-origin-setup.md`）；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）；存量海报 recompress（100+ 部仍可为 `.jpg` ~200KB）；legacy `sync:movies` 未接入 WebP 压缩；搜索 Phase B 联想下拉与存量 `imdb_id` backfill。
