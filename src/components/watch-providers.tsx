@@ -5,6 +5,7 @@ import { Button, Chip, Link } from "@heroui/react";
 import { Check, Copy } from "lucide-react";
 import { ResourceAccordion } from "@/components/resource-accordion";
 import type { ViewingPath } from "@/lib/content";
+import { formatProviderRow } from "@/lib/viewing-path-label";
 
 const CATEGORY_ORDER: ViewingPath["type"][] = [
   "订阅",
@@ -23,8 +24,6 @@ const CATEGORY_SUBTITLES: Partial<Record<ViewingPath["type"], string>> = {
   网盘: "网盘分享：复制链接后在对应客户端打开。",
   磁力: "磁力链接：复制后用下载工具打开，可用性与做种情况以实际为准。",
 };
-
-const FILE_SIZE_PATTERN = /(\d+(?:\.\d+)?\s*(?:GB|MB|TB|KB))/i;
 
 const sizeTagClass =
   "!rounded-md inline-flex items-center border border-[color:var(--sz-accent-soft)] bg-[var(--sz-accent-faint)] px-2.5 py-1 text-xs font-medium tabular-nums leading-snug text-[var(--sz-accent)] shadow-[inset_0_1px_0_rgb(255_255_255/10%)]";
@@ -129,39 +128,6 @@ function ProviderRow({ path, movieTitle }: { path: ViewingPath; movieTitle: stri
       ) : null}
     </div>
   );
-}
-
-function formatProviderRow(path: ViewingPath, movieTitle: string) {
-  const note =
-    path.type === "磁力" && path.platform !== movieTitle
-      ? `${path.platform} · ${path.note}`
-      : path.note;
-
-  const sizeMatch = note.match(FILE_SIZE_PATTERN);
-  const sizeLabel = sizeMatch?.[1]?.trim();
-  const labelWithoutSize = sizeLabel ? stripSizeToken(note, sizeLabel) : note;
-
-  if (path.type === "磁力") {
-    return { label: labelWithoutSize, sizeLabel };
-  }
-
-  const label = path.note
-    ? `${path.platform} · ${stripSizeToken(path.note, sizeLabel ?? "")}`
-    : path.platform;
-  return {
-    label: sizeLabel ? stripSizeToken(label, sizeLabel) : label,
-    sizeLabel,
-  };
-}
-
-function stripSizeToken(text: string, sizeToken: string) {
-  if (!sizeToken) return text.trim();
-  const escaped = sizeToken.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return text
-    .replace(new RegExp(`\\s*[·|]\\s*${escaped}`, "gi"), "")
-    .replace(/\s{2,}/g, " ")
-    .replace(/\s*[·|]\s*$/g, "")
-    .trim();
 }
 
 function CopyButton({ url }: { url: string }) {
