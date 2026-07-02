@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Chip, Link } from "@heroui/react";
+import { Button, Link } from "@heroui/react";
 import { Check, Copy } from "lucide-react";
 import { ResourceAccordion } from "@/components/resource-accordion";
 import type { ViewingPath } from "@/lib/content";
@@ -25,8 +25,12 @@ const CATEGORY_SUBTITLES: Partial<Record<ViewingPath["type"], string>> = {
   磁力: "磁力链接：复制后用下载工具打开，可用性与做种情况以实际为准。",
 };
 
-const sizeTagClass =
-  "!rounded-md inline-flex items-center border border-[color:var(--sz-accent-soft)] bg-[var(--sz-accent-faint)] px-2.5 py-1 text-xs font-medium tabular-nums leading-snug text-[var(--sz-accent)] shadow-[inset_0_1px_0_rgb(255_255_255/10%)]";
+const rowTagBase =
+  "inline-flex h-6 shrink-0 items-center rounded-md border px-2 text-xs leading-none";
+
+const sizeTagClass = `${rowTagBase} border-[color:var(--sz-accent-soft)] bg-[var(--sz-accent-faint)] font-medium tabular-nums text-[var(--sz-accent)]`;
+
+const specTagClass = `${rowTagBase} border-[color:var(--sz-border)] bg-[var(--sz-surface-soft)] text-[var(--sz-muted)]`;
 
 export function WatchProviders({
   paths,
@@ -102,21 +106,26 @@ function PathAccordionSection({
 
 function ProviderRow({ path, movieTitle }: { path: ViewingPath; movieTitle: string }) {
   const hasUrl = Boolean(path.url);
-  const { label, sizeLabel } = formatProviderRow(path, movieTitle);
+  const { detail, specTags, sizeLabel, tooltip } = formatProviderRow(path, movieTitle);
+  const hasMetaRow = Boolean(sizeLabel || specTags?.length || hasUrl);
 
   return (
     <div className="flex flex-col gap-2.5 px-4 py-3">
-      <p className="min-w-0 text-pretty text-sm leading-6 text-[var(--sz-text-soft)] line-clamp-2">
-        {label}
+      <p
+        className="min-w-0 text-pretty text-sm leading-6 text-[var(--sz-text-soft)] line-clamp-2"
+        title={tooltip && tooltip !== detail ? tooltip : undefined}
+      >
+        {detail}
       </p>
-      {sizeLabel || hasUrl ? (
+      {hasMetaRow ? (
         <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            {sizeLabel ? (
-              <Chip variant="soft" className={sizeTagClass}>
-                {sizeLabel}
-              </Chip>
-            ) : null}
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+            {sizeLabel ? <span className={sizeTagClass}>{sizeLabel}</span> : null}
+            {specTags?.map((tag) => (
+              <span key={tag} className={specTagClass}>
+                {tag}
+              </span>
+            ))}
           </div>
           {hasUrl ? (
             <div className="flex shrink-0 items-center gap-2">
