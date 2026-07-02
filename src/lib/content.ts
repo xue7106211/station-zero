@@ -28,6 +28,14 @@ export type MoviePalette = {
   lightMuted?: string;
 };
 
+/** TMDB belongs_to_collection，由后台同步入库。 */
+export type MovieCollection = {
+  tmdbId: number;
+  name: string;
+  posterPath?: string;
+  backdropPath?: string;
+};
+
 export type Movie = {
   slug: string;
   tmdbId?: number;
@@ -45,6 +53,8 @@ export type Movie = {
   languages?: string[]; // 语言
   releaseDate?: string; // 上映日期（YYYY-MM-DD 或人工录入文案）
   aka?: string[]; // 又名 / 别名
+  collection?: MovieCollection; // TMDB 所属系列
+  keywords?: string[]; // TMDB 关键词标签
   rating: string;
   ratings?: {
     douban: string;

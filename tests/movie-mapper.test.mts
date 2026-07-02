@@ -39,6 +39,8 @@ test("mapMovieRowToMovie maps SQL row into public Movie shape", () => {
       languages: null,
       releaseDate: null,
       aka: null,
+      collection: null,
+      keywords: [],
       rating: "8.8 / 10",
       ratings: { imdb: "8.5" },
       posterTone: "from-amber-500 via-orange-700 to-stone-900",

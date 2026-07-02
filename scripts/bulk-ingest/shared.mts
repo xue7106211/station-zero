@@ -485,6 +485,40 @@ async function curlFetchJson(url: string, bearerToken: string, originalError: un
   }
 }
 
+export function mapTmdbCollection(
+  belongsToCollection?: {
+    id?: number;
+    name?: string;
+    poster_path?: string | null;
+    backdrop_path?: string | null;
+  } | null,
+) {
+  if (!belongsToCollection?.id || !belongsToCollection?.name) {
+    return undefined;
+  }
+
+  return {
+    tmdbId: belongsToCollection.id,
+    name: belongsToCollection.name,
+    posterPath: belongsToCollection.poster_path ?? undefined,
+    backdropPath: belongsToCollection.backdrop_path ?? undefined,
+  };
+}
+
+export function mapTmdbKeywords(
+  keywordsResponse?: {
+    keywords?: Array<{ id?: number; name?: string }>;
+  } | null,
+) {
+  const names = dedupe(
+    keywordsResponse?.keywords
+      ?.map((keyword) => keyword.name)
+      .filter((name): name is string => Boolean(name)),
+  );
+
+  return names?.length ? names : undefined;
+}
+
 export function mapTmdbDetailsToMovieValues(
   movie: {
     id: number;
@@ -495,6 +529,15 @@ export function mapTmdbDetailsToMovieValues(
     vote_average?: number;
     overview?: string;
     genres?: Array<{ name?: string }>;
+    belongs_to_collection?: {
+      id?: number;
+      name?: string;
+      poster_path?: string | null;
+      backdrop_path?: string | null;
+    } | null;
+    keywords?: {
+      keywords?: Array<{ id?: number; name?: string }>;
+    };
     external_ids?: { imdb_id?: string | null };
     credits?: {
       crew?: Array<{ job?: string; name?: string }>;
@@ -536,7 +579,7 @@ export function mapTmdbDetailsToMovieValues(
     movie.alternative_titles?.titles
       ?.map((entry: { title?: string }) => entry.title)
       .filter(
-        (entryTitle: string) =>
+        (entryTitle): entryTitle is string =>
           Boolean(entryTitle) && entryTitle !== movie.title && entryTitle !== movie.original_title,
       ),
   )?.slice(0, 6);
@@ -557,6 +600,8 @@ export function mapTmdbDetailsToMovieValues(
     languages,
     releaseDate: movie.release_date ?? undefined,
     aka,
+    collection: mapTmdbCollection(movie.belongs_to_collection),
+    keywords: mapTmdbKeywords(movie.keywords),
     rating: typeof movie.vote_average === "number" ? `${movie.vote_average.toFixed(1)} / 10` : "待补充",
     ratings: {
       douban: "待补充",

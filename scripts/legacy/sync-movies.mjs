@@ -80,7 +80,7 @@ const incomingRecords = [];
 for (const seed of seeds) {
   try {
     const tmdbId = seed.tmdbId ?? await findTmdbId(seed.query ?? seed.originalTitle ?? seed.title ?? seed.slug);
-    const details = await tmdbFetch(`/movie/${tmdbId}?language=zh-CN&append_to_response=credits,watch/providers,alternative_titles`);
+    const details = await tmdbFetch(`/movie/${tmdbId}?language=zh-CN&append_to_response=credits,watch/providers,alternative_titles,keywords`);
     const record = await mapTmdbMovie(details, seed);
     incomingRecords.push(record);
     console.log(`Synced ${record.slug}`);
@@ -156,6 +156,8 @@ async function mapTmdbMovie(movie, seed) {
     languages: languages?.length ? languages : seed.languages,
     releaseDate: movie.release_date || seed.releaseDate,
     aka: aka?.length ? aka : seed.aka,
+    collection: mapTmdbCollection(movie.belongs_to_collection) ?? seed.collection,
+    keywords: mapTmdbKeywords(movie.keywords) ?? seed.keywords,
     rating: typeof movie.vote_average === 'number' ? `${movie.vote_average.toFixed(1)} / 10` : seed.rating,
     ratings: {
       douban: seed.ratings?.douban ?? '待补充',
@@ -270,6 +272,29 @@ function localizeCountry(country) {
 function localizeLanguage(language) {
   const english = language?.english_name || language?.name;
   return LANGUAGE_ZH[english] || english;
+}
+
+function mapTmdbCollection(belongsToCollection) {
+  if (!belongsToCollection?.id || !belongsToCollection?.name) {
+    return undefined;
+  }
+
+  return {
+    tmdbId: belongsToCollection.id,
+    name: belongsToCollection.name,
+    posterPath: belongsToCollection.poster_path ?? undefined,
+    backdropPath: belongsToCollection.backdrop_path ?? undefined,
+  };
+}
+
+function mapTmdbKeywords(keywordsResponse) {
+  const names = dedupe(
+    keywordsResponse?.keywords
+      ?.map((keyword) => keyword.name)
+      .filter(Boolean),
+  );
+
+  return names?.length ? names : undefined;
 }
 
 // 去重并丢掉空值；输入为空/非数组时返回 undefined（便于上层用 ?.length 判断）

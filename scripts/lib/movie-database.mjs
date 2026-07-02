@@ -77,6 +77,8 @@ export function normalizeMovieRecord(record, now = new Date().toISOString()) {
     languages: record.languages,
     releaseDate: record.releaseDate,
     aka: record.aka,
+    collection: record.collection,
+    keywords: record.keywords,
     rating: record.rating ?? '评分待确认',
     ratings: record.ratings,
     posterTone: record.posterTone ?? 'from-slate-600 via-zinc-800 to-black',

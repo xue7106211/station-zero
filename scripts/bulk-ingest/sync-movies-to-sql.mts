@@ -6,6 +6,7 @@
  *       写入 public/media/；若配置了 SUPABASE_SERVICE_ROLE_KEY 则上传到 Supabase Storage。
  *
  * npm run ingest:sync -- --batch-id pilot-20260628
+ * npm run ingest:sync -- --batch-id pilot-20260628 --tmdb-id 1265609   # 只重试单部
  * npm run ingest:sync -- --batch-id pilot-20260628 --publish   # 写入 published，上列表页
  *
  * 上游：resolve-tmdb-ids.mts
@@ -69,6 +70,7 @@ type ViewingPathInput = {
 async function main() {
   const args = parseCliArgs(process.argv.slice(2));
   const batchId = String(args["batch-id"] ?? defaultBatchId("pilot"));
+  const onlyTmdbId = args["tmdb-id"] ? Number(args["tmdb-id"]) : undefined;
   const delayMs = Number(args["delay-ms"] ?? 250);
   const publish = args.publish === true;
   const contentStatus = publish ? "published" : "draft";
@@ -115,6 +117,20 @@ async function main() {
     return;
   }
 
+  if (onlyTmdbId) {
+    if (!Number.isFinite(onlyTmdbId)) {
+      throw new Error(`Invalid --tmdb-id: ${String(args["tmdb-id"])}`);
+    }
+    const rows = groups.get(onlyTmdbId);
+    if (!rows) {
+      console.log(`No resolved staging rows for tmdbId=${onlyTmdbId} in batch ${batchId}.`);
+      return;
+    }
+    groups.clear();
+    groups.set(onlyTmdbId, rows);
+    console.log(`Syncing single movie: tmdbId=${onlyTmdbId}`);
+  }
+
   let synced = 0;
   let failed = 0;
   const failures: string[] = [];
@@ -122,7 +138,7 @@ async function main() {
   for (const [index, [tmdbId, rows]] of [...groups.entries()].entries()) {
     try {
       const details = await tmdbFetch(
-        `/movie/${tmdbId}?language=zh-CN&append_to_response=credits,alternative_titles,external_ids`,
+        `/movie/${tmdbId}?language=zh-CN&append_to_response=credits,alternative_titles,external_ids,keywords`,
       );
       const slug = await pickSlug(details, rows);
       const seedPaths = dedupeViewingPaths(rows);
@@ -186,6 +202,8 @@ async function main() {
             languages: mapped.languages,
             releaseDate: mapped.releaseDate,
             aka: mapped.aka,
+            collection: mapped.collection,
+            keywords: mapped.keywords ?? [],
             rating: mapped.rating,
             ratings: mapped.ratings,
             posterTone: mapped.posterTone,
@@ -225,6 +243,8 @@ async function main() {
               languages: mapped.languages,
               releaseDate: mapped.releaseDate,
               aka: mapped.aka,
+              collection: mapped.collection,
+              keywords: mapped.keywords ?? [],
               rating: mapped.rating,
               ratings: mapped.ratings,
               posterTone: mapped.posterTone,

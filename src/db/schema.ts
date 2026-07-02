@@ -107,6 +107,16 @@ export const movies = pgTable(
     languages: text("languages").array(),
     releaseDate: text("release_date"),
     aka: text("aka").array(),
+    collection: jsonb("collection").$type<{
+      tmdbId: number;
+      name: string;
+      posterPath?: string | null;
+      backdropPath?: string | null;
+    } | null>(),
+    keywords: text("keywords")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     rating: text("rating").notNull(),
     ratings: jsonb("ratings").$type<{
       douban?: string;

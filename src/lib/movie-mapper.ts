@@ -72,6 +72,15 @@ export function mapMovieRowToMovie(row: MovieRow, pathRows: ViewingPathRow[] = [
     languages: row.languages ?? undefined,
     releaseDate: row.releaseDate ?? undefined,
     aka: row.aka ?? undefined,
+    collection: row.collection
+      ? {
+          tmdbId: row.collection.tmdbId,
+          name: row.collection.name,
+          posterPath: row.collection.posterPath ?? undefined,
+          backdropPath: row.collection.backdropPath ?? undefined,
+        }
+      : undefined,
+    keywords: row.keywords.length > 0 ? row.keywords : undefined,
     rating: row.rating,
     ratings: row.ratings
       ? {

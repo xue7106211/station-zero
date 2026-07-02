@@ -30,6 +30,13 @@ type MovieJsonRecord = {
   languages?: string[];
   releaseDate?: string;
   aka?: string[];
+  collection?: {
+    tmdbId: number;
+    name: string;
+    posterPath?: string;
+    backdropPath?: string;
+  };
+  keywords?: string[];
   rating: string;
   ratings?: {
     douban?: string;
@@ -106,6 +113,8 @@ async function main() {
         languages: record.languages,
         releaseDate: record.releaseDate,
         aka: record.aka,
+        collection: record.collection,
+        keywords: record.keywords ?? [],
         rating: record.rating,
         ratings: record.ratings,
         posterTone: record.posterTone,
@@ -146,6 +155,8 @@ async function main() {
           languages: record.languages,
           releaseDate: record.releaseDate,
           aka: record.aka,
+          collection: record.collection,
+          keywords: record.keywords ?? [],
           rating: record.rating,
           ratings: record.ratings,
           posterTone: record.posterTone,
