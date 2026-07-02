@@ -505,6 +505,18 @@ export function mapTmdbCollection(
   };
 }
 
+/**
+ * `ingest:sync` upsert 时是否写入 `content_status`。
+ *
+ * 无 `--publish` 时保留库内已有状态，避免 `--tmdb-id` 单部重试把已发布影片打回 draft。
+ */
+export function syncUpsertContentStatusFields(
+  publish: boolean,
+  contentStatus: "draft" | "review" | "published",
+): { contentStatus: "draft" | "review" | "published" } | Record<string, never> {
+  return publish ? { contentStatus } : {};
+}
+
 export function mapTmdbKeywords(
   keywordsResponse?: {
     keywords?: Array<{ id?: number; name?: string }>;
