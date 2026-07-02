@@ -29,6 +29,7 @@ import {
   parseCliArgs,
   slugify,
   sleep,
+  syncUpsertContentStatusFields,
   withDatabase,
 } from "./shared.mts";
 import {
@@ -257,7 +258,7 @@ async function main() {
               versionSignals: mapped.versionSignals,
               deviceAdvice: mapped.deviceAdvice,
               related: mapped.related,
-              contentStatus: mapped.contentStatus,
+              ...syncUpsertContentStatusFields(publish, mapped.contentStatus),
               sourceProvider: mapped.sourceProvider,
               sourceUpdatedAt: mapped.sourceUpdatedAt,
               imageCachedAt: mapped.imageCachedAt,
