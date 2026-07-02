@@ -291,7 +291,9 @@ flowchart LR
 | `slug` | 公开 URL 标识，UNIQUE |
 | `tmdb_id` | 同步键，nullable |
 | `title`, `original_title`, `year` | 展示字段 |
-| `genres`, `cast`, `writers`, … | text[] 或 JSONB |
+| `genres`, `cast`, `writers`, `aka`, … | text[] 或 JSONB |
+| `collection` | JSONB（TMDB `belongs_to_collection`：`tmdbId`、`name`、海报路径） |
+| `keywords` | text[]（TMDB 关键词名称） |
 | `summary`, `verdict`, `best_way`, `ideal_scene`, `not_for` | 文本 |
 | `poster_url`, `backdrop_url` | CDN 路径 |
 | `palette` | JSONB |
@@ -410,7 +412,7 @@ flowchart LR
 
 | 保留 | 写入 |
 |------|------|
-| TMDB detail | `movies` UPSERT（`ON CONFLICT slug`） |
+| TMDB detail | `movies` UPSERT（`ON CONFLICT slug`）；含 `collection`、`keywords`（`append_to_response=keywords`） |
 | staging 链接优先 | `viewing_paths` 批量 INSERT |
 | 图片 | 压缩 → 对象存储 → `poster_url` |
 | palette | `movies.palette` JSONB |

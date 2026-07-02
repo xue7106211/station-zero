@@ -38,7 +38,7 @@ flowchart LR
 | 2 消歧 | `bulk-ingest/resolve-tmdb-ids.mts` | `npm run ingest:resolve` | staging → 写入 `tmdb_id` |
 | 2b ambiguous | `bulk-ingest/resolve-ambiguous.mts` | `npm run ingest:resolve-ambiguous` | 自动/半自动消歧 |
 | 2c failed | `bulk-ingest/resolve-failed.mts` | `npm run ingest:resolve-failed` | 中文片名 + 年份容差重试 |
-| 3 落库 | `bulk-ingest/sync-movies-to-sql.mts` | `npm run ingest:sync` | TMDB w500/w1280 → 480px WebP → `movies` + Storage |
+| 3 落库 | `bulk-ingest/sync-movies-to-sql.mts` | `npm run ingest:sync` | TMDB w500/w1280 → 480px WebP → `movies` + Storage；`--tmdb-id` 单部重试 |
 | 3b Storage | `bulk-ingest/upload-media-to-storage.mts` | `npm run ingest:upload-media` | 本地海报压缩后补传到 Supabase Storage |
 | 一键 Pilot | `bulk-ingest/run-pilot-ingest.mts` | `npm run ingest:pilot` | 串联 1→2→3（默认 100 部） |
 

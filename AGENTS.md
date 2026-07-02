@@ -43,6 +43,7 @@ station-zero/
 ├── drizzle/
 │   ├── 0000_*.sql            # 初始 schema migration
 │   ├── 0001_movie_search.sql # imdb_id + pg_trgm 搜索索引
+│   ├── 0002_*.sql            # collection + keywords（TMDB 系列 / 关键词）
 │   └── meta/                 # Drizzle migration 快照与日志
 │
 ├── public/
@@ -87,7 +88,10 @@ station-zero/
 │   │   ├── movie-search-input.tsx    # 头部 / 搜索页搜索框
 │   │   ├── movie-search-pagination.tsx
 │   │   ├── decision-tags.tsx # verdict + bestWay 标签
+│   │   ├── movie-summary.tsx # 简介折叠展开
+│   │   ├── movie-keywords.tsx # TMDB 关键词 Tag 列表
 │   │   ├── poster-ambient-glow.tsx
+│   │   ├── resource-accordion.tsx # 观看来源手风琴分组
 │   │   ├── watch-providers.tsx  # 观看路径（客户端，含复制链接）
 │   │   └── rating-panel.tsx
 │   │
@@ -103,6 +107,8 @@ station-zero/
 │       ├── movie-mapper.ts   # SQL 行 → Movie 映射
 │       ├── movie-search.ts   # 搜索查询规范化与 JSON 回退匹配
 │       ├── movies-pagination.ts # 列表分页工具
+│       ├── decision-tags.ts  # 详情页决策 Tag 解析
+│       ├── viewing-path-label.ts # 磁力备注清洗与规格 Tag 解析
 │       ├── nav-items.ts      # 主导航项配置
 │       ├── theme.ts          # 主题偏好逻辑
 │       └── theme.mjs         # 主题工具（供 Node 测试复用）
@@ -111,6 +117,9 @@ station-zero/
     ├── movie-database.test.mjs
     ├── movie-mapper.test.mts
     ├── movie-search.test.mts
+    ├── decision-tags.test.mts
+    ├── viewing-path-label.test.mts
+    ├── tmdb-movie-fields.test.mts
     ├── compress-image.test.mts
     └── theme.test.mjs
 ```
@@ -135,7 +144,7 @@ station-zero/
 
 - `/` — 首页：已发布影片网格（`getMoviesPage` SSR 首屏 + `/api/movies` 加载更多）。
 - `/movies` — 影片库列表（SQL 分页，30 条/页，仅 `published`）。
-- `/movies/[slug]` — 影片详情页（Top 50 `published` SSG 预热，其余 ISR）。
+- `/movies/[slug]` — 影片详情页（Top 50 `published` SSG 预热，其余 ISR）；展示豆瓣式元数据、TMDB 系列与关键词、观看来源聚合。
 - `/search` — 影片搜索（片名 / IMDB / 影人；`pg_trgm` + JSON 回退）。
 - `/collections` — 策展片单。
 - `/knowledge` — 高清知识库。
@@ -151,8 +160,11 @@ station-zero/
 - `src/components/movie-search-input.tsx` — 头部 / 搜索页影片搜索框（GET → `/search`）。
 - `src/components/theme-toggle.tsx` — 三段式主题切换（浅色 / 深色 / 跟随系统）。
 - `src/components/decision-tags.tsx` — 详情页决策标签（`verdict` + `bestWay`）。
+- `src/components/movie-summary.tsx` — 简介默认 5 行折叠，可展开全文。
+- `src/components/movie-keywords.tsx` — 详情页 TMDB 关键词 Tag 列表。
 - `src/components/poster-ambient-glow.tsx` — 详情页海报氛围光晕（读取 `palette` 或回退模糊海报）。
-- `src/components/watch-providers.tsx` — 正版观看路径聚合（客户端组件，含复制链接）。
+- `src/components/resource-accordion.tsx` — 观看来源分组手风琴（正版 / 网盘 / 磁力等）。
+- `src/components/watch-providers.tsx` — 观看路径聚合（客户端组件，含复制链接；磁力行规格 Tag 见 `viewing-path-label`）。
 
 ## 构建、测试与开发命令
 
@@ -179,7 +191,7 @@ station-zero/
 - `npm run ingest:resolve` — TMDB 初轮消歧。
 - `npm run ingest:resolve-ambiguous` — ambiguous 自动 / 半自动消歧。
 - `npm run ingest:resolve-failed` — failed 重试（中文片名 + 年份容差）。
-- `npm run ingest:sync` — TMDB 详情 + 磁力 → SQL；下载海报并上传 Storage（需 service_role）。
+- `npm run ingest:sync` — TMDB 详情 + 磁力 → SQL；下载海报并上传 Storage（需 service_role）；支持 `--batch-id`、`--publish`、`--tmdb-id`（单部重试）。
 - `npm run ingest:upload-media` — 补传本地海报到 Storage。
 - `npm run ingest:pilot` — 一键 Pilot（默认 100 部）。
 
@@ -207,7 +219,7 @@ station-zero/
 - 当前 TMDB 同步脚本可按名称搜索，但尚未把年份作为强匹配条件；遇到同名片应优先写入 `tmdbId`。
 - `slug` 是本站公开 URL 标识，优先英文小写 kebab-case；`tmdbId` 只用于后台同步。
 - 人工编辑字段应保留 Station Zero 判断层（`verdict`、`bestWay`、`idealScene`、`notFor`、`versionSignals`、`deviceAdvice`），不要被 TMDB 覆盖。
-- TMDB 可同步客观资料字段（`writers`、`countries`、`languages`、`releaseDate`、`aka` 等）；缺省时详情页对应行不渲染。
+- TMDB 可同步客观资料字段（`writers`、`countries`、`languages`、`releaseDate`、`aka`、`collection`、`keywords` 等）；缺省时详情页对应行不渲染。
 - 本地化海报由 sync 脚本下载到 `public/media/` 并上传 Supabase Storage；`movies.poster_url` 存 Storage 公网 URL，前端经 `movie-api` 只读 DB 字段。
 - Supabase 仅作数据层；浏览器永不直连 Postgres 或 Storage API。
 
@@ -246,7 +258,7 @@ station-zero/
 1. 清洗 TXT → `data/import/movies-clean.csv`（见 `data/import/index.md`）。
 2. `npm run ingest:staging` → `ingest:resolve` →（按需）`resolve-ambiguous` / `resolve-failed` → `ingest:sync`。
 3. 海报需 `SUPABASE_SERVICE_ROLE_KEY`；可单独 `npm run ingest:upload-media` 补传。
-4. 验收后 `npm run ingest:sync -- --publish` 上列表页。
+4. 验收后 `npm run ingest:sync -- --batch-id <batch> --publish` 上列表页；单部失败可用 `--tmdb-id` 重试，无需整批重跑。
 
 操作手册见 `docs/technical/bulk-ingestion-runbook.md`；架构见 `docs/technical/bulk-ingestion-scheme.md`；勾选清单见 `docs/technical/bulk-ingestion-checklist-v1.md`。
 
@@ -268,5 +280,5 @@ station-zero/
 
 **当前实施进度：**
 
-- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 100+ 部验证）、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）、bulk-ingest 新入库海报压缩（TMDB w500 + 480px WebP，见 `poster-compression-scheme.md`）、站点电影搜索 Phase A（`imdb_id` + `pg_trgm`、`/search`、头部搜索框、`GET /api/movies/search`）。
+- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 100+ 部验证）、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）、bulk-ingest 新入库海报压缩（TMDB w500 + 480px WebP，见 `poster-compression-scheme.md`）、站点电影搜索 Phase A（`imdb_id` + `pg_trgm`、`/search`、头部搜索框、`GET /api/movies/search`）、TMDB `collection` / `keywords` 入库与详情页展示、`ingest:sync --tmdb-id` 单部重试。
 - 未完成：生产 CDN / VPS 自托管部署（见 `mainland-topology.md`、`cdn-origin-setup.md`）；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）；存量海报 recompress（100+ 部仍可为 `.jpg` ~200KB）；legacy `sync:movies` 未接入 WebP 压缩；搜索 Phase B 联想下拉与存量 `imdb_id` backfill。

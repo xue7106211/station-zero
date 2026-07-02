@@ -2,7 +2,7 @@
 title: 万级影视批量录入 — 流水线 Runbook
 type: runbook
 status: active
-updated: 2026-06-28
+updated: 2026-07-02
 related:
   - technical/bulk-ingestion-scheme.md
   - technical/bulk-ingestion-checklist-v1.md
@@ -22,7 +22,7 @@ related:
 - **TMDB 只用于后台生产**，页面经 `movie-api` 读 Supabase SQL，未配置 `DATABASE_URL` 时回退 JSON
 - **磁力链来自 CSV**，sync 阶段不用 TMDB 正版路径覆盖 staging 链接
 - **策展字段占位**（`verdict`、`bestWay` 等）默认「待人工补充」；TMDB 只补客观资料
-- **默认 `draft`**：列表页只展示 `published`；Pilot 验收后再 `--publish`
+- **默认 `draft`**：列表页与首页只展示 `published`；Pilot 验收后再 `--publish`（或批量 UPDATE `content_status`）
 - **大 CSV / 原始 TXT 不进 Git**，只保留脚本、报告摘要与 [data/import/index.md](../../data/import/index.md)
 
 ## 二、完整数据流
@@ -119,6 +119,7 @@ npm run ingest:resolve -- --batch-id pilot-20260628
 npm run ingest:resolve-ambiguous -- --batch-id pilot-20260628   # 有 ambiguous 时
 npm run ingest:resolve-failed -- --batch-id pilot-20260628       # 有 failed 时
 npm run ingest:sync -- --batch-id pilot-20260628
+npm run ingest:sync -- --batch-id pilot-20260628 --tmdb-id 1265609   # 单部失败重试，勿整批重跑
 npm run ingest:sync -- --batch-id pilot-20260628 --publish       # 验收后上列表
 npm run ingest:upload-media                                      # 本地海报 → Supabase Storage
 ```
@@ -223,7 +224,7 @@ npm run ingest:sync -- --batch-id BATCH
 □ 人工 CSV 回写（若仍有个别）
 □ npm run ingest:sync
 □ 抽查详情页 / 磁力 / 海报
-□ npm run ingest:sync --publish（确认后）
+□ npm run ingest:sync -- --batch-id <batch> --publish（确认后；勿为补 1 部失败而整批重跑，用 --tmdb-id）
 ```
 
 ## 十、与 legacy 流水线的关系

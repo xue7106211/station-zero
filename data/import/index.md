@@ -62,6 +62,8 @@ npm run ingest:resolve -- --batch-id pilot-20260628
 npm run ingest:resolve-ambiguous -- --batch-id pilot-20260628   # 若有 ambiguous
 npm run ingest:resolve-failed -- --batch-id pilot-20260628       # 若有 failed
 npm run ingest:sync -- --batch-id pilot-20260628
+npm run ingest:sync -- --batch-id pilot-20260628 --tmdb-id <id>   # 单部失败重试
+npm run ingest:sync -- --batch-id pilot-20260628 --publish      # 验收后上首页/列表
 npm run ingest:upload-media                                      # 补传 Storage（可选）
 ```
 

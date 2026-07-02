@@ -8,7 +8,7 @@ MVP 基于 Next.js + TypeScript + Tailwind CSS 4 + HeroUI，包含：
 
 - 首页：已发布影片网格（SSR 首屏 + `/api/movies` 加载更多）。
 - 影片搜索：片名 / IMDB / 影人（`/search`；头部搜索框；`pg_trgm` + JSON 回退）。
-- 影片库与影片详情页：决策标签、豆瓣式元数据、正版观看路径、高清版本判断、设备与场景建议。
+- 影片库与影片详情页：决策标签、豆瓣式元数据（含 TMDB 系列与关键词）、观看来源聚合、高清版本判断、设备与场景建议。
 - 片单页：围绕设备、心情和审美组织内容。
 - 高清知识页：解释 HDR、BluRay、WEB-DL、REMUX 等概念。
 - 关于页：产品边界与合规声明。
@@ -46,6 +46,7 @@ npm run check:storage      # 海报上传 Storage 时需 service_role
 
 npm run ingest:pilot       # 一键 Pilot（默认 100 部）
 # 或分步：ingest:staging → ingest:resolve → ingest:resolve-ambiguous / ingest:resolve-failed → ingest:sync
+# ingest:sync 支持 --batch-id、--publish（上列表）、--tmdb-id（单部重试）
 npm run ingest:upload-media   # 补传本地海报到 Supabase Storage
 ```
 
@@ -99,7 +100,7 @@ Next.js 页面（img src = movies.poster_url，Supabase Storage 公网 URL）
 | 首页 `/` | `getMoviesPage(1)` SSR 首屏；`MovieLoadMoreGrid` 经 `/api/movies?page=` 加载更多 |
 | 列表 `/movies` | SQL 分页，30 条/页，`content_status = published`，`ORDER BY updated_at DESC` |
 | 首页 / 列表影片 | 仅展示 `published` 影片 |
-| 详情 `/movies/[slug]` | `movies` JOIN `viewing_paths` 单次查询；任意状态 slug 可访问 |
+| 详情 `/movies/[slug]` | `movies` JOIN `viewing_paths` 单次查询；任意状态 slug 可访问；元数据含 `collection`、`keywords` |
 | 搜索 `/search` | `searchMovies`（SQL `pg_trgm` + IMDB 精确；无库时 JSON 子串匹配）；`GET /api/movies/search` 供联想（Phase B 待做） |
 | 构建策略 | Top 50 `published` 预热 SSG；其余 slug 按需 ISR（`revalidate = 86400`） |
 | 无 `DATABASE_URL` | 自动回退 `data/movies.json`（搜索能力缩水，完整搜索需 SQL） |
@@ -112,6 +113,7 @@ Next.js 页面（img src = movies.poster_url，Supabase Storage 公网 URL）
 - `src/lib/movie-store.ts` — 文件型 JSON 读取与默认数据合并
 - `src/lib/movie-mapper.ts` — SQL 行 → 前端 `Movie` 类型映射
 - `src/lib/movie-search.ts` — 搜索查询规范化、IMDB 解析、JSON 回退匹配
+- `src/lib/viewing-path-label.ts` — 磁力备注清洗与规格 Tag 解析（供 `WatchProviders`）
 - `src/app/api/movies/search/route.ts` — 搜索 JSON API
 - `src/db/schema.ts` — Drizzle schema（`movies`、`viewing_paths`、`media_assets`、`import_staging`）
 
@@ -171,7 +173,7 @@ NO_PROXY=localhost,127.0.0.1
 
 `npm run sync:movies` 会：
 
-- 从 TMDB 拉取影片资料、演职员、观看平台、又名等字段；
+- 从 TMDB 拉取影片资料、演职员、观看平台、又名、系列（`belongs_to_collection`）、关键词等字段；
 - 将制片国家/地区、语言映射为中文展示文案；
 - 下载远程海报和背景图到 `public/media/`；
 - 从本地海报提取 `palette` 色板；
@@ -253,7 +255,7 @@ Pilot 已验证端到端流水线（staging → TMDB 消歧 → SQL + Storage）
 - [`docs/technical/bulk-ingestion-scheme.md`](docs/technical/bulk-ingestion-scheme.md) — 架构方案
 - [`docs/technical/bulk-ingestion-checklist-v1.md`](docs/technical/bulk-ingestion-checklist-v1.md) — 分阶段清单
 
-当前已完成：Schema、读取层、bulk-ingest 脚本（Pilot 100+）、Supabase Storage 海报上传、bulk-ingest 新入库海报 WebP 压缩、站点搜索 Phase A。待推进：生产 CDN / VPS 部署、存量海报 recompress、搜索 Phase B 联想下拉、全量录入（见 `bulk-ingestion-checklist-v1.md`）。
+当前已完成：Schema、读取层、bulk-ingest 脚本（Pilot 100+）、Supabase Storage 海报上传、bulk-ingest 新入库海报 WebP 压缩、站点搜索 Phase A、TMDB `collection` / `keywords` 入库与详情页展示。待推进：生产 CDN / VPS 部署、存量海报 recompress、搜索 Phase B 联想下拉、全量录入（见 `bulk-ingestion-checklist-v1.md`）。
 
 ## UI 与主题
 
@@ -269,8 +271,11 @@ Pilot 已验证端到端流水线（staging → TMDB 消歧 → SQL + Storage）
 ### 影片详情页组件
 
 - `DecisionTags` — 将 `verdict` 与 `bestWay` 拆成标签展示。
+- `MovieSummary` — 简介默认最多 5 行，可展开全文。
+- `MovieKeywords` — TMDB 关键词 Tag 列表。
 - `PosterAmbientGlow` — 基于 `palette` 或模糊海报生成顶部氛围光晕。
-- `WatchProviders` — 正版观看路径聚合与复制链接。
+- `ResourceAccordion` — 观看来源分组手风琴（正版 / 网盘 / 磁力等）。
+- `WatchProviders` — 观看路径聚合、规格 Tag 与复制链接。
 
 ### 主题切换
 

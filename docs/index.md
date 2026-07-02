@@ -2,7 +2,7 @@
 title: Station Zero 文档索引
 type: index
 status: active
-updated: 2026-06-30
+updated: 2026-07-02
 ---
 
 # Station Zero 文档索引
@@ -224,6 +224,7 @@ flowchart TB
 | 海报上传 Supabase Storage | 可执行清单 S4 | ✅ `ingest:sync` + `ingest:upload-media`（需 `SUPABASE_SERVICE_ROLE_KEY`） |
 | 海报入库压缩（WebP / 480px） | `poster-compression-scheme` | ✅ bulk-ingest 新入库（w500 + 480px WebP）；存量 recompress 未做 |
 | 站点电影搜索 | `movie-search-scheme` | ✅ Phase A：`imdb_id` + `pg_trgm`、`/search`、头部搜索框、`GET /api/movies/search`；Phase B 联想下拉与存量 `imdb_id` backfill 待做 |
+| TMDB 系列 / 关键词 | `movies.collection` + `movies.keywords` | ✅ migration `0002_*`；`ingest:sync` / `sync:movies` 同步；详情页 `MetaRow` + `MovieKeywords` |
 | 生产 VPS + CDN 部署 | `mainland-topology` + Phase 6 | ❌ 待决策与实施；配置步骤见 `cdn-origin-setup` |
 
 更细的命令与路径约定以 [AGENTS.md](../AGENTS.md) 文末「当前实施进度」为准；文档与代码冲突时，**以代码与 `AGENTS.md` 为权威**，并应反馈更新文档。
