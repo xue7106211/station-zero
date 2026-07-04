@@ -344,6 +344,56 @@ export function slugify(value: string) {
     .replace(/^-|-$/g, "");
 }
 
+/** `ingest:sync` 为新片挑选 slug 时的候选顺序（去重）。 */
+export function buildSyncMovieSlugCandidates(
+  base: string,
+  tmdbId: number,
+  releaseYear?: string,
+): string[] {
+  const normalizedBase = base.trim() || `movie-${tmdbId}`;
+  const candidates = [normalizedBase];
+  if (releaseYear) {
+    candidates.push(`${normalizedBase}-${releaseYear}`);
+  }
+  candidates.push(`${normalizedBase}-${tmdbId}`, `movie-${tmdbId}`);
+  return [...new Set(candidates)];
+}
+
+export type SlugOccupant = {
+  slug: string;
+  tmdbId: number | null;
+};
+
+/**
+ * 在已有 slug 占用情况下挑选可安全 upsert 的 slug。
+ *
+ * 若候选 slug 已被其他 `tmdbId` 占用则跳过，避免 `onConflictDoUpdate` 覆盖错片。
+ */
+export function resolveIngestMovieSlug(
+  tmdbId: number,
+  base: string,
+  releaseYear: string | undefined,
+  existingSlugForTmdbId: string | undefined,
+  occupants: SlugOccupant[],
+): string {
+  if (existingSlugForTmdbId) {
+    return existingSlugForTmdbId;
+  }
+
+  const bySlug = new Map(occupants.map((row) => [row.slug, row.tmdbId]));
+  for (const candidate of buildSyncMovieSlugCandidates(base, tmdbId, releaseYear)) {
+    const ownerTmdbId = bySlug.get(candidate);
+    if (ownerTmdbId === undefined) {
+      return candidate;
+    }
+    if (ownerTmdbId === tmdbId) {
+      return candidate;
+    }
+  }
+
+  return `movie-${tmdbId}`;
+}
+
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
