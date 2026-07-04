@@ -17,7 +17,7 @@ import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
 import { promisify } from "node:util";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { importStaging, mediaAssets, movies, viewingPaths } from "../../src/db/schema";
 import { toPublicMediaPath } from "../lib/movie-database.mjs";
 import { extractPalette } from "../lib/palette.mjs";
@@ -26,7 +26,9 @@ import {
   createTmdbClient,
   defaultBatchId,
   mapTmdbDetailsToMovieValues,
+  buildSyncMovieSlugCandidates,
   parseCliArgs,
+  resolveIngestMovieSlug,
   slugify,
   sleep,
   syncUpsertContentStatusFields,
@@ -379,25 +381,31 @@ async function pickSlug(
   rows: StagingRow[],
 ) {
   const base = slugify(details.original_title || details.title || rows[0]?.title || "movie");
-  let candidate = base || `movie-${details.id}`;
+  const releaseYear = details.release_date?.slice(0, 4);
 
-  const existing = await withDatabase(async ({ db }) => {
+  return withDatabase(async ({ db }) => {
     const [byTmdb] = await db
-      .select({ slug: movies.slug, tmdbId: movies.tmdbId })
+      .select({ slug: movies.slug })
       .from(movies)
       .where(eq(movies.tmdbId, details.id))
       .limit(1);
-    if (byTmdb) return byTmdb.slug;
 
-    const [bySlug] = await db.select({ slug: movies.slug }).from(movies).where(eq(movies.slug, candidate)).limit(1);
-    if (bySlug) {
-      const year = details.release_date?.slice(0, 4);
-      candidate = year ? `${base}-${year}` : `${base}-${details.id}`;
-    }
-    return candidate;
+    const candidates = buildSyncMovieSlugCandidates(base || `movie-${details.id}`, details.id, releaseYear);
+    const occupants = candidates.length
+      ? await db
+          .select({ slug: movies.slug, tmdbId: movies.tmdbId })
+          .from(movies)
+          .where(inArray(movies.slug, candidates))
+      : [];
+
+    return resolveIngestMovieSlug(
+      details.id,
+      base,
+      releaseYear,
+      byTmdb?.slug,
+      occupants,
+    );
   });
-
-  return existing;
 }
 
 async function safeExtractPalette(posterFile: string, slug: string) {
