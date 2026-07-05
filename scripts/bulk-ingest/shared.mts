@@ -90,9 +90,16 @@ export function parseCsvFile(path: string): CsvRow[] {
   });
 }
 
-export function selectRowsForPilot(rows: CsvRow[], limitMovies: number): CsvRow[] {
+export function selectRowsForPilot(
+  rows: CsvRow[],
+  limitMovies: number,
+  offsetMovies = 0,
+): CsvRow[] {
+  const skippedKeys = new Set<string>();
   const allowed = new Set<string>();
   const selected: CsvRow[] = [];
+  let skippedUnique = 0;
+  const hasLimit = limitMovies > 0;
 
   for (const row of rows) {
     if (!row.year?.trim()) continue;
@@ -101,7 +108,15 @@ export function selectRowsForPilot(rows: CsvRow[], limitMovies: number): CsvRow[
       selected.push(row);
       continue;
     }
-    if (allowed.size < limitMovies) {
+    if (skippedKeys.has(key)) {
+      continue;
+    }
+    if (offsetMovies > 0 && skippedUnique < offsetMovies) {
+      skippedKeys.add(key);
+      skippedUnique += 1;
+      continue;
+    }
+    if (!hasLimit || allowed.size < limitMovies) {
       allowed.add(key);
       selected.push(row);
     }

@@ -25,6 +25,7 @@ station-zero/
 │   ├── technical/
 │   │   ├── bulk-ingestion-scheme.md          # 万级录入架构方案
 │   │   ├── bulk-ingestion-runbook.md         # 批量录入操作手册（Pilot 经验）
+│   │   ├── bulk-ingestion-progress.md        # 数据库入库进度快照（接续下一批）
 │   │   ├── bulk-ingestion-checklist-v1.md    # 分阶段实施清单
 │   │   ├── movie-images.md                   # 图片本地化与 Storage / CDN 策略
 │   │   ├── poster-compression-scheme.md    # Supabase 海报体积优化方案
@@ -56,7 +57,7 @@ station-zero/
 │   ├── index.md              # 脚本索引与流水线说明
 │   ├── checks/               # 预检：database / tmdb / storage
 │   ├── legacy/               # 单部 MVP：seeds → movies.json
-│   ├── bulk-ingest/          # 万级批量：CSV → staging → SQL + Storage
+│   ├── bulk-ingest/          # 万级批量：CSV → staging → SQL + Storage（含 publish-batch.mts）
 │   └── lib/                  # 共享：movie-database、palette
 │
 ├── src/
@@ -120,6 +121,8 @@ station-zero/
     ├── decision-tags.test.mts
     ├── viewing-path-label.test.mts
     ├── tmdb-movie-fields.test.mts
+    ├── bulk-ingest-sync.test.mts
+    ├── bulk-ingest-staging.test.mts
     ├── compress-image.test.mts
     └── theme.test.mjs
 ```
@@ -187,11 +190,12 @@ station-zero/
 
 **万级批量录入（bulk-ingest）：**
 
-- `npm run ingest:staging` — CSV → `import_staging`。
+- `npm run ingest:staging` — CSV → `import_staging`；支持 `--offset-movies`、`--limit-movies`、`--batch-id`。
 - `npm run ingest:resolve` — TMDB 初轮消歧。
 - `npm run ingest:resolve-ambiguous` — ambiguous 自动 / 半自动消歧。
 - `npm run ingest:resolve-failed` — failed 重试（中文片名 + 年份容差）。
 - `npm run ingest:sync` — TMDB 详情 + 磁力 → SQL；下载海报并上传 Storage（需 service_role）；支持 `--batch-id`、`--publish`、`--tmdb-id`（单部重试）。
+- `npm run ingest:publish` — 按 `--batch-id` 将已 sync 影片设为 `published`（仅 UPDATE，不重拉 TMDB / 海报）。
 - `npm run ingest:upload-media` — 补传本地海报到 Storage。
 - `npm run ingest:pilot` — 一键 Pilot（默认 100 部）。
 
@@ -258,7 +262,7 @@ station-zero/
 1. 清洗 TXT → `data/import/movies-clean.csv`（见 `data/import/index.md`）。
 2. `npm run ingest:staging` → `ingest:resolve` →（按需）`resolve-ambiguous` / `resolve-failed` → `ingest:sync`。
 3. 海报需 `SUPABASE_SERVICE_ROLE_KEY`；可单独 `npm run ingest:upload-media` 补传。
-4. 验收后 `npm run ingest:sync -- --batch-id <batch> --publish` 上列表页；单部失败可用 `--tmdb-id` 重试，无需整批重跑。
+4. 验收后 `npm run ingest:publish -- --batch-id <batch>` 上列表页（推荐）；或 `ingest:sync --publish` 整批重 sync；单部失败可用 `--tmdb-id` 重试。
 
 操作手册见 `docs/technical/bulk-ingestion-runbook.md`；架构见 `docs/technical/bulk-ingestion-scheme.md`；勾选清单见 `docs/technical/bulk-ingestion-checklist-v1.md`。
 
@@ -272,6 +276,7 @@ station-zero/
 | 海报体积优化 | `docs/technical/poster-compression-scheme.md` |
 | 站点电影搜索 | `docs/technical/movie-search-scheme.md` |
 | 万级录入操作手册 | `docs/technical/bulk-ingestion-runbook.md` |
+| 万级录入进度快照（接续下一批） | `docs/technical/bulk-ingestion-progress.md` |
 | 万级录入架构方案 | `docs/technical/bulk-ingestion-scheme.md` |
 | 万级录入勾选清单 | `docs/technical/bulk-ingestion-checklist-v1.md` |
 | 大陆 CDN / VPS 选型 | `docs/technical/mainland-topology.md` |
@@ -280,5 +285,5 @@ station-zero/
 
 **当前实施进度：**
 
-- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 100+ 部验证）、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）、bulk-ingest 新入库海报压缩（TMDB w500 + 480px WebP，见 `poster-compression-scheme.md`）、站点电影搜索 Phase A（`imdb_id` + `pg_trgm`、`/search`、头部搜索框、`GET /api/movies/search`）、TMDB `collection` / `keywords` 入库与详情页展示、`ingest:sync --tmdb-id` 单部重试。
-- 未完成：生产 CDN / VPS 自托管部署（见 `mainland-topology.md`、`cdn-origin-setup.md`）；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）；存量海报 recompress（100+ 部仍可为 `.jpg` ~200KB）；legacy `sync:movies` 未接入 WebP 压缩；搜索 Phase B 联想下拉与存量 `imdb_id` backfill。
+- 已完成：Drizzle schema、Supabase 连通、`movie-api` SQL 读取层、JSON fallback、`db:migrate:json`、bulk-ingest 流水线（Pilot 101 部 + 第一批扩展 `batch-20260705-001` 399 部，库内 **516** 部 / **515** published）、`ingest:publish`（按 batch 轻量发布）、`prepare-staging --offset-movies`、Supabase Storage 海报上传（`ingest:sync` / `ingest:upload-media`）、bulk-ingest 新入库海报压缩（TMDB w500 + 480px WebP，见 `poster-compression-scheme.md`）、站点电影搜索 Phase A（`imdb_id` + `pg_trgm`、`/search`、头部搜索框、`GET /api/movies/search`）、TMDB `collection` / `keywords` 入库与详情页展示、`ingest:sync --tmdb-id` 单部重试。
+- 未完成：生产 CDN / VPS 自托管部署（见 `mainland-topology.md`、`cdn-origin-setup.md`）；legacy `sync:movies` 路径尚未自动上传 Storage（需手动或走 bulk-ingest）；存量海报 recompress（legacy 与早期入库仍可为 `.jpg` ~200KB）；legacy `sync:movies` 未接入 WebP 压缩；搜索 Phase B 联想下拉与存量 `imdb_id` backfill；万级全量录入（见 `bulk-ingestion-progress.md` 下一批 offset）。

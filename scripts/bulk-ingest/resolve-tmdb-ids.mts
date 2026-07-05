@@ -71,7 +71,14 @@ async function main() {
   const delayMs = Number(args["delay-ms"] ?? 250);
   const { tmdbFetch } = createTmdbClient();
 
-  const pendingGroups = await withDatabase(async ({ db }) => {
+  let resolved = 0;
+  let ambiguous = 0;
+  let failed = 0;
+  const ambiguousRows: string[] = [
+    "title,year,tmdb_id,candidate_title,candidate_original_title,candidate_release_date",
+  ];
+
+  await withDatabase(async ({ db }) => {
     const rows = await db
       .select({
         title: importStaging.title,
@@ -88,25 +95,16 @@ async function main() {
         groups.set(key, { title: row.title, year: row.year });
       }
     }
-    return [...groups.values()];
-  });
+    const pendingGroups = [...groups.values()];
 
-  if (!pendingGroups.length) {
-    console.log(`No pending groups for batch ${batchId}.`);
-    return;
-  }
+    if (!pendingGroups.length) {
+      console.log(`No pending groups for batch ${batchId}.`);
+      return;
+    }
 
-  let resolved = 0;
-  let ambiguous = 0;
-  let failed = 0;
-  const ambiguousRows: string[] = [
-    "title,year,tmdb_id,candidate_title,candidate_original_title,candidate_release_date",
-  ];
+    for (const [index, group] of pendingGroups.entries()) {
+      const outcome = await resolveTitleYear(tmdbFetch, group.title, group.year);
 
-  for (const [index, group] of pendingGroups.entries()) {
-    const outcome = await resolveTitleYear(tmdbFetch, group.title, group.year);
-
-    await withDatabase(async ({ db }) => {
       if (outcome.status === "resolved") {
         await db
           .update(importStaging)
@@ -124,10 +122,7 @@ async function main() {
           );
         resolved += 1;
         console.log(`[resolved] ${group.title} (${group.year}) -> ${outcome.tmdbId}`);
-        return;
-      }
-
-      if (outcome.status === "ambiguous") {
+      } else if (outcome.status === "ambiguous") {
         await db
           .update(importStaging)
           .set({
@@ -157,46 +152,45 @@ async function main() {
           );
         }
         console.log(`[ambiguous] ${group.title} (${group.year})`);
-        return;
+      } else {
+        await db
+          .update(importStaging)
+          .set({
+            tmdbResolveStatus: "failed",
+            candidatesJson: null,
+          })
+          .where(
+            and(
+              eq(importStaging.batchId, batchId),
+              eq(importStaging.title, group.title),
+              eq(importStaging.year, group.year),
+            ),
+          );
+        failed += 1;
+        console.log(`[failed] ${group.title} (${group.year})`);
       }
 
-      await db
-        .update(importStaging)
-        .set({
-          tmdbResolveStatus: "failed",
-          candidatesJson: null,
-        })
-        .where(
-          and(
-            eq(importStaging.batchId, batchId),
-            eq(importStaging.title, group.title),
-            eq(importStaging.year, group.year),
-          ),
-        );
-      failed += 1;
-      console.log(`[failed] ${group.title} (${group.year})`);
-    });
-
-    if (index < pendingGroups.length - 1 && delayMs > 0) {
-      await sleep(delayMs);
+      if (index < pendingGroups.length - 1 && delayMs > 0) {
+        await sleep(delayMs);
+      }
     }
-  }
 
-  mkdirSync("data/import", { recursive: true });
-  if (ambiguousRows.length > 1) {
-    writeFileSync("data/import/ambiguous-report.csv", `${ambiguousRows.join("\n")}\n`, "utf8");
-  }
+    mkdirSync("data/import", { recursive: true });
+    if (ambiguousRows.length > 1) {
+      writeFileSync("data/import/ambiguous-report.csv", `${ambiguousRows.join("\n")}\n`, "utf8");
+    }
 
-  const report = [
-    "resolve-tmdb-ids report",
-    `batch_id: ${batchId}`,
-    `groups_processed: ${pendingGroups.length}`,
-    `resolved: ${resolved}`,
-    `ambiguous: ${ambiguous}`,
-    `failed: ${failed}`,
-  ].join("\n");
-  writeFileSync("data/import/resolve-report.txt", `${report}\n`, "utf8");
-  console.log(report);
+    const report = [
+      "resolve-tmdb-ids report",
+      `batch_id: ${batchId}`,
+      `groups_processed: ${pendingGroups.length}`,
+      `resolved: ${resolved}`,
+      `ambiguous: ${ambiguous}`,
+      `failed: ${failed}`,
+    ].join("\n");
+    writeFileSync("data/import/resolve-report.txt", `${report}\n`, "utf8");
+    console.log(report);
+  });
 }
 
 main().catch((error) => {

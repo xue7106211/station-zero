@@ -2,10 +2,11 @@
 title: 万级影视批量录入 — 流水线 Runbook
 type: runbook
 status: active
-updated: 2026-07-02
+updated: 2026-07-05
 related:
   - technical/bulk-ingestion-scheme.md
   - technical/bulk-ingestion-checklist-v1.md
+  - technical/bulk-ingestion-progress.md
   - technical/movie-images.md
   - ../scripts/bulk-ingest/index.md
   - ../data/import/index.md
@@ -13,7 +14,7 @@ related:
 
 # 万级影视批量录入 — 流水线 Runbook
 
-> **定位**：本文是 bulk-ingest 流水线的**操作手册与 Pilot 经验沉淀**，供后续分批复用。架构背景见 [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md)；分阶段勾选任务见 [bulk-ingestion-checklist-v1.md](./bulk-ingestion-checklist-v1.md)。脚本细节见 [scripts/bulk-ingest/index.md](../../scripts/bulk-ingest/index.md)。
+> **定位**：本文是 bulk-ingest 流水线的**操作手册与 Pilot 经验沉淀**，供后续分批复用。架构背景见 [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md)；分阶段勾选任务见 [bulk-ingestion-checklist-v1.md](./bulk-ingestion-checklist-v1.md)；**库内进度与下一批 offset** 见 [bulk-ingestion-progress.md](./bulk-ingestion-progress.md)。脚本细节见 [scripts/bulk-ingest/index.md](../../scripts/bulk-ingest/index.md)。
 
 ## 一、架构原则
 
@@ -22,7 +23,7 @@ related:
 - **TMDB 只用于后台生产**，页面经 `movie-api` 读 Supabase SQL，未配置 `DATABASE_URL` 时回退 JSON
 - **磁力链来自 CSV**，sync 阶段不用 TMDB 正版路径覆盖 staging 链接
 - **策展字段占位**（`verdict`、`bestWay` 等）默认「待人工补充」；TMDB 只补客观资料
-- **默认 `draft`**：列表页与首页只展示 `published`；Pilot 验收后再 `--publish`（或批量 UPDATE `content_status`）
+- **默认 `draft`**：列表页与首页只展示 `published`；验收后用 `ingest:publish`（推荐）或 `ingest:sync --publish` 上列表
 - **大 CSV / 原始 TXT 不进 Git**，只保留脚本、报告摘要与 [data/import/index.md](../../data/import/index.md)
 
 ## 二、完整数据流
@@ -75,11 +76,12 @@ flowchart TB
 | 步骤 | 脚本 | 输入 → 输出 | 说明 |
 |------|------|-------------|------|
 | **0 清洗** | `clean-import-txt.mjs` | TXT → CSV | 解析片名、中文名、年份、磁力、slug；缺 year 的进 `movies-needs-review.csv` |
-| **1 Staging** | `prepare-staging.mts` | CSV → `import_staging` | 每行一条磁力；`--limit-movies N` 控制 Pilot 规模；`--batch-id` 串联全流程 |
+| **1 Staging** | `prepare-staging.mts` | CSV → `import_staging` | 每行一条磁力；`--offset-movies` / `--limit-movies` 分批；`--batch-id` 串联全流程 |
 | **2a 初轮消歧** | `resolve-tmdb-ids.mts` | staging → `tmdb_id` | 按 `(title, year)` 搜 TMDB：唯一 → resolved，多个 → ambiguous，无 → failed |
 | **2b ambiguous** | `resolve-ambiguous.mts` | ambiguous → resolved | 用 `title_zh` 复搜 + 候选打分；高置信自动，其余导出人工表 |
 | **2c failed** | `resolve-failed.mts` | failed → resolved | 用中文片名、去 `The` 前缀、年份 ±1 重试 |
 | **3 落库** | `sync-movies-to-sql.mts` | resolved → SQL + 海报 | 拉 TMDB 详情、下载海报/背景、写入磁力 viewing paths |
+| **3a 发布** | `publish-batch.mts` | draft → published | 按 `batch-id` 更新 `content_status`；不拉 TMDB、不重传海报 |
 
 共享逻辑：`scripts/bulk-ingest/shared.mts`（CSV 解析、TMDB 客户端、打分、字段映射）。
 
@@ -115,12 +117,14 @@ npm run ingest:pilot -- --batch-id pilot-20260628 --limit-movies 100
 # Windows PowerShell 可先设变量：$BATCH = "pilot-20260628"
 
 npm run ingest:staging -- --limit-movies 100 --batch-id pilot-20260628
+# 扩展批（跳过已录入片）：--offset-movies 500 --limit-movies 500
 npm run ingest:resolve -- --batch-id pilot-20260628
 npm run ingest:resolve-ambiguous -- --batch-id pilot-20260628   # 有 ambiguous 时
 npm run ingest:resolve-failed -- --batch-id pilot-20260628       # 有 failed 时
 npm run ingest:sync -- --batch-id pilot-20260628
 npm run ingest:sync -- --batch-id pilot-20260628 --tmdb-id 1265609   # 单部失败重试，勿整批重跑
-npm run ingest:sync -- --batch-id pilot-20260628 --publish       # 验收后上列表
+npm run ingest:publish -- --batch-id pilot-20260628                # 验收后上列表（推荐）
+# npm run ingest:sync -- --batch-id pilot-20260628 --publish     # 备选：整批重 sync+发布（慢）
 npm run ingest:upload-media                                      # 本地海报 → Supabase Storage
 ```
 
@@ -187,6 +191,7 @@ npm run ingest:sync -- --batch-id BATCH
 | `data/import/ambiguous-manual.csv` | 待人工 ambiguous |
 | `data/import/ambiguous-resolutions.csv` | 已确认的人工消歧 |
 | `data/import/sync-report.txt` | sync 成功 / 失败 |
+| `data/import/publish-report.txt` | 按 batch 发布统计 |
 | `data/import/pilot-summary.txt` | 一键 Pilot 汇总 |
 
 大体积 CSV / TXT 路径与 Git 策略见 [data/import/index.md](../../data/import/index.md)。
@@ -208,7 +213,7 @@ npm run ingest:sync -- --batch-id BATCH
 | 年份严格匹配 | 初轮易 failed | 已用 `resolve-failed` 补；可考虑 merge 进初轮 |
 | 源数据 title 截断 | 如 `On Chesil Beac` | 清洗阶段做 fuzzy 归一 |
 | slug 偶发为空 | 生成 `movie-{tmdbId}` | sync 阶段用 CSV slug 优先 |
-| 全量 1.8 万片 | Pilot 仅验证 100 部 | 按 batch 分批 `--limit-movies`，每批跑完 resolve 三部曲再 sync |
+| 全量 1.8 万片 | 已 Pilot + 第一批 +400；见 [bulk-ingestion-progress.md](./bulk-ingestion-progress.md) | 按 batch 使用 `--offset-movies` + `--limit-movies`（如 500/批） |
 | 海报 Storage 回退 | sync 未配 service_role 时仍写本地路径 | 配置 `SUPABASE_SERVICE_ROLE_KEY` 后 sync / upload-media 自动上传 |
 
 ## 九、推荐复用 Checklist
@@ -217,14 +222,14 @@ npm run ingest:sync -- --batch-id BATCH
 □ 源 TXT 放入 data/import/raw/
 □ node clean-import-txt → movies-clean.csv
 □ npm run check:database && npm run check:tmdb
-□ npm run ingest:staging（定 batch-id、limit-movies）
+□ npm run ingest:staging（定 batch-id、offset-movies、limit-movies）
 □ npm run ingest:resolve
 □ npm run ingest:resolve-ambiguous（若有 ambiguous）
 □ npm run ingest:resolve-failed（若有 failed）
 □ 人工 CSV 回写（若仍有个别）
 □ npm run ingest:sync
 □ 抽查详情页 / 磁力 / 海报
-□ npm run ingest:sync -- --batch-id <batch> --publish（确认后；勿为补 1 部失败而整批重跑，用 --tmdb-id）
+□ npm run ingest:publish -- --batch-id <batch>（确认后；勿为补 1 部失败而整批重跑，用 --tmdb-id）
 ```
 
 ## 十、与 legacy 流水线的关系

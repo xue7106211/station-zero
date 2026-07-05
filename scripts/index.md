@@ -34,11 +34,12 @@ flowchart LR
 | 步骤 | 脚本 | npm 命令 | 输入 → 输出 |
 |------|------|----------|-------------|
 | 0 清洗 | `bulk-ingest/clean-import-txt.mjs` | （手动 node） | 原始 TXT → `movies-clean.csv` |
-| 1 入缓冲 | `bulk-ingest/prepare-staging.mts` | `npm run ingest:staging` | CSV → `import_staging` 表 |
+| 1 入缓冲 | `bulk-ingest/prepare-staging.mts` | `npm run ingest:staging` | CSV → `import_staging`；`--offset-movies` / `--limit-movies` |
 | 2 消歧 | `bulk-ingest/resolve-tmdb-ids.mts` | `npm run ingest:resolve` | staging → 写入 `tmdb_id` |
 | 2b ambiguous | `bulk-ingest/resolve-ambiguous.mts` | `npm run ingest:resolve-ambiguous` | 自动/半自动消歧 |
 | 2c failed | `bulk-ingest/resolve-failed.mts` | `npm run ingest:resolve-failed` | 中文片名 + 年份容差重试 |
 | 3 落库 | `bulk-ingest/sync-movies-to-sql.mts` | `npm run ingest:sync` | TMDB w500/w1280 → 480px WebP → `movies` + Storage；`--tmdb-id` 单部重试 |
+| 3a 发布 | `bulk-ingest/publish-batch.mts` | `npm run ingest:publish` | 按 batch 将已入库影片设为 `published`（不拉 TMDB） |
 | 3b Storage | `bulk-ingest/upload-media-to-storage.mts` | `npm run ingest:upload-media` | 本地海报压缩后补传到 Supabase Storage |
 | 一键 Pilot | `bulk-ingest/run-pilot-ingest.mts` | `npm run ingest:pilot` | 串联 1→2→3（默认 100 部） |
 
@@ -75,6 +76,7 @@ flowchart LR
 |------|------|
 | 文档总览 | [docs/index.md](../docs/index.md) |
 | 万级录入操作手册 | [docs/technical/bulk-ingestion-runbook.md](../docs/technical/bulk-ingestion-runbook.md) |
+| 万级录入进度快照 | [docs/technical/bulk-ingestion-progress.md](../docs/technical/bulk-ingestion-progress.md) |
 | 站点电影搜索 | [docs/technical/movie-search-scheme.md](../docs/technical/movie-search-scheme.md) |
 | 图片与 Storage 策略 | [docs/technical/movie-images.md](../docs/technical/movie-images.md) |
 | 海报体积优化 | [docs/technical/poster-compression-scheme.md](../docs/technical/poster-compression-scheme.md) |

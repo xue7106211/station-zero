@@ -19,6 +19,7 @@ import { basename, extname, join } from "node:path";
 import { promisify } from "node:util";
 import { and, eq } from "drizzle-orm";
 import { importStaging, mediaAssets, movies, viewingPaths } from "../../src/db/schema";
+import type { Database } from "../../src/db/index";
 import { toPublicMediaPath } from "../lib/movie-database.mjs";
 import { extractPalette } from "../lib/palette.mjs";
 import {
@@ -136,12 +137,13 @@ async function main() {
   let failed = 0;
   const failures: string[] = [];
 
-  for (const [index, [tmdbId, rows]] of [...groups.entries()].entries()) {
-    try {
-      const details = await tmdbFetch(
-        `/movie/${tmdbId}?language=zh-CN&append_to_response=credits,alternative_titles,external_ids,keywords`,
-      );
-      const slug = await pickSlug(details, rows);
+  await withDatabase(async ({ db }) => {
+    for (const [index, [tmdbId, rows]] of [...groups.entries()].entries()) {
+      try {
+        const details = await tmdbFetch(
+          `/movie/${tmdbId}?language=zh-CN&append_to_response=credits,alternative_titles,external_ids,keywords`,
+        );
+        const slug = await pickSlug(db, details, rows);
       const seedPaths = dedupeViewingPaths(rows);
       const sourcePosterUrl = details.poster_path ? `${imageBase}${details.poster_path}` : undefined;
       const sourceBackdropUrl = details.backdrop_path
@@ -184,10 +186,9 @@ async function main() {
         palette,
       });
 
-      await withDatabase(async ({ db }) => {
-        const [movie] = await db
-          .insert(movies)
-          .values({
+      const [movie] = await db
+        .insert(movies)
+        .values({
             slug: mapped.slug,
             tmdbId: mapped.tmdbId,
             imdbId: mapped.imdbId,
@@ -265,68 +266,68 @@ async function main() {
               updatedAt: now,
             },
           })
-          .returning({ id: movies.id, slug: movies.slug });
+        .returning({ id: movies.id, slug: movies.slug });
 
-        await db.delete(viewingPaths).where(eq(viewingPaths.movieId, movie.id));
-        await db.delete(mediaAssets).where(eq(mediaAssets.movieId, movie.id));
+      await db.delete(viewingPaths).where(eq(viewingPaths.movieId, movie.id));
+      await db.delete(mediaAssets).where(eq(mediaAssets.movieId, movie.id));
 
-        if (mapped.viewingPaths.length > 0) {
-          await db.insert(viewingPaths).values(
-            mapped.viewingPaths.map((path, sortOrder) => ({
+      if (mapped.viewingPaths.length > 0) {
+        await db.insert(viewingPaths).values(
+          mapped.viewingPaths.map((path, sortOrder) => ({
+            movieId: movie.id,
+            platform: path.platform,
+            type: path.type,
+            note: path.note,
+            url: path.url,
+            sortOrder,
+          })),
+        );
+      }
+
+      const mediaRows = [
+        posterUrl
+          ? {
               movieId: movie.id,
-              platform: path.platform,
-              type: path.type,
-              note: path.note,
-              url: path.url,
-              sortOrder,
-            })),
-          );
-        }
+              kind: "poster" as const,
+              storageKey: posterMediaAsset?.storageKey ?? posterUrl.replace(/^\/media\//, ""),
+              publicUrl: posterUrl,
+              mimeType: posterMediaAsset?.mimeType ?? (posterUrl.endsWith(".webp") ? "image/webp" : "image/jpeg"),
+              byteSize: posterMediaAsset?.byteSize,
+              sourceUrl: mapped.sourcePosterUrl,
+            }
+          : null,
+        backdropUrl
+          ? {
+              movieId: movie.id,
+              kind: "backdrop" as const,
+              storageKey: backdropMediaAsset?.storageKey ?? backdropUrl.replace(/^\/media\//, ""),
+              publicUrl: backdropUrl,
+              mimeType:
+                backdropMediaAsset?.mimeType ?? (backdropUrl.endsWith(".webp") ? "image/webp" : "image/jpeg"),
+              byteSize: backdropMediaAsset?.byteSize,
+              sourceUrl: mapped.sourceBackdropUrl,
+            }
+          : null,
+      ].filter((row) => row !== null);
 
-        const mediaRows = [
-          posterUrl
-            ? {
-                movieId: movie.id,
-                kind: "poster" as const,
-                storageKey: posterMediaAsset?.storageKey ?? posterUrl.replace(/^\/media\//, ""),
-                publicUrl: posterUrl,
-                mimeType: posterMediaAsset?.mimeType ?? (posterUrl.endsWith(".webp") ? "image/webp" : "image/jpeg"),
-                byteSize: posterMediaAsset?.byteSize,
-                sourceUrl: mapped.sourcePosterUrl,
-              }
-            : null,
-          backdropUrl
-            ? {
-                movieId: movie.id,
-                kind: "backdrop" as const,
-                storageKey: backdropMediaAsset?.storageKey ?? backdropUrl.replace(/^\/media\//, ""),
-                publicUrl: backdropUrl,
-                mimeType:
-                  backdropMediaAsset?.mimeType ?? (backdropUrl.endsWith(".webp") ? "image/webp" : "image/jpeg"),
-                byteSize: backdropMediaAsset?.byteSize,
-                sourceUrl: mapped.sourceBackdropUrl,
-              }
-            : null,
-        ].filter((row) => row !== null);
+      if (mediaRows.length > 0) {
+        await db.insert(mediaAssets).values(mediaRows);
+      }
 
-        if (mediaRows.length > 0) {
-          await db.insert(mediaAssets).values(mediaRows);
-        }
-      });
+        synced += 1;
+        console.log(`[synced] ${slug} (${details.title ?? details.original_title}) paths=${seedPaths.length}`);
+      } catch (error) {
+        failed += 1;
+        const message = error instanceof Error ? error.message : String(error);
+        failures.push(`${tmdbId}: ${message}`);
+        console.error(`[failed] tmdbId=${tmdbId}: ${message}`);
+      }
 
-      synced += 1;
-      console.log(`[synced] ${slug} (${details.title ?? details.original_title}) paths=${seedPaths.length}`);
-    } catch (error) {
-      failed += 1;
-      const message = error instanceof Error ? error.message : String(error);
-      failures.push(`${tmdbId}: ${message}`);
-      console.error(`[failed] tmdbId=${tmdbId}: ${message}`);
+      if (index < groups.size - 1 && delayMs > 0) {
+        await sleep(delayMs);
+      }
     }
-
-    if (index < groups.size - 1 && delayMs > 0) {
-      await sleep(delayMs);
-    }
-  }
+  });
 
   mkdirSync("data/import", { recursive: true });
   const report = [
@@ -375,29 +376,26 @@ function normalizePathType(value: string | null | undefined): ViewingPathInput["
 }
 
 async function pickSlug(
+  db: Database,
   details: { id: number; title?: string; original_title?: string; release_date?: string },
   rows: StagingRow[],
 ) {
   const base = slugify(details.original_title || details.title || rows[0]?.title || "movie");
   let candidate = base || `movie-${details.id}`;
 
-  const existing = await withDatabase(async ({ db }) => {
-    const [byTmdb] = await db
-      .select({ slug: movies.slug, tmdbId: movies.tmdbId })
-      .from(movies)
-      .where(eq(movies.tmdbId, details.id))
-      .limit(1);
-    if (byTmdb) return byTmdb.slug;
+  const [byTmdb] = await db
+    .select({ slug: movies.slug, tmdbId: movies.tmdbId })
+    .from(movies)
+    .where(eq(movies.tmdbId, details.id))
+    .limit(1);
+  if (byTmdb) return byTmdb.slug;
 
-    const [bySlug] = await db.select({ slug: movies.slug }).from(movies).where(eq(movies.slug, candidate)).limit(1);
-    if (bySlug) {
-      const year = details.release_date?.slice(0, 4);
-      candidate = year ? `${base}-${year}` : `${base}-${details.id}`;
-    }
-    return candidate;
-  });
-
-  return existing;
+  const [bySlug] = await db.select({ slug: movies.slug }).from(movies).where(eq(movies.slug, candidate)).limit(1);
+  if (bySlug) {
+    const year = details.release_date?.slice(0, 4);
+    candidate = year ? `${base}-${year}` : `${base}-${details.id}`;
+  }
+  return candidate;
 }
 
 async function safeExtractPalette(posterFile: string, slug: string) {

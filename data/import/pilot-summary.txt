@@ -1,0 +1,10 @@
+pilot ingest complete
+batch_id: pilot-20260628
+limit_movies: 100
+publish: false
+
+Reports:
+- data/import/staging-report.txt
+- data/import/resolve-report.txt
+- data/import/sync-report.txt
+- data/import/ambiguous-report.csv (if any)

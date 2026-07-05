@@ -6,6 +6,7 @@
  *
  * npm run ingest:pilot
  * npm run ingest:pilot -- --limit-movies 100 --batch-id pilot-20260628 --publish
+ * npm run ingest:pilot -- --offset-movies 100 --limit-movies 400 --batch-id batch-20260705-001
  *
  * 前置：check:database、check:tmdb、movies-clean.csv
  */
@@ -35,19 +36,20 @@ async function main() {
   const args = parseCliArgs(process.argv.slice(2));
   const batchId = String(args["batch-id"] ?? defaultBatchId("pilot"));
   const limitMovies = String(args["limit-movies"] ?? 100);
+  const offsetMovies = String(args["offset-movies"] ?? 0);
   const publish = args.publish === true;
   const csv = String(args.csv ?? "data/import/movies-clean.csv");
   const sharedArgs = [`--batch-id`, batchId];
 
-  console.log(`Starting pilot ingest batch=${batchId} limit=${limitMovies}`);
+  console.log(
+    `Starting pilot ingest batch=${batchId} offset=${offsetMovies} limit=${limitMovies}`,
+  );
 
-  await runStep("prepare-staging.mts", [
-    ...sharedArgs,
-    "--csv",
-    csv,
-    "--limit-movies",
-    limitMovies,
-  ]);
+  const stagingArgs = [...sharedArgs, "--csv", csv, "--limit-movies", limitMovies];
+  if (Number(offsetMovies) > 0) {
+    stagingArgs.push("--offset-movies", offsetMovies);
+  }
+  await runStep("prepare-staging.mts", stagingArgs);
 
   await runStep("resolve-tmdb-ids.mts", [...sharedArgs, "--delay-ms", "250"]);
 
@@ -58,6 +60,7 @@ async function main() {
   const summary = [
     "pilot ingest complete",
     `batch_id: ${batchId}`,
+    `offset_movies: ${offsetMovies}`,
     `limit_movies: ${limitMovies}`,
     `publish: ${publish}`,
     "",

@@ -13,6 +13,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { and, eq } from "drizzle-orm";
 import { importStaging } from "../../src/db/schema";
+import type { Database } from "../../src/db/index";
 import {
   buildTitleContextMap,
   createTmdbClient,
@@ -77,6 +78,7 @@ async function loadAmbiguousGroups(batchId: string) {
 }
 
 async function applyResolution(
+  db: Database,
   batchId: string,
   group: AmbiguousGroup,
   tmdbId: number,
@@ -87,22 +89,20 @@ async function applyResolution(
     return;
   }
 
-  await withDatabase(async ({ db }) => {
-    await db
-      .update(importStaging)
-      .set({
-        tmdbId,
-        tmdbResolveStatus: "resolved",
-        candidatesJson: null,
-      })
-      .where(
-        and(
-          eq(importStaging.batchId, batchId),
-          eq(importStaging.title, group.title),
-          eq(importStaging.year, group.year),
-        ),
-      );
-  });
+  await db
+    .update(importStaging)
+    .set({
+      tmdbId,
+      tmdbResolveStatus: "resolved",
+      candidatesJson: null,
+    })
+    .where(
+      and(
+        eq(importStaging.batchId, batchId),
+        eq(importStaging.title, group.title),
+        eq(importStaging.year, group.year),
+      ),
+    );
   console.log(`[resolved] ${group.title} (${group.year}) -> ${tmdbId}`);
 }
 
@@ -126,15 +126,17 @@ async function applyManualFile(batchId: string, manualPath: string, dryRun: bool
   const rows = parseManualCsv(manualPath);
   let applied = 0;
 
-  for (const row of rows) {
-    const title = row.title?.trim();
-    const year = row.year?.trim();
-    const tmdbId = Number(row.tmdb_id || row.recommended_tmdb_id);
-    if (!title || !year || !Number.isFinite(tmdbId)) continue;
+  await withDatabase(async ({ db }) => {
+    for (const row of rows) {
+      const title = row.title?.trim();
+      const year = row.year?.trim();
+      const tmdbId = Number(row.tmdb_id || row.recommended_tmdb_id);
+      if (!title || !year || !Number.isFinite(tmdbId)) continue;
 
-    await applyResolution(batchId, { title, year, candidatesJson: null }, tmdbId, dryRun);
-    applied += 1;
-  }
+      await applyResolution(db, batchId, { title, year, candidatesJson: null }, tmdbId, dryRun);
+      applied += 1;
+    }
+  });
 
   console.log(`Applied ${applied} manual resolution(s) from ${manualPath}`);
 }
@@ -167,61 +169,65 @@ async function main() {
     "title,year,title_zh,recommended_tmdb_id,recommended_title,recommended_original_title,top_score,second_score,reason",
   ];
 
-  for (const [index, group] of groups.entries()) {
-    const context = contextMap.get(movieGroupKey(group.title, group.year));
-    let candidates = group.candidatesJson ?? [];
+  await withDatabase(async ({ db }) => {
+    for (const [index, group] of groups.entries()) {
+      const context = contextMap.get(movieGroupKey(group.title, group.year));
+      let candidates = group.candidatesJson ?? [];
 
-    if (context?.titleZh && context.titleZh !== group.title) {
-      const zhCandidates = await searchCandidates(tmdbFetch, context.titleZh, group.year, {
-        yearTolerance: 1,
-      });
-      candidates = mergeCandidates(candidates, zhCandidates);
-      if (index < groups.length - 1 && delayMs > 0) await sleep(delayMs);
+      if (context?.titleZh && context.titleZh !== group.title) {
+        const zhCandidates = await searchCandidates(tmdbFetch, context.titleZh, group.year, {
+          yearTolerance: 1,
+        });
+        candidates = mergeCandidates(candidates, zhCandidates);
+        if (index < groups.length - 1 && delayMs > 0) await sleep(delayMs);
+      }
+
+      if (context?.originalTitle && context.originalTitle !== group.title) {
+        const originalCandidates = await searchCandidates(tmdbFetch, context.originalTitle, group.year);
+        candidates = mergeCandidates(candidates, originalCandidates);
+        if (index < groups.length - 1 && delayMs > 0) await sleep(delayMs);
+      }
+
+      const outcomes = [pickBestCandidate(candidates, context, group.title)];
+      if (context?.titleZh && context.titleZh !== group.title) {
+        outcomes.push(pickBestCandidate(candidates, context, context.titleZh));
+      }
+
+      const resolvedOutcome = outcomes
+        .filter((outcome) => outcome.decision === "resolved" && outcome.pick)
+        .sort((left, right) => (right.pick?.score ?? 0) - (left.pick?.score ?? 0))[0];
+
+      const outcome =
+        resolvedOutcome ??
+        outcomes.sort((left, right) => (right.scored[0]?.score ?? 0) - (left.scored[0]?.score ?? 0))[0];
+      const top = outcome.scored[0];
+      const second = outcome.scored[1];
+
+      if (outcome.decision === "resolved" && outcome.pick) {
+        await applyResolution(db, batchId, group, outcome.pick.candidate.id, dryRun);
+        autoResolved += 1;
+        continue;
+      }
+
+      stillManual += 1;
+      manualRows.push(
+        [
+          group.title,
+          group.year,
+          context?.titleZh ?? "",
+          top?.candidate.id ?? "",
+          top?.candidate.title ?? "",
+          top?.candidate.original_title ?? "",
+          top?.score ?? "",
+          second?.score ?? "",
+          top?.reasons.join("|") ?? "",
+        ]
+          .map(escapeCsv)
+          .join(","),
+      );
+      console.log(`[manual] ${group.title} (${group.year}) top=${top?.candidate.id ?? "none"} score=${top?.score ?? 0}`);
     }
-
-    if (context?.originalTitle && context.originalTitle !== group.title) {
-      const originalCandidates = await searchCandidates(tmdbFetch, context.originalTitle, group.year);
-      candidates = mergeCandidates(candidates, originalCandidates);
-      if (index < groups.length - 1 && delayMs > 0) await sleep(delayMs);
-    }
-
-    const outcomes = [pickBestCandidate(candidates, context, group.title)];
-    if (context?.titleZh && context.titleZh !== group.title) {
-      outcomes.push(pickBestCandidate(candidates, context, context.titleZh));
-    }
-
-    const resolvedOutcome = outcomes
-      .filter((outcome) => outcome.decision === "resolved" && outcome.pick)
-      .sort((left, right) => (right.pick?.score ?? 0) - (left.pick?.score ?? 0))[0];
-
-    const outcome = resolvedOutcome ?? outcomes.sort((left, right) => (right.scored[0]?.score ?? 0) - (left.scored[0]?.score ?? 0))[0];
-    const top = outcome.scored[0];
-    const second = outcome.scored[1];
-
-    if (outcome.decision === "resolved" && outcome.pick) {
-      await applyResolution(batchId, group, outcome.pick.candidate.id, dryRun);
-      autoResolved += 1;
-      continue;
-    }
-
-    stillManual += 1;
-    manualRows.push(
-      [
-        group.title,
-        group.year,
-        context?.titleZh ?? "",
-        top?.candidate.id ?? "",
-        top?.candidate.title ?? "",
-        top?.candidate.original_title ?? "",
-        top?.score ?? "",
-        second?.score ?? "",
-        top?.reasons.join("|") ?? "",
-      ]
-        .map(escapeCsv)
-        .join(","),
-    );
-    console.log(`[manual] ${group.title} (${group.year}) top=${top?.candidate.id ?? "none"} score=${top?.score ?? 0}`);
-  }
+  });
 
   mkdirSync("data/import", { recursive: true });
   if (manualRows.length > 1) {

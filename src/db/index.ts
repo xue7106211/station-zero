@@ -24,7 +24,7 @@ export function createDatabaseClient(connectionString = process.env.DATABASE_URL
     // Supabase transaction pooler (port 6543) does not support prepared statements.
     prepare: !isSupabasePooler(connectionString),
     max: 1,
-    idle_timeout: 20,
+    idle_timeout: 120,
     connect_timeout: 10,
   });
 

@@ -5,6 +5,7 @@
  *       一行 = 一条观看路径（磁力）；同一部片可有多行。
  *
  * npm run ingest:staging -- --limit-movies 100 --batch-id pilot-20260628
+ * npm run ingest:staging -- --offset-movies 100 --limit-movies 400 --batch-id batch-20260705-001
  *
  * 上游：clean-import-txt.mjs 产出的 CSV
  * 下游：resolve-tmdb-ids.mts
@@ -27,6 +28,7 @@ async function main() {
   const csvPath = String(args.csv ?? DEFAULT_CSV);
   const batchId = String(args["batch-id"] ?? defaultBatchId("pilot"));
   const limitMovies = Number(args["limit-movies"] ?? 100);
+  const offsetMovies = Number(args["offset-movies"] ?? 0);
   const clearBatch = args["no-clear-batch"] !== true;
 
   const allRows = parseCsvFile(csvPath);
@@ -34,7 +36,14 @@ async function main() {
     throw new Error(`No rows found in ${csvPath}`);
   }
 
-  const rows = limitMovies > 0 ? selectRowsForPilot(allRows, limitMovies) : allRows;
+  if (offsetMovies < 0) {
+    throw new Error(`--offset-movies must be >= 0, got ${offsetMovies}`);
+  }
+
+  const rows =
+    limitMovies > 0 || offsetMovies > 0
+      ? selectRowsForPilot(allRows, limitMovies, offsetMovies)
+      : allRows;
   const uniqueMovies = new Set(rows.map((row) => `${row.title_zh}\t${row.year}`));
 
   await withDatabase(async ({ db }) => {
@@ -67,6 +76,7 @@ async function main() {
     `rows_inserted: ${rows.length}`,
     `unique_movies: ${uniqueMovies.size}`,
     `limit_movies: ${limitMovies}`,
+    `offset_movies: ${offsetMovies}`,
   ].join("\n");
 
   mkdirSync("data/import", { recursive: true });

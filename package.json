@@ -23,6 +23,7 @@
     "ingest:resolve-ambiguous": "node --env-file=.env.local --use-env-proxy --import tsx scripts/bulk-ingest/resolve-ambiguous.mts",
     "ingest:resolve-failed": "node --env-file=.env.local --use-env-proxy --import tsx scripts/bulk-ingest/resolve-failed.mts",
     "ingest:sync": "node --env-file=.env.local --use-env-proxy --import tsx scripts/bulk-ingest/sync-movies-to-sql.mts",
+    "ingest:publish": "node --env-file=.env.local --import tsx scripts/bulk-ingest/publish-batch.mts",
     "ingest:upload-media": "node --env-file=.env.local --use-env-proxy --import tsx scripts/bulk-ingest/upload-media-to-storage.mts",
     "ingest:pilot": "node --env-file=.env.local --use-env-proxy --import tsx scripts/bulk-ingest/run-pilot-ingest.mts"
   },

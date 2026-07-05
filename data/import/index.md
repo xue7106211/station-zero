@@ -2,7 +2,7 @@
 
 本目录存放「高清影视之家」等外部来源的**清洗产物**，不将大文件纳入 Git 远端。
 
-## 阶段性存档（2026-06-28）
+## 阶段性存档（2026-07-05）
 
 | 产物 | 路径 | 规模 | 进 Git |
 |------|------|------|--------|
@@ -11,6 +11,9 @@
 | 待复核 CSV | `movies-needs-review.csv` | 89 行（缺 year，已忽略） | **否** |
 | 原始 TXT | `raw/高清影视之家-资源.txt` | ~14 MB | **否** |
 | 清洗报告 | `clean-report.txt` | 摘要 | 是 |
+| 各步报告 | `*-report.txt`、`ambiguous-manual.csv` 等 | 摘要 | 是（视文件） |
+
+**库内进度与下一批参数**见 [`docs/technical/bulk-ingestion-progress.md`](../../docs/technical/bulk-ingestion-progress.md)（当前 **516** 部在库，下一批 `offset=500`）。
 
 源 TXT 原始位置：`Downloads/高清影视之家-集合/高清影视之家-资源.txt`
 
@@ -35,38 +38,29 @@ node scripts/bulk-ingest/clean-import-txt.mjs data/import/raw/高清影视之家
 
 产出：`movies-clean.csv`、`clean-report.txt`、`clean-issues.csv`、`movies-needs-review.csv`
 
-## 下一步
-
-Pilot（100 部）端到端：
+## 批量录入命令（分步）
 
 ```bash
-# 1. 确认 .env.local 已配置 DATABASE_URL 与 TMDB 凭证
 npm run check:database
 npm run check:tmdb
+npm run check:storage      # 海报上传 Storage 时需 service_role
 
-# 2. 若 schema 未落库
-npm run db:migrate
-
-# 3. 跑 100 部 Pilot（CSV → staging → TMDB 消歧 → SQL + 海报）
-npm run ingest:pilot
-
-# 可选：Pilot 直接发布到列表页
-npm run ingest:pilot -- --publish
+# 示例：第二批（接续 offset 500）
+$BATCH = "batch-20260706-002"
+npm run ingest:staging -- --batch-id $BATCH --offset-movies 500 --limit-movies 500
+npm run ingest:resolve -- --batch-id $BATCH
+npm run ingest:resolve-ambiguous -- --batch-id $BATCH   # 若有 ambiguous
+npm run ingest:resolve-failed -- --batch-id $BATCH       # 若有 failed
+npm run ingest:sync -- --batch-id $BATCH
+npm run ingest:publish -- --batch-id $BATCH             # 验收后上列表（推荐）
+# npm run ingest:sync -- --batch-id $BATCH --tmdb-id <id>   # 单部失败重试
+npm run ingest:upload-media                              # 补传 Storage（可选）
 ```
 
-分步执行：
+Pilot 一键（仅首批验证）：`npm run ingest:pilot`
 
-```bash
-npm run ingest:staging -- --limit-movies 100 --batch-id pilot-20260628
-npm run ingest:resolve -- --batch-id pilot-20260628
-npm run ingest:resolve-ambiguous -- --batch-id pilot-20260628   # 若有 ambiguous
-npm run ingest:resolve-failed -- --batch-id pilot-20260628       # 若有 failed
-npm run ingest:sync -- --batch-id pilot-20260628
-npm run ingest:sync -- --batch-id pilot-20260628 --tmdb-id <id>   # 单部失败重试
-npm run ingest:sync -- --batch-id pilot-20260628 --publish      # 验收后上首页/列表
-npm run ingest:upload-media                                      # 补传 Storage（可选）
-```
+报告输出：`staging-report.txt`、`resolve-report.txt`、`sync-report.txt`、`publish-report.txt`、`pilot-summary.txt`
 
-报告输出：`data/import/staging-report.txt`、`resolve-report.txt`、`sync-report.txt`、`pilot-summary.txt`
-
-全量录入见 [docs/technical/bulk-ingestion-runbook.md](../../docs/technical/bulk-ingestion-runbook.md) 与 [docs/technical/bulk-ingestion-checklist-v1.md](../../docs/technical/bulk-ingestion-checklist-v1.md)。文档总览见 [docs/index.md](../../docs/index.md)。
+操作手册：[`docs/technical/bulk-ingestion-runbook.md`](../../docs/technical/bulk-ingestion-runbook.md)  
+进度快照：[`docs/technical/bulk-ingestion-progress.md`](../../docs/technical/bulk-ingestion-progress.md)  
+文档总览：[`docs/index.md`](../../docs/index.md)

@@ -46,11 +46,14 @@ npm run check:storage      # 海报上传 Storage 时需 service_role
 
 npm run ingest:pilot       # 一键 Pilot（默认 100 部）
 # 或分步：ingest:staging → ingest:resolve → ingest:resolve-ambiguous / ingest:resolve-failed → ingest:sync
-# ingest:sync 支持 --batch-id、--publish（上列表）、--tmdb-id（单部重试）
+# ingest:staging 支持 --offset-movies、--limit-movies、--batch-id
+# ingest:sync 支持 --batch-id、--tmdb-id（单部重试）；验收发布用 ingest:publish（推荐，秒级）
+npm run ingest:publish -- --batch-id <batch>   # 将已 sync 影片设为 published
 npm run ingest:upload-media   # 补传本地海报到 Supabase Storage
 ```
 
 操作手册：[`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md)  
+**接续下一批 / 库内进度**：[`docs/technical/bulk-ingestion-progress.md`](docs/technical/bulk-ingestion-progress.md)  
 导入数据说明：[`data/import/index.md`](data/import/index.md)  
 脚本索引：[`scripts/index.md`](scripts/index.md)
 
@@ -241,6 +244,7 @@ TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路
 | 海报体积优化 | [`docs/technical/poster-compression-scheme.md`](docs/technical/poster-compression-scheme.md) |
 | 站点电影搜索 | [`docs/technical/movie-search-scheme.md`](docs/technical/movie-search-scheme.md) |
 | 万级批量录入 · 操作手册 | [`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md) |
+| 万级批量录入 · 进度快照 | [`docs/technical/bulk-ingestion-progress.md`](docs/technical/bulk-ingestion-progress.md) |
 | 万级批量录入 · 架构方案 | [`docs/technical/bulk-ingestion-scheme.md`](docs/technical/bulk-ingestion-scheme.md) |
 | 万级批量录入 · 勾选清单 | [`docs/technical/bulk-ingestion-checklist-v1.md`](docs/technical/bulk-ingestion-checklist-v1.md) |
 | 大陆 CDN / VPS 选型 | [`docs/technical/mainland-topology.md`](docs/technical/mainland-topology.md) |
@@ -249,13 +253,14 @@ TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路
 
 ### 万级批量录入
 
-Pilot 已验证端到端流水线（staging → TMDB 消歧 → SQL + Storage）。**推荐从操作手册入手**：
+Pilot 与第一批扩展（+400）已验证端到端流水线。**接续下一批前先读进度快照**：
 
+- [`docs/technical/bulk-ingestion-progress.md`](docs/technical/bulk-ingestion-progress.md) — 库内 516 部、下一批 `offset=500`
 - [`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md) — 操作手册
 - [`docs/technical/bulk-ingestion-scheme.md`](docs/technical/bulk-ingestion-scheme.md) — 架构方案
 - [`docs/technical/bulk-ingestion-checklist-v1.md`](docs/technical/bulk-ingestion-checklist-v1.md) — 分阶段清单
 
-当前已完成：Schema、读取层、bulk-ingest 脚本（Pilot 100+）、Supabase Storage 海报上传、bulk-ingest 新入库海报 WebP 压缩、站点搜索 Phase A、TMDB `collection` / `keywords` 入库与详情页展示。待推进：生产 CDN / VPS 部署、存量海报 recompress、搜索 Phase B 联想下拉、全量录入（见 `bulk-ingestion-checklist-v1.md`）。
+当前已完成：Schema、读取层、bulk-ingest 脚本（库内 **516** 部 / **515** published）、`ingest:publish`、`--offset-movies`、Supabase Storage 海报上传、bulk-ingest WebP 压缩、站点搜索 Phase A、TMDB `collection` / `keywords`。待推进：生产 CDN / VPS 部署、存量海报 recompress、搜索 Phase B、万级全量录入。
 
 ## UI 与主题
 

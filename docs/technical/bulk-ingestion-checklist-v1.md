@@ -2,10 +2,11 @@
 title: 万级影视批量录入 — 可执行清单（v1）
 type: runbook
 status: pending
-updated: 2026-06-30
+updated: 2026-07-05
 related:
   - technical/bulk-ingestion-scheme.md
   - technical/bulk-ingestion-runbook.md
+  - technical/bulk-ingestion-progress.md
   - technical/movie-images.md
 ---
 
@@ -13,7 +14,7 @@ related:
 
 > 本文是 [bulk-ingestion-scheme.md](./bulk-ingestion-scheme.md) 的**可执行落地版**：分阶段、可勾选的 TODO。决策依据与背景见原文档，本文只列动作。
 >
-> **实施进度（2026-06-30）**：Phase 1–4 工程项已在仓库落地（Pilot 100+ 验证）；Phase 0 部署决策、Phase 5 全量录入、Phase 6 生产部署仍待推进。勾选状态以代码与 [AGENTS.md](../../AGENTS.md) 为准。
+> **实施进度（2026-07-05）**：Phase 1–4 工程项已落地；**库内 516 部（515 published）**，Pilot + 第一批扩展 `batch-20260705-001`（+399）已完成；Phase 5 全量录入进行中（下一批 offset 500，见 [bulk-ingestion-progress.md](./bulk-ingestion-progress.md)）；Phase 0 部署决策、Phase 6 生产部署仍待推进。勾选状态以代码与 [AGENTS.md](../../AGENTS.md) 为准。
 
 ## 输入约束（本轮强调）
 
@@ -60,6 +61,8 @@ related:
 - [x] **P2** `scripts/bulk-ingest/resolve-tmdb-ids.mts`：TMDB 带年份消歧（`npm run ingest:resolve`）
 - [x] **P3** 人工复核 ambiguous 队列，回写 `tmdb_id`（`resolve-ambiguous` + 报告 CSV）
 - [x] **P4** `scripts/bulk-ingest/sync-movies-to-sql.mts`：TMDB UPSERT + viewing_paths + WebP→Storage（`npm run ingest:sync`）
+- [x] **P5** `scripts/bulk-ingest/publish-batch.mts`：按 batch 轻量发布（`npm run ingest:publish`）
+- [x] **P6** `prepare-staging --offset-movies`：CSV 分批偏移，避免重复 staging
 
 ## Phase 4 — Pilot（0.5–1 天）
 
@@ -68,8 +71,8 @@ related:
 
 ## Phase 5 — 全量录入（2–4 天）
 
-- [ ] **F1** 分批跑 1 万+（每批 500，限速 + 429 退避）
-- [ ] **F2** 抽检后批量 `content_status = published`
+- [ ] **F1** 分批跑 1 万+（每批 500，限速 + 429 退避）— **进行中**：已录入 ~500 唯一片，见 [bulk-ingestion-progress.md](./bulk-ingestion-progress.md)
+- [x] **F2** 抽检后批量 `content_status = published` — 已实现 `ingest:publish`；`batch-20260705-001` 已发布
 
 ## Phase 6 — 生产部署 + 隐私自查（2–3 天）
 

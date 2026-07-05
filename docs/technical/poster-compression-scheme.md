@@ -12,7 +12,7 @@ related:
 
 # Supabase 海报体积优化方案
 
-> 本文档沉淀 Station Zero 在 Supabase Storage 已存 100+ 部影片海报、单张约 **200KB** 背景下的体积优化决策与实施路径。图片 URL 策略与前端原则仍以 [movie-images.md](./movie-images.md) 为准。**bulk-ingest 新入库已接入 w500 + 480px WebP**；存量迁移与 legacy `sync:movies` 对齐见下文决策记录。
+> 本文档沉淀 Station Zero 在 Supabase Storage 已存 **500+** 部影片海报背景下的体积优化决策与实施路径（早期 Pilot 入库多为 w780 JPEG ~200KB；扩展批已走 w500 + WebP）。图片 URL 策略与前端原则仍以 [movie-images.md](./movie-images.md) 为准。**bulk-ingest 新入库已接入 w500 + 480px WebP**；存量迁移与 legacy `sync:movies` 对齐见下文决策记录。
 
 ## 背景与问题
 
@@ -20,7 +20,7 @@ related:
 
 | 项目 | legacy / 存量 | bulk-ingest 新入库（当前默认） |
 |------|----------------|--------------------------------|
-| 已入库影片 | 100+（Pilot 前多为 w780 JPEG） | Pilot 100+ 已走压缩管线 |
+| 已入库影片 | 500+（早期多为 w780 JPEG；扩展批已走 WebP） | bulk-ingest 新入库走压缩管线 |
 | Storage 单张海报体积 | 约 **150–250KB**（典型 ~200KB） | 约 **30–50KB**（480px WebP） |
 | TMDB 拉取尺寸 | **`w780`**（`sync:movies`） | **`w500`**（`ingest:sync`） |
 | 入库处理 | 下载 → 原样上传 | sharp 压缩 → WebP → Storage |
