@@ -17,7 +17,7 @@ import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
 import { promisify } from "node:util";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { importStaging, mediaAssets, movies, viewingPaths } from "../../src/db/schema";
 import { toPublicMediaPath } from "../lib/movie-database.mjs";
 import { extractPalette } from "../lib/palette.mjs";
@@ -29,6 +29,7 @@ import {
   parseCliArgs,
   slugify,
   sleep,
+  stagingViewingPathUrlsToRefresh,
   syncUpsertContentStatusFields,
   withDatabase,
 } from "./shared.mts";
@@ -267,7 +268,13 @@ async function main() {
           })
           .returning({ id: movies.id, slug: movies.slug });
 
-        await db.delete(viewingPaths).where(eq(viewingPaths.movieId, movie.id));
+        const urlsToRefresh = stagingViewingPathUrlsToRefresh(mapped.viewingPaths);
+        if (urlsToRefresh.length > 0) {
+          await db.delete(viewingPaths).where(
+            and(eq(viewingPaths.movieId, movie.id), inArray(viewingPaths.url, urlsToRefresh)),
+          );
+        }
+
         await db.delete(mediaAssets).where(eq(mediaAssets.movieId, movie.id));
 
         if (mapped.viewingPaths.length > 0) {
