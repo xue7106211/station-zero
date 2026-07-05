@@ -517,6 +517,39 @@ export function syncUpsertContentStatusFields(
   return publish ? { contentStatus } : {};
 }
 
+export type ContentStatus = "draft" | "review" | "published";
+
+const CONTENT_STATUS_RANK: Record<ContentStatus, number> = {
+  draft: 0,
+  review: 1,
+  published: 2,
+};
+
+/**
+ * `db:migrate:json` 冲突更新时合并发布状态：只升不降。
+ *
+ * 避免 movies.json 仍为 draft 时，把 bulk-ingest `--publish` 已上线的影片打回列表外。
+ */
+export function mergeContentStatusOnConflict(
+  existing: ContentStatus,
+  incoming: ContentStatus,
+): ContentStatus {
+  return CONTENT_STATUS_RANK[existing] >= CONTENT_STATUS_RANK[incoming] ? existing : incoming;
+}
+
+/** 从 staging 磁力行提取需刷新的 URL；仅这些 URL 对应的 viewing_paths 会被替换。 */
+export function stagingViewingPathUrlsToRefresh(
+  incomingPaths: Array<{ url?: string | null }>,
+): string[] {
+  return [
+    ...new Set(
+      incomingPaths
+        .map((path) => path.url?.trim())
+        .filter((url): url is string => Boolean(url)),
+    ),
+  ];
+}
+
 export function mapTmdbKeywords(
   keywordsResponse?: {
     keywords?: Array<{ id?: number; name?: string }>;

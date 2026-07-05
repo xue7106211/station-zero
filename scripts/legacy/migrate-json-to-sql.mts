@@ -10,7 +10,7 @@
  */
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { closeDatabaseClient, createDatabaseClient } from "../../src/db/index";
 import { importStaging, mediaAssets, movies, viewingPaths } from "../../src/db/schema";
 
@@ -173,7 +173,11 @@ async function main() {
           versionSignals: record.versionSignals,
           deviceAdvice: record.deviceAdvice,
           related: record.related,
-          contentStatus: record.contentStatus ?? "draft",
+          contentStatus: sql`CASE
+            WHEN ${movies.contentStatus} = 'published' OR excluded.content_status = 'published' THEN 'published'::content_status
+            WHEN ${movies.contentStatus} = 'review' OR excluded.content_status = 'review' THEN 'review'::content_status
+            ELSE 'draft'::content_status
+          END`,
           sourceProvider: record.sourceProvider ?? "manual",
           sourceUpdatedAt: record.sourceUpdatedAt ?? now,
           imageCachedAt: record.imageCachedAt,
