@@ -532,6 +532,31 @@ export function syncUpsertContentStatusFields(
   return publish ? { contentStatus } : {};
 }
 
+type SyncMovieMediaFields = {
+  posterUrl?: string;
+  backdropUrl?: string;
+  sourcePosterUrl?: string;
+  sourceBackdropUrl?: string;
+  palette?: Record<string, string | undefined>;
+  imageCachedAt?: string;
+};
+
+/**
+ * `ingest:sync` 冲突更新时的媒体字段：仅在新值存在时写入。
+ *
+ * 避免 `--tmdb-id` 重试或海报下载失败时，把库内已有 Storage URL / 色板抹成 null。
+ */
+export function syncMovieConflictMediaFields(media: SyncMovieMediaFields) {
+  return {
+    ...(media.posterUrl !== undefined ? { posterUrl: media.posterUrl } : {}),
+    ...(media.backdropUrl !== undefined ? { backdropUrl: media.backdropUrl } : {}),
+    ...(media.sourcePosterUrl !== undefined ? { sourcePosterUrl: media.sourcePosterUrl } : {}),
+    ...(media.sourceBackdropUrl !== undefined ? { sourceBackdropUrl: media.sourceBackdropUrl } : {}),
+    ...(media.palette !== undefined ? { palette: media.palette } : {}),
+    ...(media.imageCachedAt !== undefined ? { imageCachedAt: media.imageCachedAt } : {}),
+  };
+}
+
 export function mapTmdbKeywords(
   keywordsResponse?: {
     keywords?: Array<{ id?: number; name?: string }>;
