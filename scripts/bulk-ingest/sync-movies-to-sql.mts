@@ -30,6 +30,7 @@ import {
   parseCliArgs,
   slugify,
   sleep,
+  syncMovieConflictMediaFields,
   syncUpsertContentStatusFields,
   withDatabase,
 } from "./shared.mts";
@@ -250,11 +251,14 @@ async function main() {
               rating: mapped.rating,
               ratings: mapped.ratings,
               posterTone: mapped.posterTone,
-              posterUrl: mapped.posterUrl,
-              backdropUrl: mapped.backdropUrl,
-              sourcePosterUrl: mapped.sourcePosterUrl,
-              sourceBackdropUrl: mapped.sourceBackdropUrl,
-              palette: mapped.palette,
+              ...syncMovieConflictMediaFields({
+                posterUrl: mapped.posterUrl,
+                backdropUrl: mapped.backdropUrl,
+                sourcePosterUrl: mapped.sourcePosterUrl,
+                sourceBackdropUrl: mapped.sourceBackdropUrl,
+                palette: mapped.palette,
+                imageCachedAt: mapped.imageCachedAt,
+              }),
               summary: mapped.summary,
               versionSignals: mapped.versionSignals,
               deviceAdvice: mapped.deviceAdvice,
@@ -262,14 +266,17 @@ async function main() {
               ...syncUpsertContentStatusFields(publish, mapped.contentStatus),
               sourceProvider: mapped.sourceProvider,
               sourceUpdatedAt: mapped.sourceUpdatedAt,
-              imageCachedAt: mapped.imageCachedAt,
               updatedAt: now,
             },
           })
         .returning({ id: movies.id, slug: movies.slug });
 
       await db.delete(viewingPaths).where(eq(viewingPaths.movieId, movie.id));
-      await db.delete(mediaAssets).where(eq(mediaAssets.movieId, movie.id));
+
+      const hasFreshMedia = posterUrl !== undefined || backdropUrl !== undefined;
+      if (hasFreshMedia) {
+        await db.delete(mediaAssets).where(eq(mediaAssets.movieId, movie.id));
+      }
 
       if (mapped.viewingPaths.length > 0) {
         await db.insert(viewingPaths).values(
@@ -310,7 +317,7 @@ async function main() {
           : null,
       ].filter((row) => row !== null);
 
-      if (mediaRows.length > 0) {
+      if (hasFreshMedia && mediaRows.length > 0) {
         await db.insert(mediaAssets).values(mediaRows);
       }
 
