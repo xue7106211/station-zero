@@ -186,9 +186,10 @@ async function main() {
         palette,
       });
 
-      const [movie] = await db
-        .insert(movies)
-        .values({
+      await db.transaction(async (tx) => {
+        const [movie] = await tx
+          .insert(movies)
+          .values({
             slug: mapped.slug,
             tmdbId: mapped.tmdbId,
             imdbId: mapped.imdbId,
@@ -266,53 +267,54 @@ async function main() {
               updatedAt: now,
             },
           })
-        .returning({ id: movies.id, slug: movies.slug });
+          .returning({ id: movies.id, slug: movies.slug });
 
-      await db.delete(viewingPaths).where(eq(viewingPaths.movieId, movie.id));
-      await db.delete(mediaAssets).where(eq(mediaAssets.movieId, movie.id));
+        await tx.delete(viewingPaths).where(eq(viewingPaths.movieId, movie.id));
+        await tx.delete(mediaAssets).where(eq(mediaAssets.movieId, movie.id));
 
-      if (mapped.viewingPaths.length > 0) {
-        await db.insert(viewingPaths).values(
-          mapped.viewingPaths.map((path, sortOrder) => ({
-            movieId: movie.id,
-            platform: path.platform,
-            type: path.type,
-            note: path.note,
-            url: path.url,
-            sortOrder,
-          })),
-        );
-      }
-
-      const mediaRows = [
-        posterUrl
-          ? {
+        if (mapped.viewingPaths.length > 0) {
+          await tx.insert(viewingPaths).values(
+            mapped.viewingPaths.map((path, sortOrder) => ({
               movieId: movie.id,
-              kind: "poster" as const,
-              storageKey: posterMediaAsset?.storageKey ?? posterUrl.replace(/^\/media\//, ""),
-              publicUrl: posterUrl,
-              mimeType: posterMediaAsset?.mimeType ?? (posterUrl.endsWith(".webp") ? "image/webp" : "image/jpeg"),
-              byteSize: posterMediaAsset?.byteSize,
-              sourceUrl: mapped.sourcePosterUrl,
-            }
-          : null,
-        backdropUrl
-          ? {
-              movieId: movie.id,
-              kind: "backdrop" as const,
-              storageKey: backdropMediaAsset?.storageKey ?? backdropUrl.replace(/^\/media\//, ""),
-              publicUrl: backdropUrl,
-              mimeType:
-                backdropMediaAsset?.mimeType ?? (backdropUrl.endsWith(".webp") ? "image/webp" : "image/jpeg"),
-              byteSize: backdropMediaAsset?.byteSize,
-              sourceUrl: mapped.sourceBackdropUrl,
-            }
-          : null,
-      ].filter((row) => row !== null);
+              platform: path.platform,
+              type: path.type,
+              note: path.note,
+              url: path.url,
+              sortOrder,
+            })),
+          );
+        }
 
-      if (mediaRows.length > 0) {
-        await db.insert(mediaAssets).values(mediaRows);
-      }
+        const mediaRows = [
+          posterUrl
+            ? {
+                movieId: movie.id,
+                kind: "poster" as const,
+                storageKey: posterMediaAsset?.storageKey ?? posterUrl.replace(/^\/media\//, ""),
+                publicUrl: posterUrl,
+                mimeType: posterMediaAsset?.mimeType ?? (posterUrl.endsWith(".webp") ? "image/webp" : "image/jpeg"),
+                byteSize: posterMediaAsset?.byteSize,
+                sourceUrl: mapped.sourcePosterUrl,
+              }
+            : null,
+          backdropUrl
+            ? {
+                movieId: movie.id,
+                kind: "backdrop" as const,
+                storageKey: backdropMediaAsset?.storageKey ?? backdropUrl.replace(/^\/media\//, ""),
+                publicUrl: backdropUrl,
+                mimeType:
+                  backdropMediaAsset?.mimeType ?? (backdropUrl.endsWith(".webp") ? "image/webp" : "image/jpeg"),
+                byteSize: backdropMediaAsset?.byteSize,
+                sourceUrl: mapped.sourceBackdropUrl,
+              }
+            : null,
+        ].filter((row) => row !== null);
+
+        if (mediaRows.length > 0) {
+          await tx.insert(mediaAssets).values(mediaRows);
+        }
+      });
 
         synced += 1;
         console.log(`[synced] ${slug} (${details.title ?? details.original_title}) paths=${seedPaths.length}`);
