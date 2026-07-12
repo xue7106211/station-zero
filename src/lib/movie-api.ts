@@ -42,24 +42,29 @@ export type SearchMoviesResult = MoviesPageResult & {
 };
 
 /**
+ * 是否应使用 JSON 文件库（仅当未配置 `DATABASE_URL`）。
+ *
+ * 配置 SQL 后，库内影片以 Postgres 为准；`movies.json` 仅保留 legacy 编辑源（当前约十余部），
+ * 不得在 SQL 短暂故障时静默回退，否则会向用户展示严重过期的片库。
+ */
+export function shouldUseJsonMovieStore(): boolean {
+  return !isSqlStoreAvailable();
+}
+
+/**
  * 在 SQL 与 JSON 两个存储后端之间自动切换。
  *
- * 无 `DATABASE_URL` 时直接走 JSON；SQL 抛错时记录警告并回退，保证页面在无库或库故障时仍可渲染。
+ * 无 `DATABASE_URL` 时走 JSON；已配置时仅走 SQL，连接失败向上抛出，避免用陈旧 JSON 掩盖 outage。
  *
- * @param runSql - 优先执行的 Supabase 查询
- * @param runJson - SQL 不可用或失败时的 JSON 回退逻辑
+ * @param runSql - Supabase 查询（`DATABASE_URL` 已配置时执行）
+ * @param runJson - 无 `DATABASE_URL` 时的 JSON 回退逻辑
  */
 async function withStoreFallback<T>(runSql: () => Promise<T>, runJson: () => Promise<T>): Promise<T> {
-  if (!isSqlStoreAvailable()) {
+  if (shouldUseJsonMovieStore()) {
     return runJson();
   }
 
-  try {
-    return await runSql();
-  } catch (error) {
-    console.warn(`SQL movie store failed; falling back to JSON. ${formatStoreError(error)}`);
-    return runJson();
-  }
+  return runSql();
 }
 
 /**
@@ -232,7 +237,3 @@ export async function getMovieSlugs() {
   );
 }
 
-/** 将存储层错误格式化为单行日志文本。 */
-function formatStoreError(error: unknown) {
-  return error instanceof Error ? error.message : String(error);
-}
