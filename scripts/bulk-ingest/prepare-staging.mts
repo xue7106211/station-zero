@@ -57,6 +57,7 @@ async function main() {
       await db.insert(importStaging).values(
         chunk.map((row) => ({
           title: row.title.trim(),
+          titleZh: row.title_zh.trim() || row.title.trim(),
           year: row.year.trim(),
           platform: row.platform.trim() || "磁力",
           type: row.type.trim() || "磁力",

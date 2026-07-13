@@ -24,9 +24,12 @@ import {
   parseCsvFile,
   parseCsvLine,
   pickBestCandidate,
+  pickStagingSearchTitle,
   searchTmdbMovieCandidates,
   sleep,
   stripLeadingArticle,
+  stagingGroupWhere,
+  stagingMovieGroupKey,
   type TitleContext,
   type TmdbSearchCandidate,
   withDatabase,
@@ -35,8 +38,9 @@ import {
 const DEFAULT_CSV = "data/import/movies-clean.csv";
 
 type FailedGroup = {
-  title: string;
+  titleZh: string;
   year: string;
+  searchTitle: string;
 };
 
 function escapeCsv(value: unknown) {
@@ -48,19 +52,37 @@ async function loadFailedGroups(batchId: string) {
     const rows = await db
       .select({
         title: importStaging.title,
+        titleZh: importStaging.titleZh,
         year: importStaging.year,
       })
       .from(importStaging)
       .where(and(eq(importStaging.batchId, batchId), eq(importStaging.tmdbResolveStatus, "failed")));
 
-    const groups = new Map<string, FailedGroup>();
+    const groups = new Map<
+      string,
+      { titleZh: string; year: string; rows: Array<{ title: string; titleZh: string | null }> }
+    >();
     for (const row of rows) {
       if (!row.year) continue;
-      const key = movieGroupKey(row.title, row.year);
-      if (groups.has(key)) continue;
-      groups.set(key, { title: row.title, year: row.year });
+      const key = stagingMovieGroupKey(row);
+      const titleZh = row.titleZh?.trim() || row.title.trim();
+      const existing = groups.get(key);
+      if (existing) {
+        existing.rows.push({ title: row.title, titleZh: row.titleZh });
+        continue;
+      }
+      groups.set(key, {
+        titleZh,
+        year: row.year,
+        rows: [{ title: row.title, titleZh: row.titleZh }],
+      });
     }
-    return [...groups.values()];
+
+    return [...groups.values()].map((group) => ({
+      titleZh: group.titleZh,
+      year: group.year,
+      searchTitle: pickStagingSearchTitle(group.rows),
+    }));
   });
 }
 
@@ -72,7 +94,7 @@ async function applyResolution(
   dryRun: boolean,
 ) {
   if (dryRun) {
-    console.log(`[dry-run] ${group.title} (${group.year}) -> ${tmdbId}`);
+    console.log(`[dry-run] ${group.titleZh} (${group.year}) -> ${tmdbId}`);
     return;
   }
 
@@ -83,14 +105,8 @@ async function applyResolution(
       tmdbResolveStatus: "resolved",
       candidatesJson: null,
     })
-    .where(
-      and(
-        eq(importStaging.batchId, batchId),
-        eq(importStaging.title, group.title),
-        eq(importStaging.year, group.year),
-      ),
-    );
-  console.log(`[resolved] ${group.title} (${group.year}) -> ${tmdbId}`);
+    .where(stagingGroupWhere(batchId, group.titleZh, group.year));
+  console.log(`[resolved] ${group.titleZh} (${group.year}) -> ${tmdbId}`);
 }
 
 function parseManualCsv(path: string) {
@@ -115,12 +131,18 @@ async function applyManualFile(batchId: string, manualPath: string, dryRun: bool
 
   await withDatabase(async ({ db }) => {
     for (const row of rows) {
-      const title = row.title?.trim();
+      const titleZh = row.title_zh?.trim() || row.title?.trim();
       const year = row.year?.trim();
       const tmdbId = Number(row.tmdb_id || row.recommended_tmdb_id);
-      if (!title || !year || !Number.isFinite(tmdbId)) continue;
+      if (!titleZh || !year || !Number.isFinite(tmdbId)) continue;
 
-      await applyResolution(db, batchId, { title, year }, tmdbId, dryRun);
+      await applyResolution(
+        db,
+        batchId,
+        { titleZh, year, searchTitle: row.title?.trim() || titleZh },
+        tmdbId,
+        dryRun,
+      );
       applied += 1;
     }
   });
@@ -137,8 +159,8 @@ async function collectCandidates(
   const queries = [
     context?.titleZh,
     context?.originalTitle,
-    stripLeadingArticle(group.title),
-    group.title,
+    stripLeadingArticle(group.searchTitle),
+    group.searchTitle,
   ].filter((value, index, list): value is string => Boolean(value) && list.indexOf(value) === index);
 
   let candidates: TmdbSearchCandidate[] = [];
@@ -181,11 +203,11 @@ async function main() {
 
   await withDatabase(async ({ db }) => {
     for (const [index, group] of groups.entries()) {
-      const context = contextMap.get(movieGroupKey(group.title, group.year));
+      const context = contextMap.get(movieGroupKey(group.titleZh, group.year));
       const candidates = await collectCandidates(tmdbFetch, group, context, index < groups.length - 1 ? delayMs : 0);
 
-      const outcomes = [pickBestCandidate(candidates, context, group.title, { minScore: 50, minGap: 10 })];
-      if (context?.titleZh && context.titleZh !== group.title) {
+      const outcomes = [pickBestCandidate(candidates, context, group.searchTitle, { minScore: 50, minGap: 10 })];
+      if (context?.titleZh && context.titleZh !== group.searchTitle) {
         outcomes.push(
           pickBestCandidate(candidates, context, context.titleZh, { minScore: 50, minGap: 10 }),
         );
@@ -210,9 +232,9 @@ async function main() {
       stillManual += 1;
       manualRows.push(
         [
-          group.title,
+          group.searchTitle,
           group.year,
-          context?.titleZh ?? "",
+          group.titleZh,
           top?.candidate.id ?? "",
           top?.candidate.title ?? "",
           top?.candidate.original_title ?? "",
@@ -223,7 +245,7 @@ async function main() {
           .map(escapeCsv)
           .join(","),
       );
-      console.log(`[manual] ${group.title} (${group.year}) top=${top?.candidate.id ?? "none"} score=${top?.score ?? 0}`);
+      console.log(`[manual] ${group.titleZh} (${group.year}) top=${top?.candidate.id ?? "none"} score=${top?.score ?? 0}`);
     }
   });
 

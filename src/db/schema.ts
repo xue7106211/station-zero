@@ -257,7 +257,10 @@ export const importStaging = pgTable(
   "import_staging",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    /** TMDB 搜索用片名（优先英文）；消歧分组见 `titleZh`。 */
     title: text("title").notNull(),
+    /** 中文片名；与 `year` 组成消歧分组键，避免同片多磁力行英文 title 不一致而拆组。 */
+    titleZh: text("title_zh"),
     year: text("year"),
     platform: text("platform"),
     type: text("type"),
