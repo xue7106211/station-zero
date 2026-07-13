@@ -16,9 +16,11 @@ import { importStaging } from "../../src/db/schema";
 import {
   createTmdbClient,
   defaultBatchId,
-  movieGroupKey,
   parseCliArgs,
+  pickStagingSearchTitle,
   sleep,
+  stagingGroupWhere,
+  stagingMovieGroupKey,
   withDatabase,
 } from "./shared.mts";
 
@@ -82,18 +84,30 @@ async function main() {
     const rows = await db
       .select({
         title: importStaging.title,
+        titleZh: importStaging.titleZh,
         year: importStaging.year,
       })
       .from(importStaging)
       .where(and(eq(importStaging.batchId, batchId), eq(importStaging.tmdbResolveStatus, "pending")));
 
-    const groups = new Map<string, { title: string; year: string }>();
+    const groups = new Map<
+      string,
+      { titleZh: string; year: string; rows: Array<{ title: string; titleZh: string | null; year: string }> }
+    >();
     for (const row of rows) {
       if (!row.year) continue;
-      const key = movieGroupKey(row.title, row.year);
-      if (!groups.has(key)) {
-        groups.set(key, { title: row.title, year: row.year });
+      const key = stagingMovieGroupKey(row);
+      const titleZh = row.titleZh?.trim() || row.title.trim();
+      const existing = groups.get(key);
+      if (existing) {
+        existing.rows.push({ title: row.title, titleZh: row.titleZh, year: row.year });
+        continue;
       }
+      groups.set(key, {
+        titleZh,
+        year: row.year,
+        rows: [{ title: row.title, titleZh: row.titleZh, year: row.year }],
+      });
     }
     const pendingGroups = [...groups.values()];
 
@@ -103,7 +117,8 @@ async function main() {
     }
 
     for (const [index, group] of pendingGroups.entries()) {
-      const outcome = await resolveTitleYear(tmdbFetch, group.title, group.year);
+      const searchTitle = pickStagingSearchTitle(group.rows);
+      const outcome = await resolveTitleYear(tmdbFetch, searchTitle, group.year);
 
       if (outcome.status === "resolved") {
         await db
@@ -113,15 +128,9 @@ async function main() {
             tmdbResolveStatus: "resolved",
             candidatesJson: null,
           })
-          .where(
-            and(
-              eq(importStaging.batchId, batchId),
-              eq(importStaging.title, group.title),
-              eq(importStaging.year, group.year),
-            ),
-          );
+          .where(stagingGroupWhere(batchId, group.titleZh, group.year));
         resolved += 1;
-        console.log(`[resolved] ${group.title} (${group.year}) -> ${outcome.tmdbId}`);
+        console.log(`[resolved] ${group.titleZh} (${group.year}) -> ${outcome.tmdbId}`);
       } else if (outcome.status === "ambiguous") {
         await db
           .update(importStaging)
@@ -129,18 +138,12 @@ async function main() {
             tmdbResolveStatus: "ambiguous",
             candidatesJson: outcome.candidates,
           })
-          .where(
-            and(
-              eq(importStaging.batchId, batchId),
-              eq(importStaging.title, group.title),
-              eq(importStaging.year, group.year),
-            ),
-          );
+          .where(stagingGroupWhere(batchId, group.titleZh, group.year));
         ambiguous += 1;
         for (const candidate of outcome.candidates) {
           ambiguousRows.push(
             [
-              group.title,
+              searchTitle,
               group.year,
               candidate.id,
               candidate.title,
@@ -151,7 +154,7 @@ async function main() {
               .join(","),
           );
         }
-        console.log(`[ambiguous] ${group.title} (${group.year})`);
+        console.log(`[ambiguous] ${group.titleZh} (${group.year})`);
       } else {
         await db
           .update(importStaging)
@@ -159,15 +162,9 @@ async function main() {
             tmdbResolveStatus: "failed",
             candidatesJson: null,
           })
-          .where(
-            and(
-              eq(importStaging.batchId, batchId),
-              eq(importStaging.title, group.title),
-              eq(importStaging.year, group.year),
-            ),
-          );
+          .where(stagingGroupWhere(batchId, group.titleZh, group.year));
         failed += 1;
-        console.log(`[failed] ${group.title} (${group.year})`);
+        console.log(`[failed] ${group.titleZh} (${group.year})`);
       }
 
       if (index < pendingGroups.length - 1 && delayMs > 0) {

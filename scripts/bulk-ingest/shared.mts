@@ -5,7 +5,9 @@
  * 不直接运行；由 bulk-ingest/ 下各步骤脚本 import。
  */
 import { readFileSync } from "node:fs";
+import { and, eq, sql } from "drizzle-orm";
 import { createDatabaseClient, closeDatabaseClient } from "../../src/db/index";
+import { importStaging } from "../../src/db/schema";
 import { imdbIdFromTmdbExternalIds } from "../../src/lib/movie-search";
 
 export type CsvRow = {
@@ -127,6 +129,36 @@ export function selectRowsForPilot(
 
 export function movieGroupKey(title: string, year: string | null | undefined) {
   return `${title.trim()}\t${(year ?? "").trim()}`;
+}
+
+/** 从 staging 行取消歧分组键（`title_zh+year`，旧行无 title_zh 时回退 `title`）。 */
+export function stagingMovieGroupKey(
+  row: { title: string; titleZh?: string | null; year?: string | null },
+) {
+  const titleZh = row.titleZh?.trim() || row.title.trim();
+  return movieGroupKey(titleZh, row.year);
+}
+
+/** 同一影片多磁力行可能带不同 TMDB 搜索 title；优先英文片名。 */
+export function pickStagingSearchTitle(
+  rows: Array<{ title: string; titleZh?: string | null }>,
+): string {
+  const titleZh = rows.map((row) => row.titleZh?.trim()).find(Boolean) ?? "";
+  const searchTitles = [...new Set(rows.map((row) => row.title.trim()).filter(Boolean))];
+  const englishTitles = searchTitles.filter((title) => /[A-Za-z]/.test(title));
+  if (englishTitles.length) {
+    return englishTitles.sort((left, right) => right.length - left.length)[0];
+  }
+  return titleZh || searchTitles[0] || "";
+}
+
+/** 按消歧分组键匹配 staging 行（兼容 `title_zh` 为空的旧批次）。 */
+export function stagingGroupWhere(batchId: string, titleZh: string, year: string) {
+  return and(
+    eq(importStaging.batchId, batchId),
+    eq(importStaging.year, year),
+    sql`coalesce(${importStaging.titleZh}, ${importStaging.title}) = ${titleZh}`,
+  );
 }
 
 export type TitleContext = {
