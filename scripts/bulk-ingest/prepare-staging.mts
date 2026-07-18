@@ -11,13 +11,14 @@
  * 下游：resolve-tmdb-ids.mts
  */
 import { mkdirSync, writeFileSync } from "node:fs";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { importStaging } from "../../src/db/schema";
 import {
   defaultBatchId,
   parseCliArgs,
   parseCsvFile,
   selectRowsForPilot,
+  shouldBlockStagingClear,
   withDatabase,
 } from "./shared.mts";
 
@@ -30,6 +31,7 @@ async function main() {
   const limitMovies = Number(args["limit-movies"] ?? 100);
   const offsetMovies = Number(args["offset-movies"] ?? 0);
   const clearBatch = args["no-clear-batch"] !== true;
+  const forceClear = args["force-clear-batch"] === true;
 
   const allRows = parseCsvFile(csvPath);
   if (!allRows.length) {
@@ -48,6 +50,29 @@ async function main() {
 
   await withDatabase(async ({ db }) => {
     if (clearBatch) {
+      const [{ count: resolvedOrAmbiguousCount }] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(importStaging)
+        .where(
+          and(
+            eq(importStaging.batchId, batchId),
+            inArray(importStaging.tmdbResolveStatus, ["resolved", "ambiguous"]),
+          ),
+        );
+
+      if (
+        shouldBlockStagingClear(resolvedOrAmbiguousCount, {
+          clearBatch,
+          forceClear,
+        })
+      ) {
+        throw new Error(
+          `Batch ${batchId} already has ${resolvedOrAmbiguousCount} resolved/ambiguous staging row(s). ` +
+            `Re-staging would erase TMDB resolve progress. Use --no-clear-batch to append, ` +
+            `or --force-clear-batch to wipe and restart.`,
+        );
+      }
+
       await db.delete(importStaging).where(eq(importStaging.batchId, batchId));
     }
 

@@ -532,6 +532,22 @@ export function syncUpsertContentStatusFields(
   return publish ? { contentStatus } : {};
 }
 
+/** `ingest:publish` 只提升仍为 draft 的影片，保留 review 与人工下架状态。 */
+export function moviesEligibleForBatchPublish<T extends { contentStatus: string }>(rows: T[]): T[] {
+  return rows.filter((row) => row.contentStatus === "draft");
+}
+
+/**
+ * 已有 TMDB 消歧结果的 batch 默认禁止整批清空，避免误跑 staging 抹掉 resolve 进度。
+ */
+export function shouldBlockStagingClear(
+  resolvedOrAmbiguousCount: number,
+  options: { clearBatch: boolean; forceClear: boolean },
+) {
+  if (!options.clearBatch || options.forceClear) return false;
+  return resolvedOrAmbiguousCount > 0;
+}
+
 export function mapTmdbKeywords(
   keywordsResponse?: {
     keywords?: Array<{ id?: number; name?: string }>;

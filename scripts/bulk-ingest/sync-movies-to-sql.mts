@@ -248,7 +248,6 @@ async function main() {
               collection: mapped.collection,
               keywords: mapped.keywords ?? [],
               rating: mapped.rating,
-              ratings: mapped.ratings,
               posterTone: mapped.posterTone,
               posterUrl: mapped.posterUrl,
               backdropUrl: mapped.backdropUrl,
