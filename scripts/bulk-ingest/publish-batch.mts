@@ -12,7 +12,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { importStaging, movies } from "../../src/db/schema";
-import { defaultBatchId, parseCliArgs, withDatabase } from "./shared.mts";
+import { defaultBatchId, moviesEligibleForBatchPublish, parseCliArgs, withDatabase } from "./shared.mts";
 
 async function main() {
   const args = parseCliArgs(process.argv.slice(2));
@@ -43,6 +43,7 @@ async function main() {
         matchedInMovies: 0,
         published: 0,
         alreadyPublished: 0,
+        heldBack: 0,
         missingInMovies: 0,
         dryRun,
         missingTmdbIds: [] as number[],
@@ -63,8 +64,9 @@ async function main() {
       movieRows.map((row) => row.tmdbId).filter((id): id is number => id != null),
     );
     const missingTmdbIds = tmdbIds.filter((id) => !matchedTmdbIds.has(id));
-    const toPublish = movieRows.filter((row) => row.contentStatus !== "published");
-    const alreadyPublished = movieRows.length - toPublish.length;
+    const toPublish = moviesEligibleForBatchPublish(movieRows);
+    const alreadyPublished = movieRows.filter((row) => row.contentStatus === "published").length;
+    const heldBack = movieRows.length - toPublish.length - alreadyPublished;
 
     if (!dryRun && toPublish.length > 0) {
       await db
@@ -88,6 +90,12 @@ async function main() {
       }
     }
 
+    if (heldBack > 0) {
+      console.warn(
+        `Warning: ${heldBack} matched movie(s) left in review or other non-draft status and were not published.`,
+      );
+    }
+
     if (missingTmdbIds.length > 0) {
       console.warn(
         `Warning: ${missingTmdbIds.length} resolved staging tmdb_id(s) not found in movies. Run ingest:sync first.`,
@@ -100,6 +108,7 @@ async function main() {
       matchedInMovies: movieRows.length,
       published: toPublish.length,
       alreadyPublished,
+      heldBack,
       missingInMovies: missingTmdbIds.length,
       dryRun,
       missingTmdbIds,
@@ -113,6 +122,7 @@ async function main() {
     `matched_in_movies: ${report.matchedInMovies}`,
     `newly_published: ${report.published}`,
     `already_published: ${report.alreadyPublished}`,
+    `held_back_non_draft: ${report.heldBack}`,
     `missing_in_movies: ${report.missingInMovies}`,
     ...(report.dryRun ? ["mode: dry-run"] : []),
     ...(report.missingTmdbIds.length
