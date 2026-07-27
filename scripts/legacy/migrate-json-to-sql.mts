@@ -13,6 +13,7 @@ import { join } from "node:path";
 import { eq } from "drizzle-orm";
 import { closeDatabaseClient, createDatabaseClient } from "../../src/db/index";
 import { importStaging, mediaAssets, movies, viewingPaths } from "../../src/db/schema";
+import { shouldReplaceMovieRelations } from "../lib/migrate-json-relations.mts";
 
 type MovieJsonRecord = {
   slug: string;
@@ -95,6 +96,13 @@ async function main() {
 
   for (const record of records) {
     const now = record.updatedAt ?? new Date().toISOString();
+    const [existing] = await db
+      .select({ id: movies.id })
+      .from(movies)
+      .where(eq(movies.slug, record.slug))
+      .limit(1);
+    const replaceRelations = shouldReplaceMovieRelations(Boolean(existing));
+
     const [movie] = await db
       .insert(movies)
       .values({
@@ -183,6 +191,10 @@ async function main() {
       .returning({ id: movies.id, slug: movies.slug });
 
     insertedMovies += 1;
+
+    if (!replaceRelations) {
+      continue;
+    }
 
     await db.delete(viewingPaths).where(eq(viewingPaths.movieId, movie.id));
     await db.delete(mediaAssets).where(eq(mediaAssets.movieId, movie.id));
