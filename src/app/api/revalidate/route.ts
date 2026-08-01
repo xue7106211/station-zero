@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  revalidateTag(MOVIES_CATALOG_CACHE_TAG);
+  revalidateTag(MOVIES_CATALOG_CACHE_TAG, { expire: 0 });
   revalidatePath("/", "page");
   revalidatePath("/movies", "page");
   revalidatePath("/search", "page");
