@@ -7,13 +7,14 @@
 
 import Link from "next/link";
 import { getMoviesPage } from "@/lib/movie-api";
+import { MOVIES_CATALOG_REVALIDATE_SECONDS } from "@/lib/movie-catalog-cache";
 import { MovieCard, movieCardGridClassName } from "@/components/movie-card";
 import { MoviePagination } from "@/components/movie-pagination";
 import { SectionHeading, SiteShell } from "@/components/site-shell";
 import { parseMoviesPage } from "@/lib/movies-pagination";
 
 /** ISR 重新验证间隔（秒）：列表数据每日刷新一次。 */
-export const revalidate = 86400;
+export const revalidate = MOVIES_CATALOG_REVALIDATE_SECONDS;
 
 /** `/movies` 路由的 searchParams 类型（Next.js App Router 中为 Promise）。 */
 type MoviesPageProps = {

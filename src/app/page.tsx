@@ -1,8 +1,9 @@
 import { getMoviesPage } from "@/lib/movie-api";
+import { MOVIES_CATALOG_REVALIDATE_SECONDS } from "@/lib/movie-catalog-cache";
 import { MovieLoadMoreGrid } from "@/components/movie-load-more-grid";
 import { SectionHeading, SiteShell } from "@/components/site-shell";
 
-export const revalidate = 86400;
+export const revalidate = MOVIES_CATALOG_REVALIDATE_SECONDS;
 
 export default async function Home() {
   const { items, currentPage, totalPages, totalItems } = await getMoviesPage(1);
