@@ -656,3 +656,32 @@ export function mapTmdbDetailsToMovieValues(
     viewingPaths: options.seedPaths,
   };
 }
+
+/** bulk publish 后调用站点 revalidate API，刷新 ISR / Data Cache。 */
+export async function triggerSiteRevalidation(): Promise<void> {
+  const secret = process.env.REVALIDATE_SECRET?.trim();
+  const siteUrl = process.env.SITE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!secret || !siteUrl) {
+    console.warn(
+      "Site revalidation skipped. Set REVALIDATE_SECRET and SITE_URL (or NEXT_PUBLIC_SITE_URL) to refresh list pages after publish.",
+    );
+    return;
+  }
+
+  const url = new URL("/api/revalidate", siteUrl);
+  url.searchParams.set("secret", secret);
+
+  try {
+    const response = await fetch(url, { method: "POST" });
+    if (!response.ok) {
+      const body = await response.text();
+      console.warn(`Site revalidation failed (${response.status}): ${body}`);
+      return;
+    }
+    console.log("Site revalidation succeeded (/, /movies, /search).");
+  } catch (error) {
+    console.warn(
+      `Site revalidation request failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}

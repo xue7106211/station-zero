@@ -5,6 +5,7 @@
  * 读取策略：配置了 `DATABASE_URL` 时优先走 Supabase SQL；连接失败或未配置时回退 `data/movies.json`。
  */
 
+import { getCachedPublishedMoviesPageFromSql } from "./movie-catalog-cache";
 import {
   getMovieFromStore,
   getMovieSlugsFromStore,
@@ -17,7 +18,6 @@ import {
   isSqlStoreAvailable,
   listPublishedMovieSlugsFromSql,
   listPublishedMoviesFromSql,
-  listPublishedMoviesPageFromSql,
   searchPublishedMoviesFromSql,
 } from "./movie-sql-store";
 import { inferSearchMatchKind, isSearchQueryValid, normalizeSearchQuery, type SearchMatchKind } from "./movie-search";
@@ -104,7 +104,7 @@ export async function getPublishedMovies(limit?: number) {
 export async function getMoviesPage(page: number, pageSize = MOVIES_PAGE_SIZE): Promise<MoviesPageResult> {
   return withStoreFallback(
     async () => {
-      const { items, totalItems } = await listPublishedMoviesPageFromSql(page, pageSize);
+      const { items, totalItems } = await getCachedPublishedMoviesPageFromSql(page, pageSize);
       const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
       const currentPage = Math.min(Math.max(1, page), totalPages);
 

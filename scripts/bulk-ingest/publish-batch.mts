@@ -12,7 +12,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { importStaging, movies } from "../../src/db/schema";
-import { defaultBatchId, parseCliArgs, withDatabase } from "./shared.mts";
+import { defaultBatchId, parseCliArgs, triggerSiteRevalidation, withDatabase } from "./shared.mts";
 
 async function main() {
   const args = parseCliArgs(process.argv.slice(2));
@@ -123,6 +123,10 @@ async function main() {
   mkdirSync("data/import", { recursive: true });
   writeFileSync("data/import/publish-report.txt", `${lines.join("\n")}\n`, "utf8");
   console.log(lines.join("\n"));
+
+  if (!report.dryRun && report.published > 0) {
+    await triggerSiteRevalidation();
+  }
 }
 
 main().catch((error) => {
