@@ -12,6 +12,9 @@ import type { Movie } from "./content";
 import { mapMovieRowToMovie } from "./movie-mapper";
 import { inferSearchMatchKind, normalizeSearchQuery, parseImdbId } from "./movie-search";
 
+/** 列表/分页排序：批量 ingest 常共用同一 `updated_at`，需 slug 作稳定次级键。 */
+export const publishedMoviesListOrder = [desc(movies.updatedAt), asc(movies.slug)] as const;
+
 /**
  * 统计已发布影片总数。
  *
@@ -32,7 +35,7 @@ export async function countPublishedMoviesFromSql(): Promise<number> {
 /**
  * 分页查询已发布影片。
  *
- * 排序：`updated_at DESC`，与竞品列表页「最近更新优先」一致。
+ * 排序：`updated_at DESC, slug ASC`；bulk-ingest 批次内 `updated_at` 相同，slug 保证分页稳定。
  * 列表查询不加载 `viewing_paths`，减少卡片渲染的 JOIN 开销。
  *
  * @param page - 页码，从 1 开始
@@ -58,7 +61,7 @@ export async function listPublishedMoviesPageFromSql(
     .select()
     .from(movies)
     .where(eq(movies.contentStatus, "published"))
-    .orderBy(desc(movies.updatedAt))
+    .orderBy(...publishedMoviesListOrder)
     .limit(pageSize)
     .offset(offset);
 
@@ -81,7 +84,7 @@ export async function listPublishedMoviesFromSql(limit?: number): Promise<Movie[
     .select()
     .from(movies)
     .where(eq(movies.contentStatus, "published"))
-    .orderBy(desc(movies.updatedAt));
+    .orderBy(...publishedMoviesListOrder);
 
   const rows = typeof limit === "number" ? await query.limit(limit) : await query;
   return rows.map((row) => mapMovieRowToMovie(row));
@@ -129,7 +132,7 @@ export async function listPublishedMovieSlugsFromSql(limit: number): Promise<str
     .select({ slug: movies.slug })
     .from(movies)
     .where(eq(movies.contentStatus, "published"))
-    .orderBy(desc(movies.updatedAt))
+    .orderBy(...publishedMoviesListOrder)
     .limit(limit);
 
   return rows.map((row) => row.slug);
@@ -173,7 +176,8 @@ function publishedTextSearchOrder(query: string) {
       similarity(${movies.title}, ${query}),
       similarity(${movies.originalTitle}, ${query})
     ) desc,
-    ${movies.updatedAt} desc
+    ${movies.updatedAt} desc,
+    ${movies.slug} asc
   `;
 }
 
@@ -211,7 +215,7 @@ export async function searchPublishedMoviesFromSql(
       .select()
       .from(movies)
       .where(whereClause)
-      .orderBy(desc(movies.updatedAt))
+      .orderBy(...publishedMoviesListOrder)
       .limit(pageSize)
       .offset(offset);
 
