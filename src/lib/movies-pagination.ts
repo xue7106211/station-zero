@@ -1,5 +1,11 @@
 export const MOVIES_PAGE_SIZE = 30;
 
+/** 将页码钳制到 `[1, totalPages]`，供 SQL 分页与 JSON 回退共用。 */
+export function clampPageNumber(page: number, totalItems: number, pageSize = MOVIES_PAGE_SIZE): number {
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  return Math.min(Math.max(1, page), totalPages);
+}
+
 export function parseMoviesPage(pageParam?: string): number {
   const page = Number(pageParam);
   if (!Number.isFinite(page) || page < 1) return 1;
@@ -9,7 +15,7 @@ export function parseMoviesPage(pageParam?: string): number {
 export function paginateMovies<T>(items: T[], page: number, pageSize = MOVIES_PAGE_SIZE) {
   const totalItems = items.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const currentPage = clampPageNumber(page, totalItems, pageSize);
   const start = (currentPage - 1) * pageSize;
 
   return {
