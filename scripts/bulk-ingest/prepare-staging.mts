@@ -17,6 +17,8 @@ import {
   defaultBatchId,
   parseCliArgs,
   parseCsvFile,
+  parseStagingMovieLimit,
+  parseStagingMovieOffset,
   selectRowsForPilot,
   withDatabase,
 } from "./shared.mts";
@@ -27,8 +29,8 @@ async function main() {
   const args = parseCliArgs(process.argv.slice(2));
   const csvPath = String(args.csv ?? DEFAULT_CSV);
   const batchId = String(args["batch-id"] ?? defaultBatchId("pilot"));
-  const limitMovies = Number(args["limit-movies"] ?? 100);
-  const offsetMovies = Number(args["offset-movies"] ?? 0);
+  const limitMovies = parseStagingMovieLimit(args["limit-movies"]);
+  const offsetMovies = parseStagingMovieOffset(args["offset-movies"]);
   const clearBatch = args["no-clear-batch"] !== true;
 
   const allRows = parseCsvFile(csvPath);
@@ -36,14 +38,7 @@ async function main() {
     throw new Error(`No rows found in ${csvPath}`);
   }
 
-  if (offsetMovies < 0) {
-    throw new Error(`--offset-movies must be >= 0, got ${offsetMovies}`);
-  }
-
-  const rows =
-    limitMovies > 0 || offsetMovies > 0
-      ? selectRowsForPilot(allRows, limitMovies, offsetMovies)
-      : allRows;
+  const rows = selectRowsForPilot(allRows, limitMovies, offsetMovies);
   const uniqueMovies = new Set(rows.map((row) => `${row.title_zh}\t${row.year}`));
 
   await withDatabase(async ({ db }) => {

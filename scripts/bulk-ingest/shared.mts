@@ -90,6 +90,28 @@ export function parseCsvFile(path: string): CsvRow[] {
   });
 }
 
+export function parseStagingMovieLimit(value: string | boolean | undefined, defaultValue = 100): number {
+  if (value === undefined || value === true) {
+    return defaultValue;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 1) {
+    throw new Error(`--limit-movies must be a positive integer, got ${String(value)}`);
+  }
+
+  return parsed;
+}
+
+export function parseStagingMovieOffset(value: string | boolean | undefined): number {
+  const parsed = Number(value ?? 0);
+  if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 0) {
+    throw new Error(`--offset-movies must be a non-negative integer, got ${String(value ?? 0)}`);
+  }
+
+  return parsed;
+}
+
 export function selectRowsForPilot(
   rows: CsvRow[],
   limitMovies: number,
