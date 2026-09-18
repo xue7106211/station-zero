@@ -532,6 +532,23 @@ export function syncUpsertContentStatusFields(
   return publish ? { contentStatus } : {};
 }
 
+type SyncMovieOptionalTmdbFields = {
+  collection?: ReturnType<typeof mapTmdbCollection>;
+  keywords?: string[];
+};
+
+/**
+ * `ingest:sync` 冲突更新时的 TMDB 可选字段：仅在新值存在时写入。
+ *
+ * 避免 `--tmdb-id` 重试或 TMDB 响应缺字段时，把库内已有 `keywords` / `collection` 抹空。
+ */
+export function syncUpsertOptionalTmdbFields(fields: SyncMovieOptionalTmdbFields) {
+  return {
+    ...(fields.collection !== undefined ? { collection: fields.collection } : {}),
+    ...(fields.keywords !== undefined ? { keywords: fields.keywords } : {}),
+  };
+}
+
 export function mapTmdbKeywords(
   keywordsResponse?: {
     keywords?: Array<{ id?: number; name?: string }>;

@@ -31,6 +31,7 @@ import {
   slugify,
   sleep,
   syncUpsertContentStatusFields,
+  syncUpsertOptionalTmdbFields,
   withDatabase,
 } from "./shared.mts";
 import {
@@ -245,8 +246,10 @@ async function main() {
               languages: mapped.languages,
               releaseDate: mapped.releaseDate,
               aka: mapped.aka,
-              collection: mapped.collection,
-              keywords: mapped.keywords ?? [],
+              ...syncUpsertOptionalTmdbFields({
+                collection: mapped.collection,
+                keywords: mapped.keywords,
+              }),
               rating: mapped.rating,
               ratings: mapped.ratings,
               posterTone: mapped.posterTone,
