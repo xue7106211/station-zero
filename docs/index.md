@@ -2,7 +2,7 @@
 title: Station Zero 文档索引
 type: index
 status: active
-updated: 2026-07-05
+updated: 2026-10-27
 ---
 
 # Station Zero 文档索引
@@ -14,6 +14,7 @@ updated: 2026-07-05
 | 层级 | 目录 | 用途 |
 |------|------|------|
 | 开发约定 | 仓库根 `AGENTS.md`、`README.md` | 目录结构、命令、数据流、编码规范、当前实施进度 |
+| 进度 / 决策 | [`progress.md`](./progress.md)、[`decisions.md`](./decisions.md) | 仓库级进度日志与轻量决策记录 |
 | 产品方向 | `docs/product/` | 定位、MVP 范围、信息架构、合规边界 |
 | 技术决策 | `docs/technical/` | 架构方案、录入流水线、图片缓存、生产部署 |
 | 历史计划 | `docs/archive/plans/` | 已落地或归档的实施计划（参考用，以代码为准） |
@@ -49,6 +50,22 @@ updated: 2026-07-05
 | 查某次功能的历史实施步骤 | `docs/archive/plans/` 对应文件 | 以 `src/` 与 `tests/` 实际代码为准 |
 
 ## 文档目录
+
+### 仓库级
+
+#### [progress.md](./progress.md)
+
+| 属性 | 值 |
+|------|-----|
+| type / status | `index` / `active` |
+| 何时读 | 查仓库卫生与里程碑摘要；录入批次仍看 `bulk-ingestion-progress` |
+
+#### [decisions.md](./decisions.md)
+
+| 属性 | 值 |
+|------|-----|
+| type / status | `decision` / `active` |
+| 何时读 | 查轻量 ADR；专题决策仍以 `docs/technical/` 为准 |
 
 ### 产品 `docs/product/`
 

@@ -1,76 +1,77 @@
 # Station Zero 零号站
 
-Station Zero 是一个高清观影决策系统，帮助用户判断一部片值不值得看、哪里能合法看、哪个高清版本最值得看。
+**状态：** 活跃个人产品（Active · personal）
 
-## 当前版本
+Station Zero 是一个**高清观影决策系统**：帮你判断一部片值不值得看、哪个高清版本更合适、哪里能合法看，并整理观看来源索引。
 
-MVP 基于 Next.js + TypeScript + Tailwind CSS 4 + HeroUI，包含：
+目前没有公开生产部署地址；本地或自托管即可运行。生产 CDN / VPS 方案见 [`docs/technical/mainland-topology.md`](docs/technical/mainland-topology.md)。
 
-- 首页：已发布影片网格（SSR 首屏 + `/api/movies` 加载更多）。
-- 影片搜索：片名 / IMDB / 影人（`/search`；头部搜索框；`pg_trgm` + JSON 回退）。
-- 影片库与影片详情页：决策标签、豆瓣式元数据（含 TMDB 系列与关键词）、观看来源聚合、高清版本判断、设备与场景建议。
-- 片单页：围绕设备、心情和审美组织内容。
-- 高清知识页：解释 HDR、BluRay、WEB-DL、REMUX 等概念。
-- 关于页：产品边界与合规声明。
-- 站点壳层：吸顶导航、移动端抽屉菜单、浅色/深色/跟随系统主题切换。
-- 电影数据层：前端经 `movie-api` 读取 **Supabase Postgres**（优先）或 `data/movies.json`（回退）。
-- 后台采集脚本：同步 TMDB 资料、下载海报/背景图、提取海报色板；写入 JSON 或经 bulk-ingest 写入 SQL + Supabase Storage。
+## 是什么 / 不是什么
 
-## 本地开发
+| 是 | 不是 |
+|----|------|
+| 观影判断与高清版本决策界面 | 视频托管、网盘或 BT 下载站 |
+| 影视资料与观看路径的信息整理 / 索引 | 在用户访问时实时爬取 TMDB / 豆瓣的前端 |
+| Next.js 站点 + Supabase 数据层 + 后台录入脚本 | 对第三方外链下载行为负责的平台 |
+
+一句话：在本站完成「查找 → 判断 → 跳转或复制链接」；实际观看与下载发生在第三方。
+
+## 怎么跑
 
 包管理器：**npm**（锁文件 `package-lock.json`）。
 
 ```bash
+cp .env.example .env.local   # 按需填写；无 DATABASE_URL 时回退 JSON
 npm install
-npm run dev
-npm run build
-npm run lint
-npm test
+npm run dev                  # http://localhost:3000
 ```
 
-### TMDB 后台同步（legacy · 单部 / 少量）
+常用检查：
 
 ```bash
-npm run check:tmdb
-npm run sync:movies
-npm run import:movies -- path/to/movies.json
-npm run extract:palettes
+npm run lint
+npm test
+npm run build
 ```
 
-### 万级批量录入（bulk-ingest）
+未配置 `DATABASE_URL` 时，页面仍可读 `data/movies.json` 与默认策展数据。完整环境变量见 [`.env.example`](.env.example)。
+
+开发约定见 [`AGENTS.md`](AGENTS.md)；文档入口见 [`docs/index.md`](docs/index.md)。
+
+### 可选：数据库与后台同步
 
 ```bash
 npm run check:database
 npm run check:tmdb
-npm run check:storage      # 海报上传 Storage 时需 service_role
+npm run check:storage        # 海报上传 Storage 时需 service_role
 
-npm run ingest:pilot       # 一键 Pilot（默认 100 部）
-# 或分步：ingest:staging → ingest:resolve → ingest:resolve-ambiguous / ingest:resolve-failed → ingest:sync
-# ingest:staging 支持 --offset-movies、--limit-movies、--batch-id
-# ingest:sync 支持 --batch-id、--tmdb-id（单部重试）；验收发布用 ingest:publish（推荐，秒级）
-npm run ingest:publish -- --batch-id <batch>   # 将已 sync 影片设为 published
-npm run ingest:upload-media   # 补传本地海报到 Supabase Storage
+npm run sync:movies          # legacy：seeds → movies.json
+npm run db:migrate:json      # legacy：JSON upsert 到 SQL
+```
+
+### 可选：万级批量录入（bulk-ingest）
+
+```bash
+npm run ingest:pilot         # 一键 Pilot（默认 100 部）
+# 或：ingest:staging → ingest:resolve → … → ingest:sync
+npm run ingest:publish -- --batch-id <batch>
 ```
 
 操作手册：[`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md)  
-**接续下一批 / 库内进度**：[`docs/technical/bulk-ingestion-progress.md`](docs/technical/bulk-ingestion-progress.md)  
-导入数据说明：[`data/import/index.md`](data/import/index.md)  
-脚本索引：[`scripts/index.md`](scripts/index.md)
+进度快照：[`docs/technical/bulk-ingestion-progress.md`](docs/technical/bulk-ingestion-progress.md)
 
-### 数据库（Supabase Postgres）
+## 当前能力（摘要）
 
-```bash
-npm run check:database      # 验证 DATABASE_URL 连通与表状态
-npm run check:storage       # 验证 Supabase Storage 上传凭证
-npm run db:generate         # 根据 schema 生成 migration
-npm run db:migrate          # 应用 migration 到 Supabase
-npm run db:push             # 开发时快速推送 schema（可跳过 migration 文件）
-npm run db:migrate:json     # 将 data/movies.json upsert 到 SQL（legacy）
-```
+- 首页已发布影片网格（SSR + `/api/movies` 加载更多）
+- 搜索：片名 / IMDB / 影人（`/search`；`pg_trgm` + JSON 回退）
+- 影片库与详情：决策标签、元数据、观看来源聚合、设备与场景建议
+- 片单、高清知识库、关于页与合规边界
+- 主题：浅色 / 深色 / 跟随系统
+- 数据：`movie-api` 优先读 Supabase Postgres，失败回退 `data/movies.json`
 
 ## 电影数据架构
 
-Station Zero 采用「外部 API 后台生产内容，前端只读本站数据」的加载方案：
+Station Zero 采用「外部 API 后台生产内容，前端只读本站数据」：
 
 ```txt
 TMDB / 人工录入 / CSV 批量
@@ -87,207 +88,65 @@ Supabase Storage（bucket media · posters / backdrops）
         ↓
 movie-api.ts（SQL 优先，失败或无配置时回退 JSON）
         ↓
-Next.js 页面（img src = movies.poster_url，Supabase Storage 公网 URL）
+Next.js 页面（img src = movies.poster_url）
 ```
 
 核心原则：
 
 - 前端页面不在用户访问时实时调用 TMDB、豆瓣或其他外部电影 API。
-- 浏览器不直连 Supabase Postgres；仅服务端与脚本通过 `DATABASE_URL` 访问数据库。
-- 配置 `DATABASE_URL` 时，海报 URL 来自 Supabase Storage（`movies.poster_url`）；`public/media/` 为脚本本地缓存。
+- 浏览器不直连 Supabase Postgres；仅服务端与脚本通过 `DATABASE_URL` 访问。
+- 配置 `DATABASE_URL` 时，海报 URL 来自 Supabase Storage；`public/media/` 为脚本本地缓存。
 
-### 读取层（当前）
+### 读取层
 
 | 能力 | 实现 |
 |------|------|
-| 首页 `/` | `getMoviesPage(1)` SSR 首屏；`MovieLoadMoreGrid` 经 `/api/movies?page=` 加载更多 |
-| 列表 `/movies` | SQL 分页，30 条/页，`content_status = published`，`ORDER BY updated_at DESC` |
-| 首页 / 列表影片 | 仅展示 `published` 影片 |
-| 详情 `/movies/[slug]` | `movies` JOIN `viewing_paths` 单次查询；任意状态 slug 可访问；元数据含 `collection`、`keywords` |
-| 搜索 `/search` | `searchMovies`（SQL `pg_trgm` + IMDB 精确；无库时 JSON 子串匹配）；`GET /api/movies/search` 供联想（Phase B 待做） |
-| 构建策略 | Top 50 `published` 预热 SSG；其余 slug 按需 ISR（`revalidate = 86400`） |
-| 无 `DATABASE_URL` | 自动回退 `data/movies.json`（搜索能力缩水，完整搜索需 SQL） |
+| 首页 `/` | `getMoviesPage(1)` SSR；`MovieLoadMoreGrid` 经 `/api/movies` 加载更多 |
+| 列表 `/movies` | SQL 分页，30 条/页，仅 `published` |
+| 详情 `/movies/[slug]` | JOIN `viewing_paths`；任意状态 slug 可访问 |
+| 搜索 `/search` | SQL `pg_trgm` + IMDB；无库时 JSON 子串匹配 |
+| 构建 | Top 50 `published` SSG；其余 ISR（`revalidate = 86400`） |
+| 无 `DATABASE_URL` | 回退 `data/movies.json` |
 
-关键模块：
-
-- `src/app/api/movies/route.ts` — 首页「加载更多」分页 JSON API
-- `src/lib/movie-api.ts` — 页面读取门面（SQL 优先 + JSON fallback）
-- `src/lib/movie-sql-store.ts` — Supabase 查询与分页
-- `src/lib/movie-store.ts` — 文件型 JSON 读取与默认数据合并
-- `src/lib/movie-mapper.ts` — SQL 行 → 前端 `Movie` 类型映射
-- `src/lib/movie-search.ts` — 搜索查询规范化、IMDB 解析、JSON 回退匹配
-- `src/lib/viewing-path-label.ts` — 磁力备注清洗与规格 Tag 解析（供 `WatchProviders`）
-- `src/app/api/movies/search/route.ts` — 搜索 JSON API
-- `src/db/schema.ts` — Drizzle schema（`movies`、`viewing_paths`、`media_assets`、`import_staging`）
-
-### 本地文件库
-
-- `data/movies.json` — 文件型电影库，legacy 编辑与 JSON 回退源。
-- `data/movie-seeds.json` — legacy 后台同步种子。
-- `data/import/` — 万级批量清洗 CSV 与报告（见 [`index.md`](data/import/index.md)）。
-- `public/media/posters/` 与 `public/media/backdrops/` — sync 脚本本地缓存；页面以 DB 中 Storage URL 为准。
+关键模块：`src/lib/movie-api.ts`、`movie-sql-store.ts`、`movie-store.ts`、`src/db/schema.ts`。
 
 ### 环境变量
 
-复制 `.env.example` 为 `.env.local`，按需配置：
+复制 `.env.example` 为 `.env.local`：
 
 ```env
-# TMDB 后台同步（可选）
 TMDB_READ_ACCESS_TOKEN=
 TMDB_API_KEY=
-
-# Supabase Postgres（可选；配置后页面优先读 SQL）
-# Transaction pooler URI，端口 6543
-DATABASE_URL=
-
-# Supabase Storage 上传（bulk-ingest / ingest:upload-media；仅脚本，勿暴露给浏览器）
-SUPABASE_SERVICE_ROLE_KEY=
-
-# 可选
+DATABASE_URL=                 # Transaction pooler，端口 6543
+SUPABASE_SERVICE_ROLE_KEY=    # 仅脚本上传海报，勿暴露给浏览器
 SUPABASE_URL=
 SUPABASE_MEDIA_BUCKET=media
-# TMDB_IMAGE_BASE_URL=   # bulk-ingest 默认 w500；legacy sync:movies 默认 w780
-# TMDB_API_BASE_URL=     # TMDB 代理，值需含 /3 前缀
-# NEXT_IMAGE_UNOPTIMIZED=true  # 开发期绕过 Next 图片优化器
 ```
 
-未配置 `DATABASE_URL` 时，应用仍可用 `data/movies.json` 与默认策展数据运行。完整变量说明见 [`.env.example`](.env.example)。
+TMDB 只用于后台采集。访问受限时可设 `TMDB_API_BASE_URL`（需含 `/3`）或本机 `HTTPS_PROXY`；`dev` / `build` / `start` / 相关脚本已启用 `--use-env-proxy`。
 
-### 后台同步 TMDB
+### 人工录入（少量）
 
-TMDB 只用于后台采集阶段。未配置或请求失败时，前端仍会使用 `data/movies.json` 和 `src/lib/content.ts` 中的默认策展数据。
+1. 写入 `data/movie-seeds.json`（建议带 `tmdbId`、`contentStatus`）。
+2. `npm run sync:movies`
+3. 检查 `data/movies.json`；需要时 `npm run extract:palettes`
+4. 有库则 `npm run db:migrate:json`；列表可见性依赖 `contentStatus = published`
 
-1. 填入 `TMDB_READ_ACCESS_TOKEN` 或 `TMDB_API_KEY`（等号后不要多余空格或引号）。
-2. 运行 `npm run check:tmdb` 验证连通性。
-3. 运行 `npm run sync:movies` 同步 `data/movie-seeds.json` 中的影片。
-4. 若已配置 `DATABASE_URL`，运行 `npm run db:migrate:json` 将变更同步到 SQL。
+编辑判断层（`verdict`、`bestWay`、`idealScene`、`notFor`、`versionSignals`、`deviceAdvice`）应由人工维护，勿被 TMDB 覆盖。
 
-如果访问 `api.themoviedb.org` 时出现证书域名不匹配、DNS 污染或代理错误，可以把 `TMDB_API_BASE_URL` 指向你自己的 TMDB v3 兼容代理地址，值需要包含 `/3` 前缀。
-
-如果浏览器可以访问 TMDB，但 Next.js 服务端请求失败，请在 `.env.local` 里配置本机代理，例如：
-
-```env
-HTTPS_PROXY=http://127.0.0.1:7890
-HTTP_PROXY=http://127.0.0.1:7890
-NO_PROXY=localhost,127.0.0.1
-```
-
-`dev`、`build`、`start`、`check:tmdb`、`sync:movies` 已启用 Node.js `--use-env-proxy`，服务端 `fetch` 会读取这些代理变量。
-
-`npm run sync:movies` 会：
-
-- 从 TMDB 拉取影片资料、演职员、观看平台、又名、系列（`belongs_to_collection`）、关键词等字段；
-- 将制片国家/地区、语言映射为中文展示文案；
-- 下载远程海报和背景图到 `public/media/`；
-- 从本地海报提取 `palette` 色板；
-- 把本站图片路径与展示字段写入 `data/movies.json`。
-
-`/media/:path*` 已配置长缓存头，生产环境可以接 Cloudflare 或对象存储 CDN。
-
-`npm run import:movies -- path/to/movies.json` 可导入人工整理的影片数据，按 `slug` 写入或更新本地库。
-
-`npm run extract:palettes` 可为已有本地海报离线补全 `palette` 字段，无需重新请求 TMDB。
-
-TMDB 数据只用于影片资料、海报、背景图、评分和正版观看路径参考；高清版本判断仍保留 Station Zero 的编辑判断层。
-
-### 人工录入约定
-
-常规录入方式是先提供电影名称和年份，由 Agent 或编辑把它整理进 `data/movie-seeds.json`，再运行后台同步补全 TMDB 资料。
-
-推荐种子格式：
-
-```json
-[
-  {
-    "slug": "arrival",
-    "title": "降临",
-    "originalTitle": "Arrival",
-    "year": "2016",
-    "contentStatus": "published",
-    "verdict": "值得安静大屏观看",
-    "bestWay": "4K HDR / Blu-ray / 高质量正版流媒体"
-  }
-]
-```
-
-如果已知 `tmdbId`，优先写入 `tmdbId`，匹配最稳定：
-
-```json
-[
-  {
-    "slug": "arrival",
-    "tmdbId": 329865,
-    "contentStatus": "published",
-    "verdict": "值得安静大屏观看",
-    "bestWay": "4K HDR / Blu-ray / 高质量正版流媒体"
-  }
-]
-```
-
-录入原则：
-
-- `slug` 是本站公开 URL 标识，例如 `/movies/arrival`，优先使用英文小写 kebab-case。
-- `tmdbId` 是外部资料源 ID，只用于后台同步，不作为公开详情页主地址。
-- `contentStatus` 控制列表可见性：`published` 出现在 `/movies` 与首页；`draft` / `review` 仅详情直链可访问。
-- 电影名称和年份可用于初步搜索；当前脚本尚未把年份作为强匹配条件，遇到同名电影时应先确认 `tmdbId`。
-- `verdict`、`bestWay`、`idealScene`、`notFor`、`versionSignals`、`deviceAdvice` 是 Station Zero 编辑判断层，应人工维护。
-- 同步完成后检查 `data/movies.json` 是否写入本地图片路径与色板；配置 `DATABASE_URL` 后运行 `npm run db:migrate:json` 同步到 SQL。
-
-### 产品与技术文档
-
-完整索引与**按任务选读**见 [`docs/index.md`](docs/index.md)（Agent 与协作者首选入口）。开发约定见 [`AGENTS.md`](AGENTS.md)。
+## 文档
 
 | 主题 | 文档 |
 |------|------|
+| 文档索引 / 按任务选读 | [`docs/index.md`](docs/index.md) |
+| 进度日志 | [`docs/progress.md`](docs/progress.md) |
+| 决策记录 | [`docs/decisions.md`](docs/decisions.md) |
 | 产品 PRD（当前） | [`docs/product/station-zero-prd-v0.2.md`](docs/product/station-zero-prd-v0.2.md) |
-| 图片、Storage、CDN URL | [`docs/technical/movie-images.md`](docs/technical/movie-images.md) |
-| 海报体积优化 | [`docs/technical/poster-compression-scheme.md`](docs/technical/poster-compression-scheme.md) |
-| 站点电影搜索 | [`docs/technical/movie-search-scheme.md`](docs/technical/movie-search-scheme.md) |
-| 万级批量录入 · 操作手册 | [`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md) |
-| 万级批量录入 · 进度快照 | [`docs/technical/bulk-ingestion-progress.md`](docs/technical/bulk-ingestion-progress.md) |
-| 万级批量录入 · 架构方案 | [`docs/technical/bulk-ingestion-scheme.md`](docs/technical/bulk-ingestion-scheme.md) |
-| 万级批量录入 · 勾选清单 | [`docs/technical/bulk-ingestion-checklist-v1.md`](docs/technical/bulk-ingestion-checklist-v1.md) |
-| 大陆 CDN / VPS 选型 | [`docs/technical/mainland-topology.md`](docs/technical/mainland-topology.md) |
-| CDN 回源与媒体子域 | [`docs/technical/cdn-origin-setup.md`](docs/technical/cdn-origin-setup.md) |
-| VPS 身份隔离纪律 | [`docs/technical/identity-isolation-notes.md`](docs/technical/identity-isolation-notes.md) |
-
-### 万级批量录入
-
-Pilot 与第一批扩展（+400）已验证端到端流水线。**接续下一批前先读进度快照**：
-
-- [`docs/technical/bulk-ingestion-progress.md`](docs/technical/bulk-ingestion-progress.md) — 库内 516 部、下一批 `offset=500`
-- [`docs/technical/bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md) — 操作手册
-- [`docs/technical/bulk-ingestion-scheme.md`](docs/technical/bulk-ingestion-scheme.md) — 架构方案
-- [`docs/technical/bulk-ingestion-checklist-v1.md`](docs/technical/bulk-ingestion-checklist-v1.md) — 分阶段清单
-
-当前已完成：Schema、读取层、bulk-ingest 脚本（库内 **516** 部 / **515** published）、`ingest:publish`、`--offset-movies`、Supabase Storage 海报上传、bulk-ingest WebP 压缩、站点搜索 Phase A、TMDB `collection` / `keywords`。待推进：生产 CDN / VPS 部署、存量海报 recompress、搜索 Phase B、万级全量录入。
+| 图片 / Storage / CDN | [`docs/technical/movie-images.md`](docs/technical/movie-images.md) |
+| 站点搜索 | [`docs/technical/movie-search-scheme.md`](docs/technical/movie-search-scheme.md) |
+| 万级录入手册 / 进度 | [`bulk-ingestion-runbook.md`](docs/technical/bulk-ingestion-runbook.md) · [`bulk-ingestion-progress.md`](docs/technical/bulk-ingestion-progress.md) |
+| 大陆 CDN / VPS | [`docs/technical/mainland-topology.md`](docs/technical/mainland-topology.md) |
 
 ## UI 与主题
 
-默认组件库为 HeroUI，图标使用 Lucide React，全局样式在 `src/app/layout.tsx` 与 `src/app/globals.css` 中维护。
-
-### 站点壳层
-
-- `SiteShell` — 页面背景光晕、页脚与内容容器。
-- `SiteHeader` — 吸顶头部，滚动后显示半透明背景与模糊效果。
-- `SiteNav` — 桌面端导航、头部搜索框、路由激活态、移动端 Drawer 菜单。
-- `MovieSearchInput` — 头部 / 搜索页影片搜索框（提交跳转 `/search`）。
-
-### 影片详情页组件
-
-- `DecisionTags` — 将 `verdict` 与 `bestWay` 拆成标签展示。
-- `MovieSummary` — 简介默认最多 5 行，可展开全文。
-- `MovieKeywords` — TMDB 关键词 Tag 列表。
-- `PosterAmbientGlow` — 基于 `palette` 或模糊海报生成顶部氛围光晕。
-- `ResourceAccordion` — 观看来源分组手风琴（正版 / 网盘 / 磁力等）。
-- `WatchProviders` — 观看路径聚合、规格 Tag 与复制链接。
-
-### 主题切换
-
-主题偏好保存在 `localStorage` 的 `station-zero-theme`，支持：
-
-- `light` — 浅色模式
-- `dark` — 深色模式
-- `system` — 跟随系统 `prefers-color-scheme`
-
-首屏通过 `layout.tsx` 内联脚本在 paint 前写入 `<html data-theme>`，避免闪烁。设计 token 统一使用 `--sz-*` CSS 变量。
+HeroUI + Lucide；设计 token 为 `--sz-*`（见 `src/app/globals.css`）。主题偏好键：`localStorage` → `station-zero-theme`（`light` / `dark` / `system`）。
