@@ -26,4 +26,5 @@ jobs:
         run: npm test
 
       - name: Build
-        run: npm run build
+        # GHA Node 20 不支持 --use-env-proxy；本地 build 仍走代理友好脚本
+        run: npm run build:ci

@@ -31,7 +31,8 @@ npm run dev                  # http://localhost:3000
 ```bash
 npm run lint
 npm test
-npm run build
+npm run build       # 本地（需支持 --use-env-proxy 的 Node，如 22+）
+# CI 使用 npm run build:ci（无代理 flag；见下方说明）
 ```
 
 未配置 `DATABASE_URL` 时，页面仍可读 `data/movies.json` 与默认策展数据。完整环境变量见 [`.env.example`](.env.example)。
@@ -123,7 +124,7 @@ SUPABASE_URL=
 SUPABASE_MEDIA_BUCKET=media
 ```
 
-TMDB 只用于后台采集。访问受限时可设 `TMDB_API_BASE_URL`（需含 `/3`）或本机 `HTTPS_PROXY`；`dev` / `build` / `start` / 相关脚本已启用 `--use-env-proxy`。
+TMDB 只用于后台采集。访问受限时可设 `TMDB_API_BASE_URL`（需含 `/3`）或本机 `HTTPS_PROXY`；本地 `dev` / `build` / `start` 与相关脚本已启用 `--use-env-proxy`（需 Node 支持该 flag，如 22+）。GitHub Actions 使用 Node 20，不接受该 flag，因此 CI 走 `npm run build:ci`（等价于纯 `next build`），失败先例：[run 40531620322](https://github.com/xue7106211/station-zero/actions/runs/40531620322)。
 
 ### 人工录入（少量）
 
