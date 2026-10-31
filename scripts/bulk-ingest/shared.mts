@@ -5,7 +5,7 @@
  * 不直接运行；由 bulk-ingest/ 下各步骤脚本 import。
  */
 import { readFileSync } from "node:fs";
-import { createDatabaseClient, closeDatabaseClient } from "../../src/db/index";
+import { createDatabaseClient } from "../../src/db/index";
 import { imdbIdFromTmdbExternalIds } from "../../src/lib/movie-search";
 
 export type CsvRow = {
@@ -383,7 +383,9 @@ export async function withDatabase<T>(
   try {
     return await fn(client);
   } finally {
-    await closeDatabaseClient();
+    // Close the client opened for this script session. Do not call closeDatabaseClient()
+    // here — it only tears down getDatabaseClient()'s cached singleton, not this client.
+    await client.sql.end({ timeout: 5 });
   }
 }
 
