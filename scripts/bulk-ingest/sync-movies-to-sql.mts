@@ -30,7 +30,7 @@ import {
   parseCliArgs,
   slugify,
   sleep,
-  syncUpsertContentStatusFields,
+  buildSyncMovieConflictUpdateSet,
   withDatabase,
 } from "./shared.mts";
 import {
@@ -230,41 +230,7 @@ async function main() {
           })
           .onConflictDoUpdate({
             target: movies.slug,
-            set: {
-              tmdbId: mapped.tmdbId,
-              imdbId: mapped.imdbId,
-              title: mapped.title,
-              originalTitle: mapped.originalTitle,
-              year: mapped.year,
-              genres: mapped.genres,
-              director: mapped.director,
-              cast: mapped.cast,
-              runtime: mapped.runtime,
-              writers: mapped.writers,
-              countries: mapped.countries,
-              languages: mapped.languages,
-              releaseDate: mapped.releaseDate,
-              aka: mapped.aka,
-              collection: mapped.collection,
-              keywords: mapped.keywords ?? [],
-              rating: mapped.rating,
-              ratings: mapped.ratings,
-              posterTone: mapped.posterTone,
-              posterUrl: mapped.posterUrl,
-              backdropUrl: mapped.backdropUrl,
-              sourcePosterUrl: mapped.sourcePosterUrl,
-              sourceBackdropUrl: mapped.sourceBackdropUrl,
-              palette: mapped.palette,
-              summary: mapped.summary,
-              versionSignals: mapped.versionSignals,
-              deviceAdvice: mapped.deviceAdvice,
-              related: mapped.related,
-              ...syncUpsertContentStatusFields(publish, mapped.contentStatus),
-              sourceProvider: mapped.sourceProvider,
-              sourceUpdatedAt: mapped.sourceUpdatedAt,
-              imageCachedAt: mapped.imageCachedAt,
-              updatedAt: now,
-            },
+            set: buildSyncMovieConflictUpdateSet(mapped, publish, now),
           })
         .returning({ id: movies.id, slug: movies.slug });
 

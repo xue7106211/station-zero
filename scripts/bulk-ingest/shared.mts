@@ -532,6 +532,87 @@ export function syncUpsertContentStatusFields(
   return publish ? { contentStatus } : {};
 }
 
+type SyncMovieConflictUpdateInput = {
+  tmdbId: number;
+  imdbId?: string;
+  title: string;
+  originalTitle: string;
+  year: string;
+  genres: string[];
+  director: string;
+  cast: string[];
+  runtime: string;
+  writers?: string[];
+  countries?: string[];
+  languages?: string[];
+  releaseDate?: string;
+  aka?: string[];
+  collection?: ReturnType<typeof mapTmdbCollection>;
+  keywords?: string[];
+  rating: string;
+  ratings: {
+    douban?: string;
+    imdb?: string;
+    rottenTomatoes?: string;
+  };
+  posterTone: string;
+  posterUrl?: string;
+  backdropUrl?: string;
+  sourcePosterUrl?: string;
+  sourceBackdropUrl?: string;
+  palette?: Record<string, string | undefined>;
+  summary: string;
+  contentStatus: "draft" | "review" | "published";
+  sourceProvider: "tmdb" | "manual" | "other";
+  sourceUpdatedAt: string;
+  imageCachedAt?: string;
+};
+
+/**
+ * `ingest:sync` 冲突更新时写入的 TMDB 客观字段。
+ *
+ * 策展判断层（`verdict`、`bestWay`、`idealScene`、`notFor`、`versionSignals`、
+ * `deviceAdvice`、`related`）不在此列，避免 `--tmdb-id` 重试抹掉人工编辑。
+ */
+export function buildSyncMovieConflictUpdateSet(
+  mapped: SyncMovieConflictUpdateInput,
+  publish: boolean,
+  now: string,
+) {
+  return {
+    tmdbId: mapped.tmdbId,
+    imdbId: mapped.imdbId,
+    title: mapped.title,
+    originalTitle: mapped.originalTitle,
+    year: mapped.year,
+    genres: mapped.genres,
+    director: mapped.director,
+    cast: mapped.cast,
+    runtime: mapped.runtime,
+    writers: mapped.writers,
+    countries: mapped.countries,
+    languages: mapped.languages,
+    releaseDate: mapped.releaseDate,
+    aka: mapped.aka,
+    collection: mapped.collection,
+    keywords: mapped.keywords ?? [],
+    rating: mapped.rating,
+    ratings: mapped.ratings,
+    posterTone: mapped.posterTone,
+    posterUrl: mapped.posterUrl,
+    backdropUrl: mapped.backdropUrl,
+    sourcePosterUrl: mapped.sourcePosterUrl,
+    sourceBackdropUrl: mapped.sourceBackdropUrl,
+    palette: mapped.palette,
+    summary: mapped.summary,
+    ...syncUpsertContentStatusFields(publish, mapped.contentStatus),
+    sourceProvider: mapped.sourceProvider,
+    sourceUpdatedAt: mapped.sourceUpdatedAt,
+    imageCachedAt: mapped.imageCachedAt,
+    updatedAt: now,
+  };
+}
+
 export function mapTmdbKeywords(
   keywordsResponse?: {
     keywords?: Array<{ id?: number; name?: string }>;
