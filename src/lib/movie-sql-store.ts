@@ -10,6 +10,7 @@ import { getDb } from "@/db";
 import { movies, viewingPaths } from "@/db/schema";
 import type { Movie } from "./content";
 import { mapMovieRowToMovie } from "./movie-mapper";
+import { clampPageNumber } from "./movies-pagination";
 import { inferSearchMatchKind, normalizeSearchQuery, parseImdbId } from "./movie-search";
 
 /**
@@ -48,11 +49,13 @@ export async function listPublishedMoviesPageFromSql(
     return { items: [], totalItems: 0 };
   }
 
-  const offset = (page - 1) * pageSize;
   const [{ count }] = await db
     .select({ count: sql<number>`cast(count(*) as int)` })
     .from(movies)
     .where(eq(movies.contentStatus, "published"));
+
+  const safePage = clampPageNumber(page, count, pageSize);
+  const offset = (safePage - 1) * pageSize;
 
   const rows = await db
     .select()
@@ -198,7 +201,6 @@ export async function searchPublishedMoviesFromSql(
   }
 
   const imdbId = parseImdbId(query);
-  const offset = (page - 1) * pageSize;
 
   if (imdbId) {
     const whereClause = sql`${movies.contentStatus} = 'published' and ${movies.imdbId} = ${imdbId}`;
@@ -206,6 +208,9 @@ export async function searchPublishedMoviesFromSql(
       .select({ count: sql<number>`cast(count(*) as int)` })
       .from(movies)
       .where(whereClause);
+
+    const safePage = clampPageNumber(page, count, pageSize);
+    const offset = (safePage - 1) * pageSize;
 
     const rows = await db
       .select()
@@ -227,6 +232,9 @@ export async function searchPublishedMoviesFromSql(
     .select({ count: sql<number>`cast(count(*) as int)` })
     .from(movies)
     .where(whereClause);
+
+  const safePage = clampPageNumber(page, count, pageSize);
+  const offset = (safePage - 1) * pageSize;
 
   const rows = await db
     .select()
