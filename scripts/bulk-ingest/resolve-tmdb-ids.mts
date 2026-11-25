@@ -14,24 +14,28 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { and, eq } from "drizzle-orm";
 import { importStaging } from "../../src/db/schema";
 import {
+  buildTitleContextMap,
   createTmdbClient,
+  decideTmdbResolveOutcome,
   defaultBatchId,
   movieGroupKey,
   parseCliArgs,
+  parseCsvFile,
   sleep,
+  type TitleContext,
+  type TmdbResolveOutcome,
+  type TmdbSearchCandidate,
   withDatabase,
 } from "./shared.mts";
 
-type ResolveOutcome =
-  | { status: "resolved"; tmdbId: number }
-  | { status: "ambiguous"; candidates: Array<Record<string, unknown>> }
-  | { status: "failed" };
+const DEFAULT_CSV = "data/import/movies-clean.csv";
 
 async function resolveTitleYear(
   tmdbFetch: (path: string) => Promise<{ results?: Array<{ id: number; release_date?: string; title?: string; original_title?: string }> }>,
   title: string,
   year: string,
-): Promise<ResolveOutcome> {
+  context: TitleContext | undefined,
+): Promise<TmdbResolveOutcome> {
   const primary = await tmdbFetch(
     `/search/movie?query=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}&language=zh-CN&page=1`,
   );
@@ -48,27 +52,15 @@ async function resolveTitleYear(
     );
   }
 
-  if (results.length === 1) {
-    return { status: "resolved", tmdbId: results[0].id };
-  }
-  if (results.length > 1) {
-    return {
-      status: "ambiguous",
-      candidates: results.slice(0, 5).map((item: Record<string, unknown>) => ({
-        id: item.id,
-        title: item.title,
-        original_title: item.original_title,
-        release_date: item.release_date,
-      })),
-    };
-  }
-  return { status: "failed" };
+  return decideTmdbResolveOutcome(results as TmdbSearchCandidate[], context, title);
 }
 
 async function main() {
   const args = parseCliArgs(process.argv.slice(2));
   const batchId = String(args["batch-id"] ?? defaultBatchId("pilot"));
+  const csvPath = String(args.csv ?? DEFAULT_CSV);
   const delayMs = Number(args["delay-ms"] ?? 250);
+  const contextMap = buildTitleContextMap(parseCsvFile(csvPath));
   const { tmdbFetch } = createTmdbClient();
 
   let resolved = 0;
@@ -103,7 +95,8 @@ async function main() {
     }
 
     for (const [index, group] of pendingGroups.entries()) {
-      const outcome = await resolveTitleYear(tmdbFetch, group.title, group.year);
+      const context = contextMap.get(movieGroupKey(group.title, group.year));
+      const outcome = await resolveTitleYear(tmdbFetch, group.title, group.year, context);
 
       if (outcome.status === "resolved") {
         await db

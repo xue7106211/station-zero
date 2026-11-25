@@ -294,6 +294,39 @@ export function pickBestCandidate(
   return { decision: "resolved" as const, pick: top, scored };
 }
 
+export type TmdbResolveOutcome =
+  | { status: "resolved"; tmdbId: number }
+  | { status: "ambiguous"; candidates: Array<Record<string, unknown>> }
+  | { status: "failed" };
+
+function mapTmdbCandidatesForReport(items: TmdbSearchCandidate[]) {
+  return items.slice(0, 5).map((item) => ({
+    id: item.id,
+    title: item.title,
+    original_title: item.original_title,
+    release_date: item.release_date,
+  }));
+}
+
+/** Score single-candidate TMDB hits before auto-resolving in ingest:resolve. */
+export function decideTmdbResolveOutcome(
+  results: TmdbSearchCandidate[],
+  context: TitleContext | undefined,
+  searchTitle: string,
+): TmdbResolveOutcome {
+  if (results.length === 0) {
+    return { status: "failed" };
+  }
+  if (results.length === 1) {
+    const pick = pickBestCandidate(results, context, searchTitle);
+    if (pick.decision === "resolved" && pick.pick) {
+      return { status: "resolved", tmdbId: pick.pick.candidate.id };
+    }
+    return { status: "ambiguous", candidates: mapTmdbCandidatesForReport(results) };
+  }
+  return { status: "ambiguous", candidates: mapTmdbCandidatesForReport(results) };
+}
+
 export function mergeCandidates(...lists: TmdbSearchCandidate[][]) {
   const seen = new Set<number>();
   const merged: TmdbSearchCandidate[] = [];
