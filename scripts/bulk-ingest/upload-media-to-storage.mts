@@ -14,7 +14,7 @@
  * 可选：SUPABASE_URL、SUPABASE_MEDIA_BUCKET（默认 media）
  */
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { mediaAssets, movies } from "../../src/db/schema";
 import {
   buildWebpOutputPath,
@@ -128,7 +128,16 @@ async function updateMovieMedia(
       })
       .where(eq(movies.id, movie.id));
 
-    await db.delete(mediaAssets).where(eq(mediaAssets.movieId, movie.id));
+    if (poster) {
+      await db
+        .delete(mediaAssets)
+        .where(and(eq(mediaAssets.movieId, movie.id), eq(mediaAssets.kind, "poster")));
+    }
+    if (backdrop) {
+      await db
+        .delete(mediaAssets)
+        .where(and(eq(mediaAssets.movieId, movie.id), eq(mediaAssets.kind, "backdrop")));
+    }
 
     const mediaRows = [
       poster
